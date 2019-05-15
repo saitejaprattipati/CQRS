@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="3.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Author.Core.Services.EventBus\Author.Core.Services.EventBus.csproj" />
+    <ProjectReference Include="..\Author.Command.Domain\Author.Command.Domain.csproj" />
+    <ProjectReference Include="..\Author.Command.Events\Author.Command.Events.csproj" />
+    <ProjectReference Include="..\Author.Command.Persistence\Author.Command.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>

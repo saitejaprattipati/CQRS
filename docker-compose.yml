@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  author.command.api:
+    image: ${DOCKER_REGISTRY-}authorcommandapi
+    build:
+      context: .
+      dockerfile: CommandStack\Author.Command.API\Dockerfile

@@ -1,0 +1,21 @@
+version: '3.4'
+
+services:
+  author.command.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+       - ServiceBusConnection=localhost
+        - ServiceBusUserName=guest
+      - ServiceBusUserPassword=guest
+      - UseAzureServiceBus=${UseAzureServiceBus:-false}
+     
+    ports:
+      - "50102:80"
+      - "44305:443"
+    volumes:
+      - ${APPDATA}/ASP.NET/Https:C:\Users\ContainerUser\AppData\Roaming\ASP.NET\Https:ro
+      - ${APPDATA}/Microsoft/UserSecrets:C:\Users\ContainerUser\AppData\Roaming\Microsoft\UserSecrets:ro
+networks:
+  default:
+    external:
+      name: nat
