@@ -1,20 +1,26 @@
-﻿using Author.Core.Services.EventBus;
+﻿//using Microsoft.Azure.ServiceBus;
+using Author.Command.Persistence;
+using Author.Command.Persistence.Author.Command.API.ArticleAggregate;
+using Author.Command.Service;
+using Author.Core.Services.EventBus;
 using Author.Core.Services.EventBus.Azure;
 using Author.Core.Services.EventBus.Interfaces;
 using Author.Core.Services.EventBus.RabbitMQ;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.ServiceBus;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+using System;
 using System.Reflection;
-//using Microsoft.Azure.ServiceBus;
-using Author.Command.Service;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.ServiceBus;
+using NJsonSchema;
+using NSwag.AspNetCore;
 
 namespace Author.Command.API
 {
@@ -35,6 +41,37 @@ namespace Author.Command.API
             services.AddCors();
          ///   services.AddCorrelationId();
             services.AddMediatR(typeof(CreateArticleCommandHandler).GetTypeInfo().Assembly);
+            services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
+            services.AddTransient<CreateArticleCommandHandler>();
+            services.AddTransient<IArticleRepository, ArticleRepository>();
+            services.AddSwaggerDocument(config =>
+            {
+                config.PostProcess = document =>
+                {
+                    document.Info.Version = "v1";
+                    document.Info.Title = "Taxathand API";
+                    document.Info.Description = "ASP.NET Core web API";
+                    document.Info.TermsOfService = "None";
+                };
+            });
+
+            services.AddEntityFrameworkSqlServer()
+                  .AddDbContext<TaxatHand_StgContext>(options =>
+                  {
+                      options.UseSqlServer(Configuration["ConnectionString"],
+                            sqlServerOptionsAction: sqlOptions =>
+                            {
+                                sqlOptions.MigrationsAssembly(typeof(Startup).GetTypeInfo().Assembly.GetName().Name);
+                                sqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
+                            });
+                  },
+                      ServiceLifetime.Scoped  //Showing explicitly that the DbContext is shared across the HTTP request scope (graph of objects started in the HTTP request)
+                  );
+
+
+            
+
+            //  services.AddDbContext<TaxatHand_StgContext>(options => options.UseSqlServer(connection));
             AddEventing(services);
         }
 
@@ -85,18 +122,17 @@ namespace Author.Command.API
 
                     var factory = new ConnectionFactory()
                     {
-                        HostName = settings.ServiceBusConnection
+                        HostName = settings.ServiceBusConnection //"my-rabbit"
                     };
+                    //if (!string.IsNullOrEmpty(settings.ServiceBusUserName))
+                    //{
+                    //    factory.UserName = settings.ServiceBusUserName;
+                    //}
 
-                    if (!string.IsNullOrEmpty(settings.ServiceBusUserName))
-                    {
-                        factory.UserName = settings.ServiceBusUserName;
-                    }
-
-                    if (!string.IsNullOrEmpty(settings.ServiceBusUserPassword))
-                    {
-                        factory.Password = settings.ServiceBusUserPassword;
-                    }
+                    //if (!string.IsNullOrEmpty(settings.ServiceBusUserPassword))
+                    //{
+                    //    factory.Password = settings.ServiceBusUserPassword;
+                    //}
                     var retryCount = 5;
 
                     return new DefaultRabbitMQPersistentConnection(factory, logger, retryCount);
@@ -135,6 +171,8 @@ namespace Author.Command.API
             }
 
             app.UseHttpsRedirection();
+            app.UseSwagger();
+            app.UseSwaggerUi3();
             app.UseMvc();
         }
     }

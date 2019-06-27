@@ -56,7 +56,7 @@ namespace Author.Core.Services.EventBus.Azure
 
             message.UserProperties.Add("EventType", @event.EventType);
             message.UserProperties.Add("MessageVersion", 1);
-            message.UserProperties.Add("Publisher", "Order Fulfillment Command API");
+            message.UserProperties.Add("Publisher", "Author Command API");
             var topicClient = _serviceBusPersisterConnection.CreateModel();
 
             _logger.LogDebug($"EventBusServiceBus publishing message");

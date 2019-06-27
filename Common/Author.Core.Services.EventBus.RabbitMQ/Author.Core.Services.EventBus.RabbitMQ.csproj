@@ -1,9 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <FileUpgradeFlags>40</FileUpgradeFlags>
+    <UpgradeBackupLocation>C:\Users\prteja\source\repos\taxathand2.0\taxathand_Author3.0\taxathand_Author\Backup\Common\Author.Core.Services.EventBus.RabbitMQ\</UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
@@ -11,15 +12,12 @@
     <PackageReference Include="Polly" Version="7.1.0" />
     <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Author.Core.Services.EventBus\Author.Core.Services.EventBus.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Reference Include="Microsoft.CSharp">
       <HintPath>..\..\..\..\..\..\..\onecoremsvsmon\15.0.28307.421\x64\CoreClr\Microsoft.CSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
-
 </Project>

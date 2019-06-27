@@ -1,16 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <FileUpgradeFlags>40</FileUpgradeFlags>
+    <UpgradeBackupLocation>C:\Users\prteja\source\repos\taxathand2.0\taxathand_Author3.0\taxathand_Author\Backup\CommandStack\Author.Command.Events\</UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Author.Core.Services.EventBus\Author.Core.Services.EventBus.csproj" />
     <ProjectReference Include="..\Author.Command.Domain\Author.Command.Domain.csproj" />
   </ItemGroup>
-
 </Project>

@@ -1,41 +1,66 @@
 ﻿using Author.Command.Domain.Command;
+using Author.Command.Persistence.Author.Command.API.ArticleAggregate;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Author.Command.Persistence
 {
-    public class ArticleRepository
+    public class ArticleRepository : IArticleRepository
     {
 
-        public async Task<CreateArticleCommandResponse> CreateArticleDetails()
-        {
-            //string query = "INSERT INTO ArticlesTBL (ArticleTitle, ArticleContent, ArticleType, ArticleImg, ArticleBrief,  ArticleDateTime, ArticleAuthor, ArticlePublished, ArticleHomeDisplay, ArticleViews)";
-            //query += " VALUES (@ArticleTitle, @ArticleContent, @ArticleType, @ArticleImg, @ArticleBrief, @ArticleDateTime, @ArticleAuthor, @ArticlePublished, @ArticleHomeDisplay, @ArticleViews)";
+        private readonly TaxatHand_StgContext _context;
 
-            //string cmdString = "INSERT INTO books (name,author,price) VALUES (@val1, @va2, @val3)";
-            //string connString = "your connection string";
-            //using (SqlConnection conn = new SqlConnection(connString))
-            //{
-            //    using (SqlCommand comm = new SqlCommand())
-            //    {
-            //        comm.Connection = conn;
-            //        comm.CommandString = cmdString;
-            //        comm.Parameters.AddWithValue("@val1", txtbox1.Text);
-            //        comm.Parameters.AddWithValue("@val2", txtbox2.Text);
-            //        comm.Parameters.AddWithValue("@val3", txtbox3.Text);
-            //        try
-            //        {
-            //            conn.Open();
-            //            comm.ExecuteNonQuery();
-            //        }
-            //         catch(SqlException e)
-            //        {
-            //            // do something with the exception
-            //            // don't hide it
-            //        }
-            //    }
-            //}
-            return new CreateArticleCommandResponse { };
+        public IUnitOfWork UnitOfWork
+        {
+            get
+            {
+                return _context;
+            }
         }
+
+        public ArticleRepository(TaxatHand_StgContext context)
+        {
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+        }
+
+        public Articles Add(Articles Article)
+        {
+            var obj = _context.Images
+                .Include(c=>c.Articles)
+                .ThenInclude(a=>a.ArticleContents)
+                .ToList();
+            var obj1 = _context.Images
+                .ToList();
+            return _context.Articles.Add(Article).Entity;
+
+        }
+
+        public void Update(Articles order)
+        {
+            _context.Entry(order).State = EntityState.Modified;
+        }
+
+
+        public async Task<Articles> GetAsync(int orderId)
+        {
+            var order = await _context.Articles.FindAsync(orderId);
+
+            return order;
+        }
+
+
+
+    }
+
+
+    public interface IArticleRepository : IRepository<Articles>
+    {
+        Articles Add(Articles order);
+
+        void Update(Articles order);
+
+        Task<Articles> GetAsync(int orderId);
     }
 }

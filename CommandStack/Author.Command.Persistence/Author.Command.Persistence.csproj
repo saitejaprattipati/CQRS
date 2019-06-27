@@ -1,11 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <FileUpgradeFlags>40</FileUpgradeFlags>
+    <UpgradeBackupLocation>C:\Users\prteja\source\repos\taxathand2.0\taxathand_Author3.0\taxathand_Author\Backup\CommandStack\Author.Command.Persistence\</UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
   </PropertyGroup>
-
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.1" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Author.Command.Domain\Author.Command.Domain.csproj" />
   </ItemGroup>
-
 </Project>

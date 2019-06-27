@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Author.Command.Domain.Command
 {
-   public class CreateArticleCommand : IRequest<CreateArticleCommandResponse>
+    public class CreateArticleCommand : IRequest<CreateArticleCommandResponse>
     {
         [JsonProperty("id")]
         public string Id { get; set; }

@@ -1,30 +1,33 @@
-﻿using MediatR;
-//using Microsoft.Extensions.Logging;
+﻿//using Microsoft.Extensions.Logging;
 using Author.Command.Domain.Command;
-using System;
-using System.Threading.Tasks;
-using Author.Command.Domain.Models;
-using System.Collections.Generic;
-using Author.Command.Persistence;
-using System.Threading;
-
-using System.Data.SqlClient;
-
-using System.Data;
 using Author.Command.Events;
+using Author.Command.Persistence;
+using Author.Command.Persistence.Author.Command.API.ArticleAggregate;
+using MediatR;
+using Newtonsoft.Json;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Author.Command.Service
 {
-
+    public class Family
+    {
+        [JsonProperty(PropertyName = "id")]
+        public string Id { get; set; }
+        public string LastName { get; set; }
+    }
     public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand, CreateArticleCommandResponse>
     {
-        private readonly ArticleRepository _context;
-        private readonly IntegrationEventPublisherService _Eventcontext;
+        // private readonly IArticleRepository _context;
+        private readonly IIntegrationEventPublisherServiceService _Eventcontext;
+        private readonly ArticleRepository _ArticleRepository;
         //  private readonly ILogger _logger;
 
-        public CreateArticleCommandHandler(IntegrationEventPublisherService Eventcontext)
+        public CreateArticleCommandHandler(IIntegrationEventPublisherServiceService Eventcontext)
         {
-            _context = new ArticleRepository();
+            _ArticleRepository = new ArticleRepository(new TaxatHand_StgContext());
+            // _context = new ArticleRepository();
             _Eventcontext = Eventcontext;
             //    _logger = logger;
         }
@@ -38,23 +41,32 @@ namespace Author.Command.Service
             };
             try
             {
-                var Status = await _context.CreateArticleDetails();
-
-                //if (Status.UpdatedStatus.Contains("true"))
-                //{
+                Articles Article = new Articles();
+                Article.State = "Test1";
+                Article.PublishedDate=DateTime.Now;
+                Article.UpdatedDate= DateTime.Now;
+                Article.CreatedDate = DateTime.Now;
+                _ArticleRepository.Add(Article);
+                //  var Status = await _context.CreateArticleDetails();
                 var eventSourcing = new CreateArticleCommandEvent()
                 {
+                    EventType = "ArticleCreation",
                     Id = request.Id,
                     ArticleName = request.ArticleName,
                     ArticleCountry = request.ArticleCountry
                 };
-                await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
-                response.IsSuccessful = true;
-                //}
-                //else
-                //{
-                //    //Log
-                //}
+                //   using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                //  {
+                await _ArticleRepository.UnitOfWork
+                   .SaveEntitiesAsync();
+               //     throw new Exception(string.Format("Unable to find a client by id"));
+                    await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    response.IsSuccessful = true;
+
+                //    scope.Complete();
+             //   }
+            return response;
+
             }
             catch (Exception ex)
             {

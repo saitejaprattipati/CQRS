@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.421
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28922.388
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CommandStack", "CommandStack", "{99E5961A-C929-4355-AA15-68B0F8CCD388}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{C1212B40-72BC-4A19-A5F8-A53823156224}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Query Stack", "Query Stack", "{0BB711EB-C31C-45BE-A91C-4BE27F71027F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Command.API", "CommandStack\Author.Command.API\Author.Command.API.csproj", "{645DCCD5-3625-4DA9-986A-4AECAE899B0B}"
 EndProject
@@ -15,15 +19,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Command.Persistence"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Command.Service", "CommandStack\Author.Command.Service\Author.Command.Service.csproj", "{285FFE17-C044-49E0-AD1D-C3B3125E0570}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{442BA537-75BF-49D1-92D4-E36E8126226C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Core.Services.EventBus", "Common\Author.Core.Services.EventBus\Author.Core.Services.EventBus.csproj", "{7DBD1CD8-639D-4ECF-A299-25FFC18D668A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{C1212B40-72BC-4A19-A5F8-A53823156224}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Core.Services.EventBus.Azure", "Common\Author.Core.Services.EventBus.Azure\Author.Core.Services.EventBus.Azure.csproj", "{83A70480-4A1C-4BFA-8AD6-D266C7F9BF65}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Author.Core.Services.EventBus", "Common\Author.Core.Services.EventBus\Author.Core.Services.EventBus.csproj", "{7DBD1CD8-639D-4ECF-A299-25FFC18D668A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Core.Services.EventBus.RabbitMQ", "Common\Author.Core.Services.EventBus.RabbitMQ\Author.Core.Services.EventBus.RabbitMQ.csproj", "{71C75FFA-AFA9-4F02-BD29-DB99C1483097}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Author.Core.Services.EventBus.Azure", "Common\Author.Core.Services.EventBus.Azure\Author.Core.Services.EventBus.Azure.csproj", "{83A70480-4A1C-4BFA-8AD6-D266C7F9BF65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Query.API", "QueryStack\Author.Query.API\Author.Query.API.csproj", "{07AAE277-139A-456D-8E58-8B90E246E131}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Author.Core.Services.EventBus.RabbitMQ", "Common\Author.Core.Services.EventBus.RabbitMQ\Author.Core.Services.EventBus.RabbitMQ.csproj", "{71C75FFA-AFA9-4F02-BD29-DB99C1483097}"
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{575D68B2-2FC4-4440-8D92-641E84BE4B32}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,10 +55,6 @@ Global
 		{285FFE17-C044-49E0-AD1D-C3B3125E0570}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{285FFE17-C044-49E0-AD1D-C3B3125E0570}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{285FFE17-C044-49E0-AD1D-C3B3125E0570}.Release|Any CPU.Build.0 = Release|Any CPU
-		{442BA537-75BF-49D1-92D4-E36E8126226C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{442BA537-75BF-49D1-92D4-E36E8126226C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{442BA537-75BF-49D1-92D4-E36E8126226C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{442BA537-75BF-49D1-92D4-E36E8126226C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7DBD1CD8-639D-4ECF-A299-25FFC18D668A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7DBD1CD8-639D-4ECF-A299-25FFC18D668A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DBD1CD8-639D-4ECF-A299-25FFC18D668A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -67,6 +67,14 @@ Global
 		{71C75FFA-AFA9-4F02-BD29-DB99C1483097}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71C75FFA-AFA9-4F02-BD29-DB99C1483097}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71C75FFA-AFA9-4F02-BD29-DB99C1483097}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07AAE277-139A-456D-8E58-8B90E246E131}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07AAE277-139A-456D-8E58-8B90E246E131}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07AAE277-139A-456D-8E58-8B90E246E131}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07AAE277-139A-456D-8E58-8B90E246E131}.Release|Any CPU.Build.0 = Release|Any CPU
+		{575D68B2-2FC4-4440-8D92-641E84BE4B32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{575D68B2-2FC4-4440-8D92-641E84BE4B32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{575D68B2-2FC4-4440-8D92-641E84BE4B32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{575D68B2-2FC4-4440-8D92-641E84BE4B32}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,6 +88,7 @@ Global
 		{7DBD1CD8-639D-4ECF-A299-25FFC18D668A} = {C1212B40-72BC-4A19-A5F8-A53823156224}
 		{83A70480-4A1C-4BFA-8AD6-D266C7F9BF65} = {C1212B40-72BC-4A19-A5F8-A53823156224}
 		{71C75FFA-AFA9-4F02-BD29-DB99C1483097} = {C1212B40-72BC-4A19-A5F8-A53823156224}
+		{07AAE277-139A-456D-8E58-8B90E246E131} = {0BB711EB-C31C-45BE-A91C-4BE27F71027F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7B43F389-6EE9-44DA-99B9-2333DA47F5DF}
