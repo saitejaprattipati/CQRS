@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <UserSecretsId>5f2a19a3-73c8-4aac-9f56-a0d14184592d</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="7.0.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Azure.Management.ServiceBus" Version="2.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.7.9" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
+    <PackageReference Include="NSwag.AspNetCore" Version="13.0.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Author.Core.Services.EventBus.Azure\Author.Core.Services.EventBus.Azure.csproj" />
+    <ProjectReference Include="..\..\Common\Author.Core.Services.EventBus.RabbitMQ\Author.Core.Services.EventBus.RabbitMQ.csproj" />
+    <ProjectReference Include="..\..\Common\Author.Core.Services.EventBus\Author.Core.Services.EventBus.csproj" />
+    <ProjectReference Include="..\Author.Command.Domain\Author.Command.Domain.csproj" />
+    <ProjectReference Include="..\Author.Command.Service\Author.Command.Service.csproj" />
+  </ItemGroup>
+
+</Project>

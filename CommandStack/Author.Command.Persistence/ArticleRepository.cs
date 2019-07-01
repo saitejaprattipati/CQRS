@@ -27,12 +27,12 @@ namespace Author.Command.Persistence
 
         public Articles Add(Articles Article)
         {
-            var obj = _context.Images
-                .Include(c=>c.Articles)
-                .ThenInclude(a=>a.ArticleContents)
-                .ToList();
-            var obj1 = _context.Images
-                .ToList();
+            //var obj = _context.Images
+            //    .Include(c=>c.Articles)
+            //    .ThenInclude(a=>a.ArticleContents)
+            //    .ToList();
+            //var obj1 = _context.Images
+            //    .ToList();
             return _context.Articles.Add(Article).Entity;
 
         }
