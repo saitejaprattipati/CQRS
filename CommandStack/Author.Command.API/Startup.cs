@@ -21,6 +21,7 @@ using System;
 using System.Reflection;
 using NJsonSchema;
 using NSwag.AspNetCore;
+using NetCore.AutoRegisterDi;
 
 namespace Author.Command.API
 {
@@ -42,8 +43,18 @@ namespace Author.Command.API
          ///   services.AddCorrelationId();
             services.AddMediatR(typeof(CreateArticleCommandHandler).GetTypeInfo().Assembly);
             services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
-            services.AddTransient<CreateArticleCommandHandler>();
-            services.AddTransient<IArticleRepository, ArticleRepository>();
+            //  services.AddTransient<CreateArticleCommandHandler>();
+
+
+
+            services.RegisterAssemblyPublicNonGenericClasses(
+              Assembly.GetExecutingAssembly())
+        .Where(c => c.Name.EndsWith("Persistence"))
+        .AsPublicImplementedInterfaces();
+
+
+
+          //  services.AddTransient<IArticleRepository, ArticleRepository>();
             services.AddSwaggerDocument(config =>
             {
                 config.PostProcess = document =>

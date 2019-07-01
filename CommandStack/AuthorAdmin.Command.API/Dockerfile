@@ -1,9 +1,9 @@
-EXPOSE 4369 5671 5672 25672 15671 15672
-
-FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+#EXPOSE 4369 5671 5672 25672 15671 15672
+#
+#FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
+#WORKDIR /app
+#EXPOSE 80
+#EXPOSE 443
 
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:2.1-stretch-slim AS base
