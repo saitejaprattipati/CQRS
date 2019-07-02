@@ -44,6 +44,7 @@ namespace AuthorAdmin.Command.API.Controllers
         {
         }
 
+        [Route("CreateAsync")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

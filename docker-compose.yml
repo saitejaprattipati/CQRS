@@ -24,3 +24,13 @@ services:
       - rabbitmq
     links: 
       - rabbitmq
+
+  authoradmin.command.api:
+    image: ${DOCKER_REGISTRY-}authorcommandapi
+    build:
+      context: .
+      dockerfile: CommandStack/AuthorAdmin.Command.API/Dockerfile
+    depends_on:
+      - rabbitmq
+    links: 
+      - rabbitmq

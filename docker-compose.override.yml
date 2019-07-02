@@ -16,3 +16,19 @@ services:
     volumes:
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+
+  authoradmin.command.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_HTTPS_PORT=44306
+      - ServiceBusUserName=guest
+      - ServiceBusUserPassword=guest
+      - ServiceBusConnection=rabbitmq
+      - UseAzureServiceBus=${UseAzureServiceBus:-false}
+    ports:
+      - "50103:80"
+      - "44306:443"
+    volumes:
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
