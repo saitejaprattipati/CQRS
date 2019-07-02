@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Author.Command.Domain.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorAdmin.Command.API.Controllers
@@ -40,6 +42,23 @@ namespace AuthorAdmin.Command.API.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Product>> CreateAsync(Product product)
+        {
+            if (product.Description.Contains("XYZ Widget"))
+            {
+                return BadRequest();
+            }
+
+            //await _repository.AddProductAsync(product);
+
+            //return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+
+            return Ok();
         }
     }
 }

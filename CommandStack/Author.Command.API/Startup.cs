@@ -38,7 +38,7 @@ namespace Author.Command.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<AuthorConfigurationSettings>(Configuration);
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
             services.AddCors();
          ///   services.AddCorrelationId();
             services.AddMediatR(typeof(CreateArticleCommandHandler).GetTypeInfo().Assembly);
