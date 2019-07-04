@@ -8,6 +8,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 //using System.Web.Http.ModelBinding;
 
 namespace Author.Command.Service
@@ -28,53 +29,55 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
-
-            // Check User Exists
-            var userExists = _systemUserRepository.UserExists(request.Email);
-            if (userExists)
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                //ModelState.AddModelError("email", new Exception("This email address already exists"));
-                throw new HttpStatusCodeException(StatusCodes.Status400BadRequest, @"This email address already exists");
+                // Check User Exists
+                var userExists = _systemUserRepository.UserExists(request.Email);
+                if (userExists)
+                {
+                    //ModelState.AddModelError("email", new Exception("This email address already exists"));
+                    throw new HttpStatusCodeException(StatusCodes.Status400BadRequest, @"This email address already exists");
+                }
+
+                var user = new SystemUsers
+                {
+                    FirstName = request.FirstName,
+                    Email = request.Email,
+                    LastName = request.LastName,
+                    Level = request.Level,
+                    Location = request.Location,
+                    MobilePhoneNumber = request.MobilePhoneNumber,
+                    Role = Convert.ToInt32(request.Role),
+                    WorkPhoneNumber = request.WorkPhoneNumber,
+                    CreatedBy = "CMS Admin",
+                    CreatedDate = DateTime.UtcNow,
+                    UpdatedBy = "CMS Admin",
+                    UpdatedDate = DateTime.UtcNow
+                };
+
+                _systemUserRepository.Add(user);
+                await _systemUserRepository.UnitOfWork.SaveEntitiesAsync();
+
+
+                var homeCountry = new SystemUserAssociatedCountries();
+                homeCountry.CountryId = request.HomeCountry;
+                homeCountry.IsPrimary = true;
+                homeCountry.SystemUserId = user.SystemUserId;
+                _systemUserRepository.Add(homeCountry);
+
+                foreach (var country in request.Countries.Where(x => !x.Equals(request.HomeCountry)))
+                {
+                    var associatedCountry = new SystemUserAssociatedCountries();
+                    associatedCountry.CountryId = country;
+                    associatedCountry.SystemUserId = user.SystemUserId;
+                    associatedCountry.IsPrimary = false;
+                    _systemUserRepository.Add(associatedCountry);
+                }
+
+                await _systemUserRepository.UnitOfWork.SaveEntitiesAsync();
+                response.IsSuccessful = true;
+                scope.Complete();
             }
-
-            var user = new SystemUsers
-            {
-                FirstName = request.FirstName,
-                Email = request.Email,
-                LastName = request.LastName,
-                Level = request.Level,
-                Location = request.Location,
-                MobilePhoneNumber = request.MobilePhoneNumber,
-                Role = Convert.ToInt32(request.Role),
-                WorkPhoneNumber = request.WorkPhoneNumber,
-                CreatedBy = "CMS Admin",
-                CreatedDate = DateTime.UtcNow,
-                UpdatedBy = "CMS Admin",
-                UpdatedDate = DateTime.UtcNow
-            };
-
-            _systemUserRepository.Add(user);
-            await _systemUserRepository.UnitOfWork.SaveEntitiesAsync();
-
-
-            var homeCountry = new SystemUserAssociatedCountries();
-            homeCountry.CountryId = request.HomeCountry;
-            homeCountry.IsPrimary = true;
-            homeCountry.SystemUserId = user.SystemUserId;
-            _systemUserRepository.Add(homeCountry);
-
-            foreach (var country in request.Countries.Where(x => !x.Equals(request.HomeCountry)))
-            {
-                var associatedCountry = new SystemUserAssociatedCountries();
-                associatedCountry.CountryId = country;
-                associatedCountry.SystemUserId = user.SystemUserId;
-                associatedCountry.IsPrimary = false;
-                _systemUserRepository.Add(associatedCountry);
-            }
-
-            await _systemUserRepository.UnitOfWork.SaveEntitiesAsync();
-            response.IsSuccessful = true;
-
             return response;
         }
     }

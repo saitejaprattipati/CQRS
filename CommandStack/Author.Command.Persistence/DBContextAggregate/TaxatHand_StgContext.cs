@@ -69,8 +69,8 @@ namespace Author.Command.Persistence.DBContextAggregate
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Server=.;Database=TaxatHand_Stg;Integrated Security=true;");
+//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                optionsBuilder.UseSqlServer("Server=taxathand.database.windows.net;Initial Catalog=TaxatHand_AzureDB;Persist Security Info=False;User ID=Taxathand_Admin;Password=tax@hand#1234;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
             }
         }
 
