@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\prteja\source\repos\taxathand2.0\taxathand_Author3.0\taxathand_Author\Backup\CommandStack\Author.Command.Service\</UpgradeBackupLocation>
     <OldToolsVersion>2.0</OldToolsVersion>

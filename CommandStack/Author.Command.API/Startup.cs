@@ -1,6 +1,6 @@
 ﻿//using Microsoft.Azure.ServiceBus;
 using Author.Command.Persistence;
-using Author.Command.Persistence.Author.Command.API.ArticleAggregate;
+using Author.Command.Persistence.DBContextAggregate;
 using Author.Command.Service;
 using Author.Core.Services.EventBus;
 using Author.Core.Services.EventBus.Azure;

@@ -1,5 +1,5 @@
 ﻿using Author.Command.Domain.Command;
-using Author.Command.Persistence.Author.Command.API.ArticleAggregate;
+using Author.Command.Persistence.DBContextAggregate;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;

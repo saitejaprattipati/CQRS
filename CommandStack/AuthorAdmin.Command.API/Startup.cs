@@ -1,6 +1,6 @@
 ﻿//using Microsoft.Azure.ServiceBus;
 using Author.Command.Persistence;
-using Author.Command.Persistence.Author.Command.API.ArticleAggregate;
+using Author.Command.Persistence.DBContextAggregate;
 using Author.Command.Service;
 using Author.Core.Services.EventBus;
 using Author.Core.Services.EventBus.Azure;
@@ -21,6 +21,7 @@ using System;
 using System.Reflection;
 using NJsonSchema;
 using NSwag.AspNetCore;
+using AuthorAdmin.Command.API.ExceptionMiddleware;
 
 namespace AuthorAdmin.Command.API
 {
@@ -177,6 +178,7 @@ namespace AuthorAdmin.Command.API
             app.UseHttpsRedirection();
             app.UseSwagger();
             app.UseSwaggerUi3();
+            app.ConfigureExceptionHandler();
             app.UseMvc();
         }
     }

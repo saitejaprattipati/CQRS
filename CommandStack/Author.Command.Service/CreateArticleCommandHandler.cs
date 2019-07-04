@@ -2,7 +2,7 @@
 using Author.Command.Domain.Command;
 using Author.Command.Events;
 using Author.Command.Persistence;
-using Author.Command.Persistence.Author.Command.API.ArticleAggregate;
+using Author.Command.Persistence.DBContextAggregate;
 using MediatR;
 using Newtonsoft.Json;
 using System;
