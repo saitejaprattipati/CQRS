@@ -1,7 +1,9 @@
 ﻿using Author.Command.Domain.Command;
+using Author.Command.Domain.Models;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Linq;
 using System.Threading;
@@ -28,11 +30,12 @@ namespace Author.Command.Service
             };
 
             // Check User Exists
-            //var userExists = _systemUserRepository.UserExists(request.Email);
-            //if (userExists)
-            //{
-            //    ModelState.AddModelError("email", new Exception("This email address already exists"));
-            //}
+            var userExists = _systemUserRepository.UserExists(request.Email);
+            if (userExists)
+            {
+                //ModelState.AddModelError("email", new Exception("This email address already exists"));
+                throw new HttpStatusCodeException(StatusCodes.Status400BadRequest, @"This email address already exists");
+            }
 
             var user = new SystemUsers
             {
