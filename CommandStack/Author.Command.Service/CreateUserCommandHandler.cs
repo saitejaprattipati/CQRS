@@ -1,15 +1,13 @@
 ﻿using Author.Command.Domain.Command;
-using Author.Command.Domain.Models;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
+using Author.Core.Framework.ExceptionHandling;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
-//using System.Web.Http.ModelBinding;
 
 namespace Author.Command.Service
 {
@@ -36,7 +34,8 @@ namespace Author.Command.Service
                 if (userExists)
                 {
                     //ModelState.AddModelError("email", new Exception("This email address already exists"));
-                    throw new HttpStatusCodeException(StatusCodes.Status400BadRequest, @"This email address already exists");
+                    //throw new HttpStatusCodeException(StatusCodes.Status400BadRequest, @"This email address already exists");
+                    throw new RulesException("email", @"This email address already exists");
                 }
 
                 var user = new SystemUsers

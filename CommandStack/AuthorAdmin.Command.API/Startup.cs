@@ -22,6 +22,9 @@ using System.Reflection;
 using NJsonSchema;
 using NSwag.AspNetCore;
 using AuthorAdmin.Command.API.ExceptionMiddleware;
+using Author.Core.Framework;
+using Author.Core.Framework.Utilities;
+using NetCore.AutoRegisterDi;
 
 namespace AuthorAdmin.Command.API
 {
@@ -42,13 +45,18 @@ namespace AuthorAdmin.Command.API
             {
                 op.SuppressUseValidationProblemDetailsForInvalidModelStateResponses = true;
             });
-            
+
             services.AddCors();
             ///   services.AddCorrelationId();
             services.AddMediatR(typeof(CreateArticleCommandHandler).GetTypeInfo().Assembly);
-            services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
-            services.AddTransient<CreateArticleCommandHandler>();
-            services.AddTransient<IArticleRepository, ArticleRepository>();
+            //services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
+            //services.AddTransient<CreateArticleCommandHandler>();
+            //services.AddTransient<IArticleRepository, ArticleRepository>();
+
+            services.RegisterAssemblyPublicNonGenericClasses(Assembly.GetExecutingAssembly())
+                    .Where(c => c.Name.EndsWith("Persistence") || (c.Name.EndsWith("Service")))
+                    .AsPublicImplementedInterfaces();
+
             services.AddSwaggerDocument(config =>
             {
                 config.PostProcess = document =>
@@ -74,7 +82,7 @@ namespace AuthorAdmin.Command.API
                   );
 
 
-
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             //  services.AddDbContext<TaxatHand_StgContext>(options => options.UseSqlServer(connection));
             AddEventing(services);
@@ -164,7 +172,7 @@ namespace AuthorAdmin.Command.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IUtilityService utilityService)
         {
             if (env.IsDevelopment())
             {
@@ -178,7 +186,7 @@ namespace AuthorAdmin.Command.API
             app.UseHttpsRedirection();
             app.UseSwagger();
             app.UseSwaggerUi3();
-            app.ConfigureExceptionHandler();
+            app.ConfigureExceptionHandler(utilityService);
             app.UseMvc();
         }
     }

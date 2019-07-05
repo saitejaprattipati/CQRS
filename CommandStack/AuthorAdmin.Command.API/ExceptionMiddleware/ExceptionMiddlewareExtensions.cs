@@ -1,16 +1,18 @@
 ﻿using Author.Core.Framework;
+using Author.Core.Framework.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using System;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace AuthorAdmin.Command.API.ExceptionMiddleware
 {
     public static class ExceptionMiddlewareExtensions
     {
-        public static void ConfigureExceptionHandler(this IApplicationBuilder app)
+        public static void ConfigureExceptionHandler(this IApplicationBuilder app, IUtilityService utilityService)
         {
             app.UseExceptionHandler(errorApp =>
             {
@@ -23,7 +25,7 @@ namespace AuthorAdmin.Command.API.ExceptionMiddleware
                     // you should implement your own as you may want to interpret it differently
                     // i.e. based on the current principal
 
-                    var errorDetail = "Error occured";//utilityService.IsTrusted() ? exception.Demystify().ToString() : "The instance value should be used to identify the problem when calling customer support";
+                    var errorDetail = utilityService.IsTrusted() ? exception.Demystify().ToString() : "The instance value should be used to identify the problem when calling customer support";
 
                     var problemDetails = new ProblemDetails
                     {
