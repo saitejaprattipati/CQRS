@@ -48,7 +48,7 @@ namespace AuthorAdmin.Command.API
 
             services.AddCors();
             ///   services.AddCorrelationId();
-            services.AddMediatR(typeof(CreateArticleCommandHandler).GetTypeInfo().Assembly);
+            services.AddMediatR(typeof(CreateUserCommandHandler).GetTypeInfo().Assembly);
             services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
             //services.AddTransient<CreateArticleCommandHandler>();
             //services.AddTransient<IArticleRepository, ArticleRepository>();
