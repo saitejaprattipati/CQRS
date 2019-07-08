@@ -11,7 +11,7 @@ using System.Transactions;
 
 namespace Author.Command.Service
 {
-    public class CreateUserCommandHandler : IRequestHandler<SystemUserViewCommand, CreateSystemUserCommandResponse>
+    public class CreateUserCommandHandler : IRequestHandler<CreateSystemUserCommand, CreateSystemUserCommandResponse>
     {
         private readonly IIntegrationEventPublisherServiceService _eventcontext;
         private readonly SystemUserRepository _systemUserRepository;
@@ -21,7 +21,7 @@ namespace Author.Command.Service
             _systemUserRepository = new SystemUserRepository(new TaxatHand_StgContext());
             _eventcontext = eventcontext;
         }
-        public async Task<CreateSystemUserCommandResponse> Handle(SystemUserViewCommand request, CancellationToken cancellationToken)
+        public async Task<CreateSystemUserCommandResponse> Handle(CreateSystemUserCommand request, CancellationToken cancellationToken)
         {
             var response = new CreateSystemUserCommandResponse()
             {
