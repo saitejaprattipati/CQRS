@@ -36,8 +36,6 @@ namespace AuthorAdmin.Command.API
         }
 
         public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<AuthorConfigurationSettings>(Configuration);
@@ -47,15 +45,12 @@ namespace AuthorAdmin.Command.API
             });
 
             services.AddCors();
-            ///   services.AddCorrelationId();
             services.AddMediatR(typeof(CreateUserCommandHandler).GetTypeInfo().Assembly);
             services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
-            //services.AddTransient<CreateArticleCommandHandler>();
-            //services.AddTransient<IArticleRepository, ArticleRepository>();
-
-            services.RegisterAssemblyPublicNonGenericClasses(Assembly.GetExecutingAssembly())
-                    .Where(c => c.Name.EndsWith("Persistence"))
-                    .AsPublicImplementedInterfaces();
+            services.RegisterAssemblyPublicNonGenericClasses(
+              Assembly.GetExecutingAssembly())
+        .Where(c => c.Name.EndsWith("Persistence"))
+        .AsPublicImplementedInterfaces();
 
             services.AddSwaggerDocument(config =>
             {
@@ -172,11 +167,12 @@ namespace AuthorAdmin.Command.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IUtilityService utilityService)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                loggerFactory.AddFile("Logs/AuthorAdmin-{Date}.txt");
             }
             else
             {

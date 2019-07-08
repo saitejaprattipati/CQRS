@@ -47,7 +47,7 @@ namespace Author.Command.API
 
             services.RegisterAssemblyPublicNonGenericClasses(
               Assembly.GetExecutingAssembly())
-        .Where(c => c.Name.EndsWith("Persistence"))
+              .Where(c => c.Name.EndsWith("Persistence"))
         .AsPublicImplementedInterfaces();
 
 
