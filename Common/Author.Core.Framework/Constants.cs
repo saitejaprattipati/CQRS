@@ -19,4 +19,11 @@ namespace Author.Core.Framework
         [Description("Global admin")]
         GlobalAdmin
     }
+
+    public enum CustomErrorsMode
+    {
+        Off = 0,
+        On = 1,
+        RemoteOnly = 2
+    }
 }

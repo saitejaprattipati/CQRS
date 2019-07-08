@@ -8,10 +8,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Author.Command.Domain.Command
 {
-    public class SystemUserViewCommand : IRequest<CreateSystemUserCommandResponse>
+    public class CreateSystemUserCommand : IRequest<CreateSystemUserCommandResponse>
     {
-        public int Id { get; set; }
-
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         [Required]
         public string FirstName { get; set; }
@@ -40,19 +38,11 @@ namespace Author.Command.Domain.Command
         [Required]
         public SystemUserRole Role { get; set; }
 
-        public TimeSpan? TimeZone { get; set; }
-
         [Required]
         public int HomeCountry { get; set; }
 
         [Required]
         public List<int> Countries { get; set; }
-
-        //[RegularExpression(Constants.GeneralStringRegularExpression)]
-        //public string CreatedBy { get; set; }
-
-        //[RegularExpression(Constants.GeneralStringRegularExpression)]
-        //public string UpdatedBy { get; set; }
     }
 
     public class CreateSystemUserCommandResponse : CommandResponse

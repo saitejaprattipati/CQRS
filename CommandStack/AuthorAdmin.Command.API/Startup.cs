@@ -22,6 +22,8 @@ using System.Reflection;
 using NJsonSchema;
 using NSwag.AspNetCore;
 using AuthorAdmin.Command.API.ExceptionMiddleware;
+using Author.Core.Framework;
+using Author.Core.Framework.Utilities;
 using NetCore.AutoRegisterDi;
 
 namespace AuthorAdmin.Command.API
@@ -75,7 +77,7 @@ namespace AuthorAdmin.Command.API
                   );
 
 
-
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             //  services.AddDbContext<TaxatHand_StgContext>(options => options.UseSqlServer(connection));
             AddEventing(services);
@@ -180,7 +182,7 @@ namespace AuthorAdmin.Command.API
             app.UseHttpsRedirection();
             app.UseSwagger();
             app.UseSwaggerUi3();
-            app.ConfigureExceptionHandler();
+            app.ConfigureExceptionHandler(utilityService);
             app.UseMvc();
         }
     }

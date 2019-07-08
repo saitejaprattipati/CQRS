@@ -24,7 +24,7 @@ namespace AuthorAdmin.Command.API.Controllers
         [Route("CreateUser")]
         [ProducesResponseType(typeof(string), 201)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<IActionResult> CreateUser([FromBody] SystemUserViewCommand command)
+        public async Task<IActionResult> CreateUser([FromBody] CreateSystemUserCommand command)
         {
             var response = await _mediator.Send(command);
 

@@ -45,8 +45,6 @@ namespace Author.Command.API
             services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
             //  services.AddTransient<CreateArticleCommandHandler>();
 
-
-
             services.RegisterAssemblyPublicNonGenericClasses(
               Assembly.GetExecutingAssembly())
               .Where(c => c.Name.EndsWith("Persistence"))
