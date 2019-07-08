@@ -42,14 +42,15 @@ namespace Author.Command.API
             services.AddCors();
          ///   services.AddCorrelationId();
             services.AddMediatR(typeof(CreateArticleCommandHandler).GetTypeInfo().Assembly);
-            services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
+          //  services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
             //  services.AddTransient<CreateArticleCommandHandler>();
 
 
 
             services.RegisterAssemblyPublicNonGenericClasses(
               Assembly.GetExecutingAssembly())
-        .Where(c => c.Name.EndsWith("Persistence"))
+              .Where(c => c.Name.EndsWith("Persistence"))
+        .Where(c => c.Name.EndsWith("Service"))
         .AsPublicImplementedInterfaces();
 
 

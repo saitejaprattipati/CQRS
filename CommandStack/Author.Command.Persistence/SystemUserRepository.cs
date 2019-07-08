@@ -41,7 +41,7 @@ namespace Author.Command.Persistence
         }
     }
 
-    interface ISystemUserRepository : IRepository<SystemUsers>
+   public interface ISystemUserRepository : IRepository<SystemUsers>
     {
         SystemUsers Add(SystemUsers user);
 
