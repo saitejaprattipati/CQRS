@@ -49,12 +49,12 @@ namespace AuthorAdmin.Command.API
             services.AddCors();
             ///   services.AddCorrelationId();
             services.AddMediatR(typeof(CreateArticleCommandHandler).GetTypeInfo().Assembly);
-            //services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
+            services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
             //services.AddTransient<CreateArticleCommandHandler>();
             //services.AddTransient<IArticleRepository, ArticleRepository>();
 
             services.RegisterAssemblyPublicNonGenericClasses(Assembly.GetExecutingAssembly())
-                    .Where(c => c.Name.EndsWith("Persistence") || (c.Name.EndsWith("Service")))
+                    .Where(c => c.Name.EndsWith("Persistence"))
                     .AsPublicImplementedInterfaces();
 
             services.AddSwaggerDocument(config =>
