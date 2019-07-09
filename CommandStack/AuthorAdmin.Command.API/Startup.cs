@@ -45,8 +45,13 @@ namespace AuthorAdmin.Command.API
             });
 
             services.AddCors();
-            services.AddMediatR(typeof(CreateUserCommandHandler).GetTypeInfo().Assembly);
+
+          //  services.AddMediatR(CreateUserCommandHandler);
+
+
+            services.AddMediatR(typeof(CreateArticleCommandHandler).GetTypeInfo().Assembly);
             services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
+            services.AddTransient<IUtilityService, UtilityService>();
             services.RegisterAssemblyPublicNonGenericClasses(
               Assembly.GetExecutingAssembly())
         .Where(c => c.Name.EndsWith("Persistence"))
@@ -167,7 +172,7 @@ namespace AuthorAdmin.Command.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IUtilityService utilityService, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {

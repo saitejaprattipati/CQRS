@@ -2,6 +2,7 @@
 using MediatR;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Author.Command.Domain.Command
 {
@@ -14,6 +15,7 @@ namespace Author.Command.Domain.Command
         //public string Name { get; set; }
 
         [JsonProperty("position")]
+        [Range(0, int.MaxValue, ErrorMessage = "Only positive number allowed")]
         public int Position { get; set; }
     }
     public class CreateResourceGroupCommandResponse : CommandResponse
