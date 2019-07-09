@@ -25,6 +25,8 @@ using AuthorAdmin.Command.API.ExceptionMiddleware;
 using Author.Core.Framework;
 using Author.Core.Framework.Utilities;
 using NetCore.AutoRegisterDi;
+using AutoMapper;
+using Author.Command.Service.Mapping;
 
 namespace AuthorAdmin.Command.API
 {
@@ -83,6 +85,15 @@ namespace AuthorAdmin.Command.API
 
 
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
+            // Auto Mapper Configurations
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
 
             //  services.AddDbContext<TaxatHand_StgContext>(options => options.UseSqlServer(connection));
             AddEventing(services);

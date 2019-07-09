@@ -2,6 +2,7 @@
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
 using Author.Core.Framework.ExceptionHandling;
+using AutoMapper;
 using MediatR;
 using System;
 using System.Linq;
@@ -15,11 +16,13 @@ namespace Author.Command.Service
     {
         private readonly IIntegrationEventPublisherServiceService _eventcontext;
         private readonly SystemUserRepository _systemUserRepository;
+        private readonly IMapper _mapper;
 
-        public CreateUserCommandHandler(IIntegrationEventPublisherServiceService eventcontext)
+        public CreateUserCommandHandler(IIntegrationEventPublisherServiceService eventcontext, IMapper mapper)
         {
             _systemUserRepository = new SystemUserRepository(new TaxatHand_StgContext());
             _eventcontext = eventcontext;
+            _mapper = mapper;
         }
         public async Task<CreateSystemUserCommandResponse> Handle(CreateSystemUserCommand request, CancellationToken cancellationToken)
         {
@@ -38,21 +41,28 @@ namespace Author.Command.Service
                     throw new RulesException("email", @"This email address already exists");
                 }
 
-                var user = new SystemUsers
-                {
-                    FirstName = request.FirstName,
-                    Email = request.Email,
-                    LastName = request.LastName,
-                    Level = request.Level,
-                    Location = request.Location,
-                    MobilePhoneNumber = request.MobilePhoneNumber,
-                    Role = Convert.ToInt32(request.Role),
-                    WorkPhoneNumber = request.WorkPhoneNumber,
-                    CreatedBy = "CMS Admin",
-                    CreatedDate = DateTime.UtcNow,
-                    UpdatedBy = "CMS Admin",
-                    UpdatedDate = DateTime.UtcNow
-                };
+                //var user = new SystemUsers
+                //{
+                //    FirstName = request.FirstName,
+                //    Email = request.Email,
+                //    LastName = request.LastName,
+                //    Level = request.Level,
+                //    Location = request.Location,
+                //    MobilePhoneNumber = request.MobilePhoneNumber,
+                //    Role = Convert.ToInt32(request.Role),
+                //    WorkPhoneNumber = request.WorkPhoneNumber,
+                //    CreatedBy = "CMS Admin",
+                //    CreatedDate = DateTime.UtcNow,
+                //    UpdatedBy = "CMS Admin",
+                //    UpdatedDate = DateTime.UtcNow
+                //};
+
+                var user = _mapper.Map<SystemUsers>(request);
+                user.CreatedBy = "CMS Admin";
+                user.CreatedDate = DateTime.UtcNow;
+                user.UpdatedBy = "CMS Admin";
+                user.UpdatedDate = DateTime.UtcNow;
+
 
                 _systemUserRepository.Add(user);
                 await _systemUserRepository.UnitOfWork.SaveEntitiesAsync();

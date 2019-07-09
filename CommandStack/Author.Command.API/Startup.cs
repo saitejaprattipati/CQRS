@@ -22,6 +22,8 @@ using System.Reflection;
 using NJsonSchema;
 using NSwag.AspNetCore;
 using NetCore.AutoRegisterDi;
+using AutoMapper;
+using Author.Command.Service.Mapping;
 
 namespace Author.Command.API
 {
@@ -78,7 +80,15 @@ namespace Author.Command.API
                   );
 
 
-            
+            // Auto Mapper Configurations
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
 
             //  services.AddDbContext<TaxatHand_StgContext>(options => options.UseSqlServer(connection));
             AddEventing(services);
