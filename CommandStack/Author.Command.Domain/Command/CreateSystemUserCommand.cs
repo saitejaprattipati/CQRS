@@ -39,6 +39,7 @@ namespace Author.Command.Domain.Command
         public SystemUserRole Role { get; set; }
 
         [Required]
+        [Range(0, int.MaxValue, ErrorMessage = "Only positive number allowed")]
         public int HomeCountry { get; set; }
 
         [Required]

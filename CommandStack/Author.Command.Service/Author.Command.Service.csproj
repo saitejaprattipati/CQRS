@@ -6,6 +6,7 @@
     <OldToolsVersion>2.0</OldToolsVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="6.1.1" />
     <PackageReference Include="MediatR" Version="7.0.0" />
     <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.4.0" />
     <PackageReference Include="Microsoft.Azure.ServiceBus" Version="3.4.0" />
