@@ -21,10 +21,33 @@ namespace AuthorAdmin.Command.API.Controllers
         }
 
         [HttpPost]
-        [Route("CreateUser")]
-        [ProducesResponseType(typeof(string), 201)]
-        [ProducesResponseType(typeof(string), 400)]
+        [Route("createuser")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateUser([FromBody] CreateSystemUserCommand command)
+        {
+            var response = await _mediator.Send(command);
+
+            if (response == null)
+            {
+                return BadRequest();
+            }
+
+            if (response.IsSuccessful)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(response.FailureReason);
+            }
+        }
+
+        [HttpPost]
+        [Route("updateuser")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateSystemUserCommand command)
         {
             var response = await _mediator.Send(command);
 

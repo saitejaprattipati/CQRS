@@ -1,8 +1,8 @@
 ﻿using Author.Command.Persistence.DBContextAggregate;
+using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace Author.Command.Persistence
 {
@@ -25,7 +25,7 @@ namespace Author.Command.Persistence
 
         public bool UserExists(string email)
         {
-            if (string.IsNullOrEmpty(email)) return true;
+            if (string.IsNullOrWhiteSpace(email)) return true;
 
             return _context.SystemUsers.Any(x => email.Equals(x.Email, StringComparison.InvariantCultureIgnoreCase));
         }
@@ -39,14 +39,40 @@ namespace Author.Command.Persistence
         {
             return _context.SystemUserAssociatedCountries.Add(sysuserassociatedcountries).Entity;
         }
+
+        public void Update(SystemUsers user)
+        {
+            _context.Entry(user).State = EntityState.Modified;
+        }
+
+        public async Task<bool> RemoveSystemUserAssociatedCountriesAsync(int systemuserId)
+        {
+            var existingSysUserCountries=  await _context.SystemUserAssociatedCountries.Where(sy => sy.SystemUserId.Equals(systemuserId)).ToListAsync();
+
+            if (existingSysUserCountries.Count == 0)
+            {
+                return false;
+            }
+
+            foreach (var country in existingSysUserCountries)
+            {
+                _context.SystemUserAssociatedCountries.Remove(country);
+            }
+
+            return true;
+        }
     }
 
    public interface ISystemUserRepository : IRepository<SystemUsers>
     {
         SystemUsers Add(SystemUsers user);
 
+        void Update(SystemUsers user);
+
         SystemUserAssociatedCountries Add(SystemUserAssociatedCountries sysuserassociatedcountries);
 
         bool UserExists(string email);
+
+        Task<bool> RemoveSystemUserAssociatedCountriesAsync(int systemuserId);
     }
 }
