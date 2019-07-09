@@ -40,7 +40,7 @@ namespace Author.Command.Service
 
                 if (!userExists)
                 {
-                    throw new RulesException("email", @"User with email address :${request.Email}  does not exists");
+                    throw new RulesException("email", @"User with email address :" + request.Email+"  does not exists");
                 }
 
                 var user = _mapper.Map<SystemUsers>(request);

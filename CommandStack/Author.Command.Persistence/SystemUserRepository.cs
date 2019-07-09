@@ -43,6 +43,8 @@ namespace Author.Command.Persistence
         public void Update(SystemUsers user)
         {
             _context.Entry(user).State = EntityState.Modified;
+            _context.Entry(user).Property(x => x.CreatedBy).IsModified = false;
+            _context.Entry(user).Property(x => x.CreatedDate).IsModified = false;
         }
 
         public async Task<bool> RemoveSystemUserAssociatedCountriesAsync(int systemuserId)

@@ -9,8 +9,9 @@ namespace Author.Command.Domain.Command
 {
     public class UpdateSystemUserCommand: IRequest<UpdateSystemUserCommandResponse>
     {
-        [RegularExpression(Constants.GeneralStringRegularExpression)]
-        public string SystemUserId { get; set; }
+       [Required]
+       [Range(0,int.MaxValue, ErrorMessage = "Only positive number allowed")]
+        public int SystemUserId { get; set; }
 
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         [Required]
@@ -33,8 +34,8 @@ namespace Author.Command.Domain.Command
         [Required]
         public string Location { get; set; }
 
-        [RegularExpression(Constants.GeneralStringRegularExpression)]
         [Required]
+        [EmailAddress(ErrorMessage ="Invalid EmailId")]
         public string Email { get; set; }
 
         [Required]
