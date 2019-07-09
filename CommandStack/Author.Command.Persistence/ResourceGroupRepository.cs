@@ -37,17 +37,24 @@ namespace Author.Command.Persistence
 
         }
 
-        public void Update(Articles order)
+        public void Update<T>(T obj)
         {
-            _context.Entry(order).State = EntityState.Modified;
+            _context.Entry(obj).State = EntityState.Modified;
+        }
+        public void Delete<T>(T obj)
+        {
+            _context.Entry(obj).State = EntityState.Deleted;
         }
 
 
-        public async Task<Articles> GetAsync(int orderId)
+        public ResourceGroups GetResourceGroup(int resourceGroupId)
         {
-            var order = await _context.Articles.FindAsync(orderId);
+            var ResourceGroup = (from rg in _context.ResourceGroups
+                                .Include(c=>c.ResourceGroupContents)                                
+                                 .Where(b => b.ResourceGroupId == resourceGroupId)
+                        select(rg)).FirstOrDefault();
 
-            return order;
+            return ResourceGroup;
         }
         public List<Languages> GetAllLanguages()
         {

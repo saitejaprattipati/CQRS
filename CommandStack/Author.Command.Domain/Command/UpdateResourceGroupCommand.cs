@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Author.Command.Domain.Command
 {
-    class UpdateResourceGroupCommand : IRequest<UpdateResourceGroupCommandResponse>
+   public class UpdateResourceGroupCommand : IRequest<UpdateResourceGroupCommandResponse>
     {
         [JsonProperty("resourceGroupId")]
         public int ResourceGroupId { get; set; }
