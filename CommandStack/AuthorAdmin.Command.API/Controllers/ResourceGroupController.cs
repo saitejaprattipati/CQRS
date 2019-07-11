@@ -23,10 +23,60 @@ namespace AuthorAdmin.Command.API.Controllers
         }
 
         [HttpPost]
-        [Route("CreateResourceGroup")]
+        [Route("createResourceGroup")]
         [ProducesResponseType(typeof(string), 201)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> CreateResourceGroup([FromBody] CreateResourceGroupCommand command)
+        {
+            var response = await _mediator.Send(command);
+
+            if (response == null)
+            {
+                _log.LogError("Error : " + response.FailureReason);
+                return BadRequest();
+            }
+
+            if (response.IsSuccessful)
+            {
+                return Ok();
+            }
+            else
+            {
+                _log.LogError("Error : " + response.FailureReason);
+                return BadRequest(response.FailureReason);
+            }
+        }
+
+        [HttpPost]
+        [Route("updateResourceGroup")]
+        [ProducesResponseType(typeof(string),201)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> UpdateResourceGroup([FromBody] UpdateResourceGroupCommand command)
+        {
+            var response = await _mediator.Send(command);
+
+            if (response == null)
+            {
+                _log.LogError("Error : " + response.FailureReason);
+                return BadRequest();
+            }
+
+            if (response.IsSuccessful)
+            {
+                return Ok();
+            }
+            else
+            {
+                _log.LogError("Error : " + response.FailureReason);
+                return BadRequest(response.FailureReason);
+            }
+        }
+
+        [HttpPost]
+        [Route("manipulateResourceGroup")]
+        [ProducesResponseType(typeof(string), 201)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> ManipulateResourceGroup([FromBody] ManipulateResourceGroupCommand command)
         {
             var response = await _mediator.Send(command);
 
