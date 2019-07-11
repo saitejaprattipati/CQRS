@@ -3,15 +3,17 @@ using Author.Core.Framework;
 using Author.Core.Framework.Utilities.Validators;
 using MediatR;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 
 namespace Author.Command.Domain.Command
 {
-    public class CreateSystemUserCommand : IRequest<CreateSystemUserCommandResponse>
+    public class UpdateSystemUserCommand: IRequest<UpdateSystemUserCommandResponse>
     {
+       [Required]
+       [Range(0,int.MaxValue, ErrorMessage = "Only positive number allowed")]
+        public int SystemUserId { get; set; }
+
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         [Required]
         public string FirstName { get; set; }
@@ -34,11 +36,12 @@ namespace Author.Command.Domain.Command
         public string Location { get; set; }
 
         [Required]
+        //[EmailAddress(ErrorMessage ="Invalid EmailId")]
         [EmailValidator]
         public string Email { get; set; }
 
         [Required]
-        [Range(1, 4 , ErrorMessage = "Role not valid")]
+        [Range(1, 4, ErrorMessage = "Role not valid")]
         public int Role { get; set; }
 
         [Required]
@@ -50,7 +53,7 @@ namespace Author.Command.Domain.Command
         public List<int> Countries { get; set; }
     }
 
-    public class CreateSystemUserCommandResponse : CommandResponse
+    public class UpdateSystemUserCommandResponse : CommandResponse
     {
         [JsonProperty("UpdatedStatus")]
         public string UpdatedStatus { get; set; }

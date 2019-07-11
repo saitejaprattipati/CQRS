@@ -12,61 +12,49 @@ using System.Transactions;
 
 namespace Author.Command.Service
 {
-    public class CreateUserCommandHandler : IRequestHandler<CreateSystemUserCommand, CreateSystemUserCommandResponse>
+    public class UpdateSystemUserCommandHandler : IRequestHandler<UpdateSystemUserCommand, UpdateSystemUserCommandResponse>
     {
         private readonly IIntegrationEventPublisherServiceService _eventcontext;
         private readonly SystemUserRepository _systemUserRepository;
         private readonly IMapper _mapper;
 
-        public CreateUserCommandHandler(IIntegrationEventPublisherServiceService eventcontext, IMapper mapper)
+
+        public UpdateSystemUserCommandHandler(IIntegrationEventPublisherServiceService eventcontext, IMapper mapper)
         {
             _systemUserRepository = new SystemUserRepository(new TaxatHand_StgContext());
             _eventcontext = eventcontext;
             _mapper = mapper;
         }
-        public async Task<CreateSystemUserCommandResponse> Handle(CreateSystemUserCommand request, CancellationToken cancellationToken)
+
+        public async Task<UpdateSystemUserCommandResponse> Handle(UpdateSystemUserCommand request, CancellationToken cancellationToken)
         {
-            var response = new CreateSystemUserCommandResponse()
+            var response = new UpdateSystemUserCommandResponse()
             {
                 IsSuccessful = false
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                // Check User Exists
-                var userExists = _systemUserRepository.UserExists(request.Email);
-                if (userExists)
+                var userExists =
+                   _systemUserRepository.UserExists(request.Email,request.SystemUserId);
+
+                if (!userExists)
                 {
-                    //ModelState.AddModelError("email", new Exception("This email address already exists"));
-                    //throw new HttpStatusCodeException(StatusCodes.Status400BadRequest, @"This email address already exists");
-                    throw new RulesException("email", @"This email address already exists");
+                    throw new RulesException("email", $"User with SystemuserId: {request.SystemUserId} and email address: {request.Email} does not exists");
                 }
 
-                //var user = new SystemUsers
-                //{
-                //    FirstName = request.FirstName,
-                //    Email = request.Email,
-                //    LastName = request.LastName,
-                //    Level = request.Level,
-                //    Location = request.Location,
-                //    MobilePhoneNumber = request.MobilePhoneNumber,
-                //    Role = Convert.ToInt32(request.Role),
-                //    WorkPhoneNumber = request.WorkPhoneNumber,
-                //    CreatedBy = "CMS Admin",
-                //    CreatedDate = DateTime.UtcNow,
-                //    UpdatedBy = "CMS Admin",
-                //    UpdatedDate = DateTime.UtcNow
-                //};
-
                 var user = _mapper.Map<SystemUsers>(request);
-                user.CreatedBy = "CMS Admin";
-                user.CreatedDate = DateTime.UtcNow;
                 user.UpdatedBy = "CMS Admin";
                 user.UpdatedDate = DateTime.UtcNow;
-
-
-                _systemUserRepository.Add(user);
+                _systemUserRepository.Update(user);
                 await _systemUserRepository.UnitOfWork.SaveEntitiesAsync();
 
+                var isExistingSysUserCountriesRemoved = await _systemUserRepository.RemoveSystemUserAssociatedCountriesAsync(Convert.ToInt32(request.SystemUserId));
+
+                if (isExistingSysUserCountriesRemoved)
+                {
+                    await _systemUserRepository.UnitOfWork.SaveEntitiesAsync();
+                }
 
                 var homeCountry = new SystemUserAssociatedCountries();
                 homeCountry.CountryId = request.HomeCountry;
