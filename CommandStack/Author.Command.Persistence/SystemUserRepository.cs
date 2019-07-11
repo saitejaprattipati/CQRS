@@ -1,6 +1,7 @@
 ﻿using Author.Command.Persistence.DBContextAggregate;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,11 +24,18 @@ namespace Author.Command.Persistence
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public bool UserExists(string email)
+        public bool UserExists(string email, int systemUserId)
         {
             if (string.IsNullOrWhiteSpace(email)) return true;
 
-            return _context.SystemUsers.Any(x => email.Equals(x.Email, StringComparison.InvariantCultureIgnoreCase));
+            // For new user 
+            if (systemUserId == 0)
+            {
+                return _context.SystemUsers.Any(x => email.Equals(x.Email, StringComparison.InvariantCultureIgnoreCase));
+            }
+
+            // For existing user
+            return _context.SystemUsers.Any(x => (email.Equals(x.Email, StringComparison.InvariantCultureIgnoreCase)) && (x.SystemUserId.Equals(systemUserId)));
         }
 
         public SystemUsers Add(SystemUsers user)
@@ -63,6 +71,22 @@ namespace Author.Command.Persistence
 
             return true;
         }
+
+        public async Task<List<SystemUsers>> GetSystemUsersByIds(List<int> systemuserIds)
+        {
+            return await _context.SystemUsers.Include(syc=>syc.SystemUserAssociatedCountries)
+                                            .Where(sy => systemuserIds.Contains<int>(sy.SystemUserId)).ToListAsync();
+        }
+
+        public void Delete<T>(T obj)
+        {
+            _context.Entry(obj).State = EntityState.Deleted;
+        }
+
+        public void DeleteSystemUser(SystemUsers systemuser)
+        {
+            _context.SystemUsers.Remove(systemuser);
+        }
     }
 
    public interface ISystemUserRepository : IRepository<SystemUsers>
@@ -73,8 +97,12 @@ namespace Author.Command.Persistence
 
         SystemUserAssociatedCountries Add(SystemUserAssociatedCountries sysuserassociatedcountries);
 
-        bool UserExists(string email);
+        bool UserExists(string email, int systemUserId);
 
         Task<bool> RemoveSystemUserAssociatedCountriesAsync(int systemuserId);
+
+        Task<List<SystemUsers>> GetSystemUsersByIds(List<int> systemuserIds);
+
+        void Delete<T>(T obj);
     }
 }

@@ -1,7 +1,9 @@
 ﻿using Author.Core.Framework;
+using Author.Core.Framework.ExceptionHandling;
 using Author.Core.Framework.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using System;
@@ -31,8 +33,13 @@ namespace AuthorAdmin.Command.API.ExceptionMiddleware
                     {
                         Instance = $"urn:tax@handAPI:error:{Guid.NewGuid()}"
                     };
-
-                    if (exception is BadHttpRequestException badHttpRequestException)
+                    if (exception is RulesException)
+                    {
+                        problemDetails.Title = "Invalid request";
+                        problemDetails.Status = StatusCodes.Status400BadRequest;
+                        problemDetails.Detail = ((RulesException)exception).Errors[0].ErrorMessage;
+                    }
+                    else if (exception is BadHttpRequestException badHttpRequestException)
                     {
                         problemDetails.Title = "Invalid request";
                         problemDetails.Status = (int)typeof(BadHttpRequestException).GetProperty("StatusCode",

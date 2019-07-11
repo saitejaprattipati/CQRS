@@ -1,5 +1,6 @@
 ﻿using Author.Command.Domain.Models;
 using Author.Core.Framework;
+using Author.Core.Framework.Utilities.Validators;
 using MediatR;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -35,17 +36,20 @@ namespace Author.Command.Domain.Command
         public string Location { get; set; }
 
         [Required]
-        [EmailAddress(ErrorMessage ="Invalid EmailId")]
+        //[EmailAddress(ErrorMessage ="Invalid EmailId")]
+        [EmailValidator]
         public string Email { get; set; }
 
         [Required]
-        public SystemUserRole Role { get; set; }
+        [Range(1, 4, ErrorMessage = "Role not valid")]
+        public int Role { get; set; }
 
         [Required]
         [Range(0, int.MaxValue, ErrorMessage = "Only positive number allowed")]
         public int HomeCountry { get; set; }
 
         [Required]
+        [EnsureAllListElementsArePositiveIntegers]
         public List<int> Countries { get; set; }
     }
 

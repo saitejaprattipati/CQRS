@@ -26,4 +26,6 @@ namespace Author.Core.Framework
         On = 1,
         RemoteOnly = 2
     }
+
+
 }

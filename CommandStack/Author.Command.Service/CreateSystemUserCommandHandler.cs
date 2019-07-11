@@ -12,49 +12,43 @@ using System.Transactions;
 
 namespace Author.Command.Service
 {
-    public class UpdateUserCommandHandler : IRequestHandler<UpdateSystemUserCommand, UpdateSystemUserCommandResponse>
+    public class CreateSystemUserCommandHandler : IRequestHandler<CreateSystemUserCommand, CreateSystemUserCommandResponse>
     {
         private readonly IIntegrationEventPublisherServiceService _eventcontext;
         private readonly SystemUserRepository _systemUserRepository;
         private readonly IMapper _mapper;
 
-
-        public UpdateUserCommandHandler(IIntegrationEventPublisherServiceService eventcontext, IMapper mapper)
+        public CreateSystemUserCommandHandler(IIntegrationEventPublisherServiceService eventcontext, IMapper mapper)
         {
             _systemUserRepository = new SystemUserRepository(new TaxatHand_StgContext());
             _eventcontext = eventcontext;
             _mapper = mapper;
         }
-
-        public async Task<UpdateSystemUserCommandResponse> Handle(UpdateSystemUserCommand request, CancellationToken cancellationToken)
+        public async Task<CreateSystemUserCommandResponse> Handle(CreateSystemUserCommand request, CancellationToken cancellationToken)
         {
-            var response = new UpdateSystemUserCommandResponse()
+            var response = new CreateSystemUserCommandResponse()
             {
                 IsSuccessful = false
             };
-
-            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var userExists =
-                   _systemUserRepository.UserExists(request.Email);
-
-                if (!userExists)
+                // Check User Exists
+                var userExists = _systemUserRepository.UserExists(request.Email,0);
+                if (userExists)
                 {
-                    throw new RulesException("email", @"User with email address :" + request.Email+"  does not exists");
+                    throw new RulesException("email", $"This email address: {request.Email} already exists");
                 }
 
                 var user = _mapper.Map<SystemUsers>(request);
+                user.CreatedBy = "CMS Admin";
+                user.CreatedDate = DateTime.UtcNow;
                 user.UpdatedBy = "CMS Admin";
                 user.UpdatedDate = DateTime.UtcNow;
-                _systemUserRepository.Update(user);
+
+
+                _systemUserRepository.Add(user);
                 await _systemUserRepository.UnitOfWork.SaveEntitiesAsync();
 
-                var isExistingSysUserCountriesRemoved = await _systemUserRepository.RemoveSystemUserAssociatedCountriesAsync(Convert.ToInt32(request.SystemUserId));
-
-                if (isExistingSysUserCountriesRemoved)
-                {
-                    await _systemUserRepository.UnitOfWork.SaveEntitiesAsync();
-                }
 
                 var homeCountry = new SystemUserAssociatedCountries();
                 homeCountry.CountryId = request.HomeCountry;
@@ -62,7 +56,8 @@ namespace Author.Command.Service
                 homeCountry.SystemUserId = user.SystemUserId;
                 _systemUserRepository.Add(homeCountry);
 
-                foreach (var country in request.Countries.Where(x => !x.Equals(request.HomeCountry)))
+                var countryPermissionList = request.Countries.Distinct();
+                foreach (var country in countryPermissionList.Where(x => !x.Equals(request.HomeCountry)))
                 {
                     var associatedCountry = new SystemUserAssociatedCountries();
                     associatedCountry.CountryId = country;
