@@ -8,6 +8,7 @@ namespace Author.Command.Domain.Command
 {
    public class UpdateResourceGroupCommand : IRequest<UpdateResourceGroupCommandResponse>
     {
+        [Required]
         [JsonProperty("resourceGroupId")]
         public int ResourceGroupId { get; set; }
 
@@ -22,7 +23,7 @@ namespace Author.Command.Domain.Command
     }
     public class UpdateResourceGroupCommandResponse : CommandResponse
     {
-        [JsonProperty("UpdatedStatus")]
+        [JsonProperty("updatedStatus")]
         public string UpdatedStatus { get; set; }
     }
 }
