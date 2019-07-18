@@ -6,17 +6,17 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Author.Command.Domain.Command
 {
-   public class ManipulateResourceGroupCommand : IRequest<ManipulateResourceGroupCommandResponse>
+   public class ManipulateTaxGroupCommand : IRequest<ManipulateTaxGroupCommandResponse>
     {
-        [JsonProperty("resourceGroupIds")]
-        public List<int> ResourceGroupIds { get; set; }
+        [JsonProperty("taxGroupIds")]
+        public List<int> TaxGroupIds { get; set; }
 
         [JsonProperty("operation")]
         public string Operation { get; set; }
     }
-    public class ManipulateResourceGroupCommandResponse : CommandResponse
+    public class ManipulateTaxGroupCommandResponse : CommandResponse
     {
-        [JsonProperty("UpdatedStatus")]
+        [JsonProperty("updatedStatus")]
         public string UpdatedStatus { get; set; }
     }
 }

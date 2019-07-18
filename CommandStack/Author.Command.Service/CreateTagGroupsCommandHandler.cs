@@ -11,10 +11,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using System.Transactions;
 
 namespace Author.Command.Service
 {
-   public class CreateTagGroupsCommandHandler : IRequestHandler<CreateTagGroupsCommand, TagGroupsCommandResponse>
+    public class CreateTagGroupsCommandHandler : IRequestHandler<CreateTagGroupsCommand, TagGroupsCommandResponse>
     {
         private readonly IIntegrationEventPublisherServiceService _Eventcontext;
         private readonly TagGroupsRepository _taxTagsRepository;
@@ -32,6 +33,8 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
                 List<Languages> _languages = _taxTagsRepository.GetAllLanguages();
                 TaxTags _taxTag = new TaxTags();
                 _taxTag.IsPublished = true;
@@ -51,7 +54,9 @@ namespace Author.Command.Service
                 await _taxTagsRepository.UnitOfWork
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
-                return response;
+                scope.Complete();
+            }
+            return response;
         }
     }
 }

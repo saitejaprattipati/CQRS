@@ -50,14 +50,14 @@ namespace Author.Command.Persistence
         {
             _context.ResourceGroups.Remove(resourceGroup);
         }
-        public ResourceGroups GetResourceGroup(int resourceGroupId)
-        {
-            var ResourceGroup = (from rg in _context.ResourceGroups
-                                .Include(c => c.ResourceGroupContents)
-                                 .Where(b => b.ResourceGroupId == resourceGroupId)
-                                 select (rg)).FirstOrDefault();
-            return ResourceGroup;
-        }
+        //public ResourceGroups GetResourceGroup(int resourceGroupId)
+        //{
+        //    var ResourceGroup = (from rg in _context.ResourceGroups
+        //                        .Include(c => c.ResourceGroupContents)
+        //                         .Where(b => b.ResourceGroupId == resourceGroupId)
+        //                         select (rg)).FirstOrDefault();
+        //    return ResourceGroup;
+        //}
         public List<Languages> GetAllLanguages()
         {
             var languages = _context.Languages.ToList();

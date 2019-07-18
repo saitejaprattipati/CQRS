@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Author.Command.Persistence
 {
-   public class TagGroupsRepository
+    public class TagGroupsRepository
     {
         private readonly TaxatHand_StgContext _context;
 
@@ -31,6 +31,25 @@ namespace Author.Command.Persistence
         {
             var languages = _context.Languages.ToList();
             return _context.Languages.AsNoTracking().ToList();
+        }
+        public List<TaxTags> GetTagGroups(List<int> taxGroupsIds)
+        {
+            List<TaxTags> objtaggroups = _context.TaxTags
+                 .Include(s => s.TaxTagContents)
+             .Where(a => taxGroupsIds.Contains(a.TaxTagId)).ToList();
+            return objtaggroups;
+        }
+        public void Update<T>(T obj)
+        {
+            _context.Entry(obj).State = EntityState.Modified;
+        }
+        public void Delete<T>(T obj)
+        {
+            _context.Entry(obj).State = EntityState.Deleted;
+        }
+        public void DeletetagGroup(TaxTags tagGroup)
+        {
+            _context.TaxTags.Remove(tagGroup);
         }
     }
 }

@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using System.Transactions;
 
 namespace Author.Command.Service
 {
@@ -34,9 +35,11 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
-                List<Languages> _languages=_ResourceGroupRepository.GetAllLanguages();
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                List<Languages> _languages = _ResourceGroupRepository.GetAllLanguages();
                 ResourceGroups _resourceGroup = new ResourceGroups();
-                _resourceGroup.IsPublished=true;
+                _resourceGroup.IsPublished = true;
                 _resourceGroup.Position = request.Position;
                 _resourceGroup.CreatedBy = "";
                 _resourceGroup.CreatedDate = DateTime.Now;
@@ -49,10 +52,12 @@ namespace Author.Command.Service
                     resourceGroupContent.LanguageId = Convert.ToInt32(_languages.FirstOrDefault(x => x.Locale == langName.Language).LanguageId.ToString());
                     _resourceGroup.ResourceGroupContents.Add(resourceGroupContent);
                 }
-                _ResourceGroupRepository.Add(_resourceGroup);        
+                _ResourceGroupRepository.Add(_resourceGroup);
                 await _ResourceGroupRepository.UnitOfWork
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
+                scope.Complete();
+            }
                 return response;
         }
     }
