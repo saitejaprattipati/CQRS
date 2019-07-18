@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using Author.Core.Framework.ExceptionHandling;
+using System.Transactions;
 
 namespace Author.Command.Service
 {
@@ -33,43 +34,47 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
-            List<ResourceGroups> resourceGroups = _ResourceGroupRepository.getResourceGroups(request.ResourceGroupIds);
-            if (request.ResourceGroupIds.Count != resourceGroups.Count)
-                throw new RulesException("Invalid", @"ResourceGroup not found");
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                List<ResourceGroups> resourceGroups = _ResourceGroupRepository.getResourceGroups(request.ResourceGroupIds);
+                if (request.ResourceGroupIds.Count != resourceGroups.Count)
+                    throw new RulesException("Invalid", @"ResourceGroup not found");
 
-            if (request.Operation == "Publish")
-            {
-                foreach (var resourcegroup in resourceGroups)
+                if (request.Operation == "Publish")
                 {
-                    resourcegroup.IsPublished = true;
-                    _ResourceGroupRepository.Update<ResourceGroups>(resourcegroup);
-                }
-            }
-            else if (request.Operation == "UnPublish")
-            {
-                foreach (var resourcegroup in resourceGroups)
-                {
-                    resourcegroup.IsPublished = false;
-                    _ResourceGroupRepository.Update<ResourceGroups>(resourcegroup);
-                }
-            }
-            else if (request.Operation == "Delete")
-            {
-                foreach (ResourceGroups resourcegroup in resourceGroups)
-                {
-                    foreach (var resourceGroupContents in resourcegroup.ResourceGroupContents.ToList())
+                    foreach (var resourcegroup in resourceGroups)
                     {
-                        resourcegroup.ResourceGroupContents.Remove(resourceGroupContents);
-                        _ResourceGroupRepository.Delete<ResourceGroupContents>(resourceGroupContents);
+                        resourcegroup.IsPublished = true;
+                        _ResourceGroupRepository.Update<ResourceGroups>(resourcegroup);
                     }
-                    _ResourceGroupRepository.DeleteResourceGroup(resourcegroup);
                 }
+                else if (request.Operation == "UnPublish")
+                {
+                    foreach (var resourcegroup in resourceGroups)
+                    {
+                        resourcegroup.IsPublished = false;
+                        _ResourceGroupRepository.Update<ResourceGroups>(resourcegroup);
+                    }
+                }
+                else if (request.Operation == "Delete")
+                {
+                    foreach (ResourceGroups resourcegroup in resourceGroups)
+                    {
+                        foreach (var resourceGroupContents in resourcegroup.ResourceGroupContents.ToList())
+                        {
+                            resourcegroup.ResourceGroupContents.Remove(resourceGroupContents);
+                            _ResourceGroupRepository.Delete<ResourceGroupContents>(resourceGroupContents);
+                        }
+                        _ResourceGroupRepository.DeleteResourceGroup(resourcegroup);
+                    }
+                }
+                else
+                    throw new RulesException("Operation", @"The Operation " + request.Operation + " is not valied");
+                await _ResourceGroupRepository.UnitOfWork
+                   .SaveEntitiesAsync();
+                response.IsSuccessful = true;
+                scope.Complete();
             }
-            else
-                throw new RulesException("Operation", @"The Operation " + request.Operation + " is not valied");
-            await _ResourceGroupRepository.UnitOfWork
-               .SaveEntitiesAsync();
-            response.IsSuccessful = true;
             return response;
         }
     }

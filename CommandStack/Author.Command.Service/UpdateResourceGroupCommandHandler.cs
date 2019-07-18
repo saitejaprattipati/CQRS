@@ -31,41 +31,47 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
-
-            var resourceGroup = _ResourceGroupRepository.GetResourceGroup(request.ResourceGroupId);
-            resourceGroup.Position = request.Position;
-            List<Languages> languages = _ResourceGroupRepository.GetAllLanguages();
-
-            foreach (var content in request.LanguageName)
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var resourceGroupContents = resourceGroup.ResourceGroupContents.Where(s => s.LanguageId == (languages.Where(x => x.Locale == content.Language).Select(a => a.LanguageId).FirstOrDefault())).FirstOrDefault();
-                if (resourceGroupContents == null)
+                List<int> objresourceGroupId = new List<int>();
+                objresourceGroupId.Add(request.ResourceGroupId);
+                //test
+                var resourceGroup = _ResourceGroupRepository.getResourceGroups(objresourceGroupId)[0];
+                resourceGroup.Position = request.Position;
+                List<Languages> languages = _ResourceGroupRepository.GetAllLanguages();
+
+                foreach (var content in request.LanguageName)
                 {
-                    ResourceGroupContents objresourceGroupContents = new ResourceGroupContents();
-                    objresourceGroupContents.GroupName = content.Name;
-                    objresourceGroupContents.LanguageId = (languages.Where(x => x.Locale == content.Language).Select(a => a.LanguageId).FirstOrDefault());
-                    resourceGroup.ResourceGroupContents.Add(objresourceGroupContents);
+                    var resourceGroupContents = resourceGroup.ResourceGroupContents.Where(s => s.LanguageId == (languages.Where(x => x.Locale == content.Language).Select(a => a.LanguageId).FirstOrDefault())).FirstOrDefault();
+                    if (resourceGroupContents == null)
+                    {
+                        ResourceGroupContents objresourceGroupContents = new ResourceGroupContents();
+                        objresourceGroupContents.GroupName = content.Name;
+                        objresourceGroupContents.LanguageId = (languages.Where(x => x.Locale == content.Language).Select(a => a.LanguageId).FirstOrDefault());
+                        resourceGroup.ResourceGroupContents.Add(objresourceGroupContents);
+                    }
+                    else
+                    {
+                        resourceGroupContents.GroupName = content.Name;
+                        _ResourceGroupRepository.Update(resourceGroupContents);
+                    }
                 }
-                else
+                //    List<ResourceGroupContents> ResourceGroupContents = resourceGroup.ResourceGroupContents.Where(s => s.ResourceGroupId == request.ResourceGroupId).ToList();
+                foreach (var resourceContent in resourceGroup.ResourceGroupContents.ToList())
                 {
-                    resourceGroupContents.GroupName = content.Name;
-                    _ResourceGroupRepository.Update(resourceGroupContents);
+                    if (request.LanguageName.Where(s => s.Language == (languages.Where(x => x.LanguageId == resourceContent.LanguageId).Select(a => a.Locale).FirstOrDefault())).Count() == 0)
+                    {
+                        resourceGroup.ResourceGroupContents.Remove(resourceContent);
+                        _ResourceGroupRepository.Delete(resourceContent);
+                    }
                 }
+                resourceGroup.UpdatedBy = "";
+                resourceGroup.UpdatedDate = DateTime.Now;
+                await _ResourceGroupRepository.UnitOfWork
+                      .SaveEntitiesAsync();
+                response.IsSuccessful = true;
+                scope.Complete();
             }
-            List<ResourceGroupContents> ResourceGroupContents = resourceGroup.ResourceGroupContents.Where(s => s.ResourceGroupId == request.ResourceGroupId).ToList();
-            foreach (var resourceContent in resourceGroup.ResourceGroupContents.ToList())
-            {
-                if (request.LanguageName.Where(s => s.Language == (languages.Where(x => x.LanguageId == resourceContent.LanguageId).Select(a => a.Locale).FirstOrDefault())).Count() == 0)
-                {
-                    resourceGroup.ResourceGroupContents.Remove(resourceContent);
-                    _ResourceGroupRepository.Delete(resourceContent);
-                }
-            }
-            resourceGroup.UpdatedBy = "";
-            resourceGroup.UpdatedDate = DateTime.Now;
-            await _ResourceGroupRepository.UnitOfWork
-                  .SaveEntitiesAsync();
-            response.IsSuccessful = true;
             return response;
         }
     }
