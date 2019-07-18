@@ -34,8 +34,6 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
-            try
-            {
                 List<Languages> _languages=_ResourceGroupRepository.GetAllLanguages();
                 ResourceGroups _resourceGroup = new ResourceGroups();
                 _resourceGroup.IsPublished=true;
@@ -56,14 +54,6 @@ namespace Author.Command.Service
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
                 return response;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Error : "+ ex.Message);
-                response.IsSuccessful = false;
-                response.FailureReason = ex.Message.Contains("Object reference not set to an instance of an object") ? "Field Error": "Technical Error";
-            }
-            return response;
         }
     }
 }
