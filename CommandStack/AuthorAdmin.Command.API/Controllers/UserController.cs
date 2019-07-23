@@ -22,7 +22,8 @@ namespace AuthorAdmin.Command.API.Controllers
         /// <summary>
         /// Create SystemUser
         /// </summary>
-        /// <param name="command">Input command</param>
+        /// <remarks>This API will create SystemUser</remarks>
+        /// <param name="command">Create SystemUser command object</param>
         /// <returns></returns>
         [HttpPost]
         [Route("createuser")]
@@ -50,7 +51,8 @@ namespace AuthorAdmin.Command.API.Controllers
         /// <summary>
         /// Update SystemUser
         /// </summary>
-        /// <param name="command">Input command</param>
+        /// <remarks>This API will update SystemUser</remarks>
+        /// <param name="command">Update SystemUser command object</param>
         /// <returns></returns>
         [HttpPut]
         [Route("updateuser")]
@@ -78,7 +80,8 @@ namespace AuthorAdmin.Command.API.Controllers
         /// <summary>
         /// Delete User
         /// </summary>
-        /// <param name="command">Input command</param>
+        /// <remarks>This API will delete SystemUser</remarks>
+        /// <param name="command">Delete SystemUser command object</param>
         /// <returns></returns>
         [HttpDelete]
         [Route("deleteuser")]

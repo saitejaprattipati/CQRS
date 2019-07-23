@@ -57,7 +57,7 @@ namespace Author.Command.Persistence
 
         public async Task<bool> RemoveSystemUserAssociatedCountriesAsync(int systemuserId)
         {
-            var existingSysUserCountries=  await _context.SystemUserAssociatedCountries.Where(sy => sy.SystemUserId.Equals(systemuserId)).ToListAsync();
+            var existingSysUserCountries = await _context.SystemUserAssociatedCountries.Where(sy => sy.SystemUserId.Equals(systemuserId)).ToListAsync();
 
             if (existingSysUserCountries.Count == 0)
             {
@@ -74,7 +74,7 @@ namespace Author.Command.Persistence
 
         public async Task<List<SystemUsers>> GetSystemUsersByIds(List<int> systemuserIds)
         {
-            return await _context.SystemUsers.Include(syc=>syc.SystemUserAssociatedCountries)
+            return await _context.SystemUsers.Include(syc => syc.SystemUserAssociatedCountries)
                                             .Where(sy => systemuserIds.Contains<int>(sy.SystemUserId)).ToListAsync();
         }
 
@@ -89,7 +89,7 @@ namespace Author.Command.Persistence
         }
     }
 
-   public interface ISystemUserRepository : IRepository<SystemUsers>
+    public interface ISystemUserRepository : IRepository<SystemUsers>
     {
         SystemUsers Add(SystemUsers user);
 
