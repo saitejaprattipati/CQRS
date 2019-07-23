@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AuthorAdmin.Command.API</name>
+    </assembly>
+    <members>
+        <member name="M:AuthorAdmin.Command.API.Controllers.UserController.CreateUser(Author.Command.Domain.Command.CreateSystemUserCommand)">
+            <summary>
+            Create SystemUser
+            </summary>
+            <remarks>This API will create SystemUser</remarks>
+            <param name="command">Create SystemUser command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.UserController.UpdateUser(Author.Command.Domain.Command.UpdateSystemUserCommand)">
+            <summary>
+            Update SystemUser
+            </summary>
+            <remarks>This API will update SystemUser</remarks>
+            <param name="command">Update SystemUser command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.UserController.DeleteUser(Author.Command.Domain.Command.DeleteSystemUserCommand)">
+            <summary>
+            Delete User
+            </summary>
+            <remarks>This API will delete SystemUser</remarks>
+            <param name="command">Delete SystemUser command object</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
