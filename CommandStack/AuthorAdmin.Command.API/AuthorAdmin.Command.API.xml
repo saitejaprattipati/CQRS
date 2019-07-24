@@ -4,6 +4,14 @@
         <name>AuthorAdmin.Command.API</name>
     </assembly>
     <members>
+        <member name="M:AuthorAdmin.Command.API.Controllers.SiteDisclaimerController.UpdateSiteDisclaimer(Author.Command.Domain.Command.UpdateSiteDisclaimerCommand)">
+            <summary>
+            Update SiteDisclaimer
+            </summary>
+            <remarks>This API will update SiteDisclaimer</remarks>
+            <param name="command">Update SiteDisclaimer command object</param>
+            <returns></returns>
+        </member>
         <member name="M:AuthorAdmin.Command.API.Controllers.UserController.CreateUser(Author.Command.Domain.Command.CreateSystemUserCommand)">
             <summary>
             Create SystemUser
