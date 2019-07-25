@@ -60,5 +60,5 @@ namespace Author.Command.Persistence
         Articles Add(Articles article);
 
         Task<Articles> AddAsync(Articles article);
-    }
+    } 
 }
