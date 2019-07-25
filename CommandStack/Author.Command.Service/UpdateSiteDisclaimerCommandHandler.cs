@@ -17,13 +17,11 @@ namespace Author.Command.Service
     {
         private readonly IIntegrationEventPublisherServiceService _eventcontext;
         private readonly SiteDisclaimerRepository _siteDisclaimerRepository;
-        private readonly LanguageRepository _languageRepository;
 
 
         public UpdateSiteDisclaimerCommandHandler(IIntegrationEventPublisherServiceService eventcontext)
         {
             _siteDisclaimerRepository = new SiteDisclaimerRepository(new TaxatHand_StgContext());
-            _languageRepository = new LanguageRepository(new TaxatHand_StgContext());
             _eventcontext = eventcontext;
         }
 

@@ -9,13 +9,29 @@ namespace AuthorAdmin.Command.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SiteDisclaimerController : ControllerBase
+    public class SiteDisclaimerController : BaseController
     {
         private readonly IMediator _mediator;
 
         public SiteDisclaimerController(IMediator mediator)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        }
+
+        /// <summary>
+        /// Create SiteDisclaimer
+        /// </summary>
+        /// <remarks>This API will create SiteDisclaimer</remarks>
+        /// <param name="command">Create SiteDisclaimer command object</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("createsitedisclaimer")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateSiteDisclaimer([FromBody] CreateSiteDisclaimerCommand command)
+        {
+            var response = await _mediator.Send(command);
+            return CreateResponse(response);
         }
 
         /// <summary>
@@ -31,20 +47,7 @@ namespace AuthorAdmin.Command.API.Controllers
         public async Task<IActionResult> UpdateSiteDisclaimer([FromBody] UpdateSiteDisclaimerCommand command)
         {
             var response = await _mediator.Send(command);
-
-            if (response == null)
-            {
-                return BadRequest();
-            }
-
-            if (response.IsSuccessful)
-            {
-                return Ok();
-            }
-            else
-            {
-                return BadRequest(response.FailureReason);
-            }
+            return CreateResponse(response);
         }
     }
 }
