@@ -30,6 +30,19 @@ namespace Author.Command.Persistence
                                                   .Where(a => a.ArticleId == siteDisclaimerId)
                                                   .FirstOrDefaultAsync(a => a.Type == Convert.ToInt32(ArticleType.Page));
         }
+
+        public Articles Add(Articles article)
+        {
+            return _context.Articles.Add(article).Entity;
+        }
+
+        public async Task<Articles> AddAsync(Articles article)
+        {
+            await _context.Articles.AddAsync(article);
+            return article;
+        }
+
+
         public void Update<T>(T obj)
         {
             _context.Entry(obj).State = EntityState.Modified;
@@ -43,5 +56,9 @@ namespace Author.Command.Persistence
     public interface ISiteDisclaimerRepository : IRepository<Articles>
     {
         Articles GetSiteDisclaimer(int siteDisclaimerId);
-    }
+
+        Articles Add(Articles article);
+
+        Task<Articles> AddAsync(Articles article);
+    } 
 }
