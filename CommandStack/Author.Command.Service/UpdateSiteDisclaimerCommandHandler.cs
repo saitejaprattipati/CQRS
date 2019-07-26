@@ -60,6 +60,7 @@ namespace Author.Command.Service
                         siteDisclaimerContent.Content = item.Body;
                         siteDisclaimerContent.TeaserText = item.TeaserText;
                         siteDisclaimerContent.Title = item.Title;
+                        siteDisclaimerContent.LanguageId = item.LanguageId;
                         _siteDisclaimerRepository.Update(siteDisclaimerContent);
                     }
                 }
