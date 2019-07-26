@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AuthorAdmin.Command.API</name>
+    </assembly>
+    <members>
+        <member name="M:AuthorAdmin.Command.API.Controllers.ContentDisclaimerController.CreateContentDisclaimer(Author.Command.Domain.Command.CreateContentDisclaimerCommand)">
+            <summary>
+            Create ContentDisclaimer
+            </summary>
+            <remarks>This API will create ContentDisclaimer</remarks>
+            <param name="command">Create ContentDisclaimer command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.ContentDisclaimerController.UpdateContentDisclaimer(Author.Command.Domain.Command.UpdateContentDisclaimerCommand)">
+            <summary>
+            Update ContentDisclaimer
+            </summary>
+            <remarks>This API will update ContentDisclaimer</remarks>
+            <param name="command">Update ContentDisclaimer command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.SiteDisclaimerController.CreateSiteDisclaimer(Author.Command.Domain.Command.CreateSiteDisclaimerCommand)">
+            <summary>
+            Create SiteDisclaimer
+            </summary>
+            <remarks>This API will create SiteDisclaimer</remarks>
+            <param name="command">Create SiteDisclaimer command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.SiteDisclaimerController.UpdateSiteDisclaimer(Author.Command.Domain.Command.UpdateSiteDisclaimerCommand)">
+            <summary>
+            Update SiteDisclaimer
+            </summary>
+            <remarks>This API will update SiteDisclaimer</remarks>
+            <param name="command">Update SiteDisclaimer command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.UserController.CreateUser(Author.Command.Domain.Command.CreateSystemUserCommand)">
+            <summary>
+            Create SystemUser
+            </summary>
+            <remarks>This API will create SystemUser</remarks>
+            <param name="command">Create SystemUser command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.UserController.UpdateUser(Author.Command.Domain.Command.UpdateSystemUserCommand)">
+            <summary>
+            Update SystemUser
+            </summary>
+            <remarks>This API will update SystemUser</remarks>
+            <param name="command">Update SystemUser command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.UserController.DeleteUser(Author.Command.Domain.Command.DeleteSystemUserCommand)">
+            <summary>
+            Delete User
+            </summary>
+            <remarks>This API will delete SystemUser</remarks>
+            <param name="command">Delete SystemUser command object</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

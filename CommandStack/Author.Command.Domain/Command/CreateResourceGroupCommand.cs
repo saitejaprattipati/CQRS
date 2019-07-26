@@ -23,9 +23,9 @@ namespace Author.Command.Domain.Command
         [JsonProperty("UpdatedStatus")]
         public string UpdatedStatus { get; set; }
     }
-    public class LanguageName
-    {
-        public string Language { get; set; }
-        public string Name { get; set; }
-    }
+    //public class LanguageName
+    //{
+    //    public string Language { get; set; }
+    //    public string Name { get; set; }
+    //}
 }
