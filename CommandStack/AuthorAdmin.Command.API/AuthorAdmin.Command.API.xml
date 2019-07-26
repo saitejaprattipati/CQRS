@@ -4,6 +4,22 @@
         <name>AuthorAdmin.Command.API</name>
     </assembly>
     <members>
+        <member name="M:AuthorAdmin.Command.API.Controllers.ContentDisclaimerController.CreateContentDisclaimer(Author.Command.Domain.Command.CreateContentDisclaimerCommand)">
+            <summary>
+            Create ContentDisclaimer
+            </summary>
+            <remarks>This API will create ContentDisclaimer</remarks>
+            <param name="command">Create ContentDisclaimer command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.ContentDisclaimerController.UpdateContentDisclaimer(Author.Command.Domain.Command.UpdateContentDisclaimerCommand)">
+            <summary>
+            Update ContentDisclaimer
+            </summary>
+            <remarks>This API will update ContentDisclaimer</remarks>
+            <param name="command">Update ContentDisclaimer command object</param>
+            <returns></returns>
+        </member>
         <member name="M:AuthorAdmin.Command.API.Controllers.SiteDisclaimerController.CreateSiteDisclaimer(Author.Command.Domain.Command.CreateSiteDisclaimerCommand)">
             <summary>
             Create SiteDisclaimer

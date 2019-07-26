@@ -27,7 +27,7 @@ namespace Author.Command.Persistence
         {
             //Update existing disclaimer
             return await _context.Articles.Include(a => a.ArticleContents)
-                                                  .Where(a => a.ArticleId == siteDisclaimerId)
+                                                  .Where(a => a.ArticleId.Equals(siteDisclaimerId))
                                                   .FirstOrDefaultAsync(a => a.Type == Convert.ToInt32(ArticleType.Page));
         }
 

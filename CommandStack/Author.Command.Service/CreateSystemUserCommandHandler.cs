@@ -30,7 +30,7 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 // Check User Exists
                 var userExists = _systemUserRepository.UserExists(request.Email,0);
