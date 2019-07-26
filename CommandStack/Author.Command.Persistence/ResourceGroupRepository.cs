@@ -64,10 +64,6 @@ namespace Author.Command.Persistence
             return _context.Languages.AsNoTracking().ToList();
         }
     }
-    public class RecordsBase<T>
-    {
-        public IEnumerable<T> Records { get; set; }
-    }
     public interface IResourceGroupRepository : IRepository<Articles>
     {
         ResourceGroups Add(ResourceGroups order);

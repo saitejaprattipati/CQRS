@@ -36,6 +36,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorAdmin.Command.API", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Core.Framework", "Common\Author.Core.Framework\Author.Core.Framework.csproj", "{4CB242B2-BA6E-4C81-890B-BA8C63E2D876}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Author.Core.Services.BlobStorage", "Common\Author.Core.Services.BlobStorage\Author.Core.Services.BlobStorage.csproj", "{C5EA2DBD-6AFA-4D31-A25F-17EBB8EBB567}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -90,6 +92,10 @@ Global
 		{4CB242B2-BA6E-4C81-890B-BA8C63E2D876}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CB242B2-BA6E-4C81-890B-BA8C63E2D876}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CB242B2-BA6E-4C81-890B-BA8C63E2D876}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5EA2DBD-6AFA-4D31-A25F-17EBB8EBB567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5EA2DBD-6AFA-4D31-A25F-17EBB8EBB567}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5EA2DBD-6AFA-4D31-A25F-17EBB8EBB567}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5EA2DBD-6AFA-4D31-A25F-17EBB8EBB567}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,6 +112,7 @@ Global
 		{07AAE277-139A-456D-8E58-8B90E246E131} = {0BB711EB-C31C-45BE-A91C-4BE27F71027F}
 		{FCDB2BB4-790E-4513-A951-EB242D5896FE} = {99E5961A-C929-4355-AA15-68B0F8CCD388}
 		{4CB242B2-BA6E-4C81-890B-BA8C63E2D876} = {C1212B40-72BC-4A19-A5F8-A53823156224}
+		{C5EA2DBD-6AFA-4D31-A25F-17EBB8EBB567} = {C1212B40-72BC-4A19-A5F8-A53823156224}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7B43F389-6EE9-44DA-99B9-2333DA47F5DF}
