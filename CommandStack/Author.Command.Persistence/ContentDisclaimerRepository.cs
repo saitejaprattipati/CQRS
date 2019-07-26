@@ -1,6 +1,7 @@
 ﻿using Author.Command.Persistence.DBContextAggregate;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -28,6 +29,12 @@ namespace Author.Command.Persistence
             return await _context.Disclaimers.Include(d => d.DisclaimerContents)
                                                   .Where(dc => dc.DisclaimerId.Equals(disclaimerId))
                                                   .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<Disclaimers>> GetDisclaimerByIds(List<int> disclaimerIds)
+        {
+            return await _context.Disclaimers.Include(dc => dc.DisclaimerContents)
+                                            .Where(d => disclaimerIds.Contains<int>(d.DisclaimerId)).ToListAsync();
         }
 
 
