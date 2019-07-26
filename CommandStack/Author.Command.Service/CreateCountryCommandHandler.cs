@@ -81,7 +81,7 @@ namespace Author.Command.Service
                 Countries _Country = new Countries();
                 _Country.PngimageId = pngImageId;
                 _Country.SvgimageId = svgImageId;
-                _Country.IsPublished = true;
+                _Country.IsPublished = false;
                 _Country.CreatedBy = "";
                 _Country.CreatedDate = DateTime.Now;
                 _Country.UpdatedBy = "";
