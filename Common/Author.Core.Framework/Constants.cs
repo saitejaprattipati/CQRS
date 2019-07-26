@@ -27,5 +27,16 @@ namespace Author.Core.Framework
         RemoteOnly = 2
     }
 
-
+    public enum ImageType
+    {
+        Banner = 1,
+        [Description("Banner Resource")]
+        BannerResource,
+        Content,
+        [Description("Flag PNG")]
+        FlagPNG,
+        [Description("Flag SVG")]
+        FlagSVG,
+        Profile
+    }
 }
