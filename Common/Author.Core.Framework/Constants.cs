@@ -67,4 +67,16 @@ namespace Author.Core.Framework
         [Description("Terms of Use")]
         TermsOfUse = 107
     }
+    public enum ImageType
+    {
+        Banner = 1,
+        [Description("Banner Resource")]
+        BannerResource,
+        Content,
+        [Description("Flag PNG")]
+        FlagPNG,
+        [Description("Flag SVG")]
+        FlagSVG,
+        Profile
+    }
 }

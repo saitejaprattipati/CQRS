@@ -27,6 +27,8 @@ using Author.Core.Framework.Utilities;
 using NetCore.AutoRegisterDi;
 using AutoMapper;
 using Author.Command.Service.Mapping;
+using Author.Core.Services.BlobStorage;
+using Author.Core.Services.BlobStorage.Interfaces;
 using Swashbuckle.AspNetCore.Swagger;
 using System.IO;
 
@@ -55,6 +57,7 @@ namespace AuthorAdmin.Command.API
 
             services.AddMediatR(typeof(CreateArticleCommandHandler).GetTypeInfo().Assembly);
             services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
+            services.AddTransient<IIntegrationEventBlobService, IntegrationEventBlobService>();
             services.AddTransient<IUtilityService, UtilityService>();
             services.RegisterAssemblyPublicNonGenericClasses(
               Assembly.GetExecutingAssembly())
@@ -133,6 +136,25 @@ namespace AuthorAdmin.Command.API
             {
                 //  _logger.LogInformation($"Retrieved Service Bus connection settings");
             }
+
+
+
+
+            services.AddSingleton<IBlobConnection>(sp =>
+            {
+                var logger = sp.GetRequiredService<ILogger<BlobConnection>>();    
+                return new BlobConnection();
+            });
+            services.AddSingleton<IEventStorage, EventsBlobStorage>(sp =>
+            {
+                var blobStoragePersisterConnection = sp.GetRequiredService<IBlobConnection>();
+                var logger = sp.GetRequiredService<ILogger<EventsBlobStorage>>();
+
+                return new EventsBlobStorage(blobStoragePersisterConnection, logger);
+            });
+
+
+
 
             // Configure Service Bus Provider - RabbitMq or Azure Service Bus based on environment variables
             if (Configuration.GetValue<bool>("UseAzureServiceBus"))

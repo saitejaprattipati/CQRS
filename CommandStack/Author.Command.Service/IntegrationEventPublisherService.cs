@@ -53,7 +53,7 @@ namespace Author.Command.Service
                 //await queueClient.CloseAsync();
 
 
-                _bus.Publish(evt);
+               _bus.Publish(evt);
             }
             catch (Exception ex)
             {

@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Azure.ServiceBus" Version="3.4.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\Author.Core.Services.BlobStorage\Author.Core.Services.BlobStorage.csproj" />
     <ProjectReference Include="..\..\Common\Author.Core.Services.EventBus\Author.Core.Services.EventBus.csproj" />
     <ProjectReference Include="..\Author.Command.Domain\Author.Command.Domain.csproj" />
     <ProjectReference Include="..\Author.Command.Events\Author.Command.Events.csproj" />
