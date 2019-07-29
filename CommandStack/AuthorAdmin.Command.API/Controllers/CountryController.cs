@@ -118,5 +118,30 @@ namespace AuthorAdmin.Command.API.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("manipulateCountry")]
+        [ProducesResponseType(typeof(string), 201)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> ManipulateCountry([FromBody] ManipulateCountriesCommand command)
+        {
+            var response = await _mediator.Send(command);
+
+            if (response == null)
+            {
+                _log.LogError("Error : " + response.FailureReason);
+                return BadRequest();
+            }
+
+            if (response.IsSuccessful)
+            {
+                return Ok();
+            }
+            else
+            {
+                _log.LogError("Error : " + response.FailureReason);
+                return BadRequest(response.FailureReason);
+            }
+        }
+
     }
 }
