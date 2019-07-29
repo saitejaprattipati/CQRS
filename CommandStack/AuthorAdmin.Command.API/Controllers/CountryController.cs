@@ -82,5 +82,41 @@ namespace AuthorAdmin.Command.API.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("updateCountry")]
+        [ProducesResponseType(typeof(string), 201)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> updateCountry([FromForm] UpdateCountryCommand command)
+        {
+            command = JsonConvert.DeserializeObject<UpdateCountryCommand>(Request.Form.ToList()[0].Value.ToString());
+            foreach (var file in Request.Form.Files)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    file.OpenReadStream().CopyTo(memoryStream);
+                    if (file.FileName.Contains("svg")) { command.ImagesData.SVGName = file.FileName; command.ImagesData.SVGData = Convert.ToBase64String(memoryStream.ToArray()); }
+                    else { command.ImagesData.JPGName = file.FileName; command.ImagesData.JPGData = Convert.ToBase64String(memoryStream.ToArray()); }
+                }
+            }
+            var response = await _mediator.Send(command);
+
+            if (response == null)
+            {
+                _log.LogError("Error : " + response.FailureReason);
+                return BadRequest();
+            }
+
+            if (response.IsSuccessful)
+            {
+                _log.LogError("Successfull");
+                return Ok();
+            }
+            else
+            {
+                _log.LogError("Error : " + response.FailureReason);
+                return BadRequest(response.FailureReason);
+            }
+        }
+
     }
 }

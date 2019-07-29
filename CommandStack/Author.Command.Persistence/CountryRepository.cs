@@ -31,10 +31,31 @@ namespace Author.Command.Persistence
         {
             return _context.Images.Add(_images).Entity;
         }
+        public void Update<T>(T obj)
+        {
+            _context.Entry(obj).State = EntityState.Modified;
+        }
+        public void Delete<T>(T obj)
+        {
+            _context.Entry(obj).State = EntityState.Deleted;
+        }
         public List<Languages> GetAllLanguages()
         {
             var languages = _context.Languages.ToList();
             return _context.Languages.AsNoTracking().ToList();
+        }
+        public List<Countries> getCountry(List<int> CountryIds)
+        {
+            List<Countries> objCountry = _context.Countries
+                 .Include(s => s.CountryContents)
+             .Where(a => CountryIds.Contains(a.CountryId)).ToList();
+            return objCountry;
+        }
+        public List<Images> getImages(List<int?> CountryIds)
+        {
+            List<Images> objImage = _context.Images
+             .Where(a => CountryIds.Contains(a.ImageId)).ToList();
+            return objImage;
         }
     }
     public interface ICountryRepository : IRepository<Articles>
