@@ -44,6 +44,14 @@ namespace Author.Command.Persistence
             var languages = _context.Languages.ToList();
             return _context.Languages.AsNoTracking().ToList();
         }
+        public void DeleteCountry(Countries country)
+        {
+            _context.Countries.Remove(country);
+        }
+        public void DeleteImage(Images image)
+        {
+            _context.Images.Remove(image);
+        }
         public List<Countries> getCountry(List<int> CountryIds)
         {
             List<Countries> objCountry = _context.Countries
