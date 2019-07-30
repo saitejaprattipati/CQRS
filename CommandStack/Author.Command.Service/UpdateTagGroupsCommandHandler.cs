@@ -12,10 +12,11 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using System.Transactions;
+using Author.Core.Framework.ExceptionHandling;
 
 namespace Author.Command.Service
 {
-   public class UpdateTagGroupsCommandHandler : IRequestHandler<UpdateTagGroupsCommand, UpdateTagGroupsCommandResponse>
+   public class UpdateTagGroupsCommandHandler : IRequestHandler<UpdateTagsCommand, UpdateTagGroupsCommandResponse>
     {
         private readonly IIntegrationEventPublisherServiceService _Eventcontext;
         private readonly TagGroupsRepository _taxTagsRepository;
@@ -27,7 +28,7 @@ namespace Author.Command.Service
             _Eventcontext = Eventcontext;
             _logger = logger;
         }
-        public async Task<UpdateTagGroupsCommandResponse> Handle(UpdateTagGroupsCommand request, CancellationToken cancellationToken)
+        public async Task<UpdateTagGroupsCommandResponse> Handle(UpdateTagsCommand request, CancellationToken cancellationToken)
         {
             UpdateTagGroupsCommandResponse response = new UpdateTagGroupsCommandResponse()
             {
@@ -39,7 +40,26 @@ namespace Author.Command.Service
                 objTagGroups.Add(request.TagGroupsId);
                 var taxGroup = _taxTagsRepository.GetTagGroups(objTagGroups)[0];
                 List<Languages> languages = _taxTagsRepository.GetAllLanguages();
-
+                if (request.TagType == "Tag")
+                {
+                    if(taxGroup.ParentTagId==null) throw new RulesException("Invalid", @"Tag not Valid");
+                    taxGroup.ParentTagId = request.TagGroup;
+                    foreach (var country in request.RelatedCountyIds)
+                    {
+                        var taxCountries = taxGroup.TaxTagRelatedCountries.Where(s => s.CountryId == country).FirstOrDefault();
+                        if(taxCountries == null)
+                        { 
+                        TaxTagRelatedCountries objRelatedCountries = new TaxTagRelatedCountries();
+                        objRelatedCountries.CountryId = country;
+                        taxGroup.TaxTagRelatedCountries.Add(objRelatedCountries);
+                        }
+                        else
+                        {
+                            taxCountries.CountryId = country;
+                            _taxTagsRepository.Update(taxCountries);
+                        }
+                    }
+                }
                 foreach (var content in request.LanguageName)
                 {
                     var taxGroupContents = taxGroup.TaxTagContents.Where(s => s.LanguageId == content.LanguageId).FirstOrDefault();
@@ -63,6 +83,14 @@ namespace Author.Command.Service
                     {
                         taxGroup.TaxTagContents.Remove(resourceContent);
                         _taxTagsRepository.Delete(resourceContent);
+                    }
+                }
+                foreach (var resourceCountries in taxGroup.TaxTagRelatedCountries.ToList())
+                {
+                    if (request.RelatedCountyIds.Where(s =>s == resourceCountries.CountryId).Count() == 0)
+                    {
+                        taxGroup.TaxTagRelatedCountries.Remove(resourceCountries);
+                        _taxTagsRepository.Delete(resourceCountries);
                     }
                 }
                 taxGroup.UpdatedBy = "";

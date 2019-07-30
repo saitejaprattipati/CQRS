@@ -12,7 +12,7 @@ namespace AuthorAdmin.Command.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ResourceGroupController : ControllerBase
+    public class ResourceGroupController : BaseController
     {
         private readonly IMediator _mediator;
         private ILogger<ResourceGroupController> _log;
@@ -21,7 +21,12 @@ namespace AuthorAdmin.Command.API.Controllers
             _log = log;
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
-
+        /// <summary>
+        /// Create Resource Group
+        /// </summary>
+        /// <remarks>This API will create resource group</remarks>
+        /// <param name="command">Create resource group command object</param>
+        /// <returns></returns>
         [HttpPost]
         [Route("createResourceGroup")]
         [ProducesResponseType(typeof(string), 201)]
@@ -29,72 +34,37 @@ namespace AuthorAdmin.Command.API.Controllers
         public async Task<IActionResult> CreateResourceGroup([FromBody] CreateResourceGroupCommand command)
         {
             var response = await _mediator.Send(command);
-
-            if (response == null)
-            {
-                _log.LogError("Error : " + response.FailureReason);
-                return BadRequest();
-            }
-
-            if (response.IsSuccessful)
-            {
-                return Ok();
-            }
-            else
-            {
-                _log.LogError("Error : " + response.FailureReason);
-                return BadRequest(response.FailureReason);
-            }
+            return CreateResponse(response);
         }
-
-        [HttpPost]
+        /// <summary>
+        /// Update Resource Group
+        /// </summary>
+        /// <remarks>This API will update resource group</remarks>
+        /// <param name="command">Update resource group command object</param>
+        /// <returns></returns>
+        [HttpPut]
         [Route("updateResourceGroup")]
         [ProducesResponseType(typeof(string),201)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> UpdateResourceGroup([FromBody] UpdateResourceGroupCommand command)
         {
             var response = await _mediator.Send(command);
-
-            if (response == null)
-            {
-                _log.LogError("Error : " + response.FailureReason);
-                return BadRequest();
-            }
-
-            if (response.IsSuccessful)
-            {
-                return Ok();
-            }
-            else
-            {
-                _log.LogError("Error : " + response.FailureReason);
-                return BadRequest(response.FailureReason);
-            }
+            return CreateResponse(response);
         }
-
-        [HttpPost]
+        /// <summary>
+        /// Manipulate Resource Group
+        /// </summary>
+        /// <remarks>This API will manipulate resource group</remarks>
+        /// <param name="command">Manipulate resource group command object</param>
+        /// <returns></returns>
+        [HttpDelete]
         [Route("manipulateResourceGroup")]
         [ProducesResponseType(typeof(string), 201)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> ManipulateResourceGroup([FromBody] ManipulateResourceGroupCommand command)
         {
             var response = await _mediator.Send(command);
-
-            if (response == null)
-            {
-                _log.LogError("Error : " + response.FailureReason);
-                return BadRequest();
-            }
-
-            if (response.IsSuccessful)
-            {
-                return Ok();
-            }
-            else
-            {
-                _log.LogError("Error : " + response.FailureReason);
-                return BadRequest(response.FailureReason);
-            }
+            return CreateResponse(response);
         }
     }
 }

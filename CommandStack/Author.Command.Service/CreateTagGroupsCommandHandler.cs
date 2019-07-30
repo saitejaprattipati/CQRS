@@ -15,7 +15,7 @@ using System.Transactions;
 
 namespace Author.Command.Service
 {
-    public class CreateTagGroupsCommandHandler : IRequestHandler<CreateTagGroupsCommand, TagGroupsCommandResponse>
+    public class CreateTagGroupsCommandHandler : IRequestHandler<CreateTagsCommand, TagsCommandResponse>
     {
         private readonly IIntegrationEventPublisherServiceService _Eventcontext;
         private readonly TagGroupsRepository _taxTagsRepository;
@@ -27,15 +27,14 @@ namespace Author.Command.Service
             _Eventcontext = Eventcontext;
             _logger = logger;
         }
-        public async Task<TagGroupsCommandResponse> Handle(CreateTagGroupsCommand request, CancellationToken cancellationToken)
+        public async Task<TagsCommandResponse> Handle(CreateTagsCommand request, CancellationToken cancellationToken)
         {
-            TagGroupsCommandResponse response = new TagGroupsCommandResponse()
+            TagsCommandResponse response = new TagsCommandResponse()
             {
                 IsSuccessful = false
             };
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                List<Languages> _languages = _taxTagsRepository.GetAllLanguages();
                 TaxTags _taxTag = new TaxTags();
                 _taxTag.IsPublished = true;
                 _taxTag.CreatedBy = "";
@@ -43,6 +42,16 @@ namespace Author.Command.Service
                 _taxTag.UpdatedBy = "";
                 _taxTag.UpdatedDate = DateTime.Now;
                 _taxTag.ParentTagId = null;
+                if (request.TagType == "Tag")
+                {
+                    _taxTag.ParentTagId = request.TagGroup;
+                    foreach (var country in request.RelatedCountyIds)
+                    {
+                        TaxTagRelatedCountries objRelatedCountries = new TaxTagRelatedCountries();
+                        objRelatedCountries.CountryId = country;
+                        _taxTag.TaxTagRelatedCountries.Add(objRelatedCountries);
+                    }
+                }
                 foreach (var langName in request.LanguageName)
                 {
                     var taxTagsContent = new TaxTagContents();

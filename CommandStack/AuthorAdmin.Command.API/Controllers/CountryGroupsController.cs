@@ -31,8 +31,8 @@ namespace AuthorAdmin.Command.API.Controllers
         /// <summary>
         /// Create Country Groups
         /// </summary>
-        /// <remarks>This API will create Country Groups</remarks>
-        /// <param name="command">Create Country Groups command object</param>
+        /// <remarks>This API will create country groups</remarks>
+        /// <param name="command">Create country groups command object</param>
         /// <returns></returns>
         [HttpPost]
         [Route("createCountryGroups")]
@@ -46,10 +46,10 @@ namespace AuthorAdmin.Command.API.Controllers
         /// <summary>
         /// Update Country Groups
         /// </summary>
-        /// <remarks>This API will Update Country Groups</remarks>
-        /// <param name="command">Update Country Groups command object</param>
+        /// <remarks>This API will Update country groups</remarks>
+        /// <param name="command">Update country groups command object</param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPut]
         [Route("updateCountryGroups")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
@@ -61,10 +61,10 @@ namespace AuthorAdmin.Command.API.Controllers
         /// <summary>
         /// Manipilate Country Groups
         /// </summary>
-        /// <remarks>This API will Manipilate Country Groups</remarks>
-        /// <param name="command">Manipilate Country Groups command object</param>
+        /// <remarks>This API will Manipilate country groups</remarks>
+        /// <param name="command">Manipilate country groups command object</param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpDelete]
         [Route("manipulateCountry")]
         [ProducesResponseType(typeof(string), 201)]
         [ProducesResponseType(typeof(string), 400)]
