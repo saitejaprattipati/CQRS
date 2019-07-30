@@ -13,6 +13,9 @@ namespace Author.Command.Domain.Command
 
         [JsonProperty("operation")]
         public string Operation { get; set; }
+
+        [JsonProperty("tagType")]
+        public string TagType { get; set; }
     }
     public class ManipulateTaxGroupCommandResponse : CommandResponse
     {

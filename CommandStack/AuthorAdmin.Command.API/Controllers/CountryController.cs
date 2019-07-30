@@ -19,7 +19,7 @@ namespace AuthorAdmin.Command.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CountryController : ControllerBase
+    public class CountryController : BaseController
     {
         private readonly IMediator _mediator;
         private ILogger<CountryController> _log;
@@ -43,9 +43,14 @@ namespace AuthorAdmin.Command.API.Controllers
                 string bytes = Convert.ToBase64String(memoryStream.ToArray());
             }
             //string base64 = Convert.ToBase64String(bytes);
-        }
+        } 
 
-
+        /// <summary>
+        /// Create Country
+        /// </summary>
+        /// <remarks>This API will create country</remarks>
+        /// <param name="command">Create Country command object</param>
+        /// <returns></returns>
         [HttpPost]
         [Route("createCountry")]
         [ProducesResponseType(typeof(string), 201)]
@@ -63,26 +68,15 @@ namespace AuthorAdmin.Command.API.Controllers
                 }
             }
             var response = await _mediator.Send(command);
-
-            if (response == null)
-            {
-                _log.LogError("Error : " + response.FailureReason);
-                return BadRequest();
-            }
-
-            if (response.IsSuccessful)
-            {
-                _log.LogError("Successfull");
-                return Ok();
-            }
-            else
-            {
-                _log.LogError("Error : " + response.FailureReason);
-                return BadRequest(response.FailureReason);
-            }
+            return CreateResponse(response);
         }
-
-        [HttpPost]
+        /// <summary>
+        /// Update Country
+        /// </summary>
+        /// <remarks>This API will update Country</remarks>
+        /// <param name="command">Update Country command object</param>
+        /// <returns></returns>
+        [HttpPut]
         [Route("updateCountry")]
         [ProducesResponseType(typeof(string), 201)]
         [ProducesResponseType(typeof(string), 400)]
@@ -99,48 +93,22 @@ namespace AuthorAdmin.Command.API.Controllers
                 }
             }
             var response = await _mediator.Send(command);
-
-            if (response == null)
-            {
-                _log.LogError("Error : " + response.FailureReason);
-                return BadRequest();
-            }
-
-            if (response.IsSuccessful)
-            {
-                _log.LogError("Successfull");
-                return Ok();
-            }
-            else
-            {
-                _log.LogError("Error : " + response.FailureReason);
-                return BadRequest(response.FailureReason);
-            }
+            return CreateResponse(response);
         }
-
-        [HttpPost]
+        /// <summary>
+        /// Manipulate Country
+        /// </summary>
+        /// <remarks>This API will manipulate country</remarks>
+        /// <param name="command">Manipulate Country command object</param>
+        /// <returns></returns>
+        [HttpDelete]
         [Route("manipulateCountry")]
         [ProducesResponseType(typeof(string), 201)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> ManipulateCountry([FromBody] ManipulateCountriesCommand command)
         {
             var response = await _mediator.Send(command);
-
-            if (response == null)
-            {
-                _log.LogError("Error : " + response.FailureReason);
-                return BadRequest();
-            }
-
-            if (response.IsSuccessful)
-            {
-                return Ok();
-            }
-            else
-            {
-                _log.LogError("Error : " + response.FailureReason);
-                return BadRequest(response.FailureReason);
-            }
+            return CreateResponse(response);
         }
 
     }

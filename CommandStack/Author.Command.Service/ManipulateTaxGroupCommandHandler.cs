@@ -42,31 +42,43 @@ namespace Author.Command.Service
 
                 if (request.Operation == "Publish")
                 {
-                    foreach (var taggroup in tagGroups)
+                    foreach (var taxgroup in tagGroups)
                     {
-                        taggroup.IsPublished = true;
-                        _tagGroupRepository.Update<TaxTags>(taggroup);
+                        if (taxgroup.ParentTagId == null && request.TagType == "Tag") throw new RulesException("Invalid", @"Tag not Valid");
+                        taxgroup.IsPublished = true;
+                        _tagGroupRepository.Update<TaxTags>(taxgroup);
                     }
                 }
                 else if (request.Operation == "UnPublish")
                 {
-                    foreach (var taggroup in tagGroups)
+                    foreach (var taxgroup in tagGroups)
                     {
-                        taggroup.IsPublished = false;
-                        _tagGroupRepository.Update<TaxTags>(taggroup);
+                        if (taxgroup.ParentTagId == null && request.TagType == "Tag") throw new RulesException("Invalid", @"Tag not Valid");
+                        taxgroup.IsPublished = false;
+                        _tagGroupRepository.Update<TaxTags>(taxgroup);
                     }
                 }
                 else if (request.Operation == "Delete")
                 {
-                    foreach (TaxTags taggroup in tagGroups)
+                    foreach (TaxTags taxgroup in tagGroups)
                     {
-                        foreach (var tagGroupContents in taggroup.TaxTagContents.ToList())
+                        foreach (var tagGroupContents in taxgroup.TaxTagContents.ToList())
                         {
-                            taggroup.TaxTagContents.Remove(tagGroupContents);
+                            taxgroup.TaxTagContents.Remove(tagGroupContents);
                             _tagGroupRepository.Delete<TaxTagContents>(tagGroupContents);
+                        }                       
+                        if (request.TagType == "Tag")
+                        {
+                            if (taxgroup.ParentTagId == null) throw new RulesException("Invalid", @"Tag not Valid");
+                            foreach (var country in taxgroup.TaxTagRelatedCountries.ToList())
+                            {
+                                taxgroup.TaxTagRelatedCountries.Remove(country);
+                                _tagGroupRepository.Delete<TaxTagRelatedCountries>(country);
+                            }
                         }
-                        _tagGroupRepository.DeletetagGroup(taggroup);
+                        _tagGroupRepository.DeletetagGroup(taxgroup);
                     }
+                    
                 }
                 else
                     throw new RulesException("Operation", @"The Operation " + request.Operation + " is not valied");
