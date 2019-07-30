@@ -42,12 +42,12 @@ namespace Author.Command.Service
 
                 foreach (var content in request.LanguageName)
                 {
-                    var resourceGroupContents = resourceGroup.ResourceGroupContents.Where(s => s.LanguageId == (languages.Where(x => x.Locale == content.Language).Select(a => a.LanguageId).FirstOrDefault())).FirstOrDefault();
+                    var resourceGroupContents = resourceGroup.ResourceGroupContents.Where(s => s.LanguageId == content.LanguageId).FirstOrDefault();
                     if (resourceGroupContents == null)
                     {
                         ResourceGroupContents objresourceGroupContents = new ResourceGroupContents();
                         objresourceGroupContents.GroupName = content.Name;
-                        objresourceGroupContents.LanguageId = (languages.Where(x => x.Locale == content.Language).Select(a => a.LanguageId).FirstOrDefault());
+                        objresourceGroupContents.LanguageId = content.LanguageId;
                         resourceGroup.ResourceGroupContents.Add(objresourceGroupContents);
                     }
                     else
@@ -59,7 +59,7 @@ namespace Author.Command.Service
                 //    List<ResourceGroupContents> ResourceGroupContents = resourceGroup.ResourceGroupContents.Where(s => s.ResourceGroupId == request.ResourceGroupId).ToList();
                 foreach (var resourceContent in resourceGroup.ResourceGroupContents.ToList())
                 {
-                    if (request.LanguageName.Where(s => s.Language == (languages.Where(x => x.LanguageId == resourceContent.LanguageId).Select(a => a.Locale).FirstOrDefault())).Count() == 0)
+                    if (request.LanguageName.Where(s => s.LanguageId == resourceContent.LanguageId).Count() == 0)
                     {
                         resourceGroup.ResourceGroupContents.Remove(resourceContent);
                         _ResourceGroupRepository.Delete(resourceContent);

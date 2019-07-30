@@ -47,7 +47,7 @@ namespace Author.Command.Service
                 {
                     var taxTagsContent = new TaxTagContents();
                     taxTagsContent.DisplayName = langName.Name.Trim();
-                    taxTagsContent.LanguageId = Convert.ToInt32(_languages.FirstOrDefault(x => x.Locale == langName.Language).LanguageId.ToString());
+                    taxTagsContent.LanguageId = langName.LanguageId;
                     _taxTag.TaxTagContents.Add(taxTagsContent);
                 }
                 _taxTagsRepository.Add(_taxTag);

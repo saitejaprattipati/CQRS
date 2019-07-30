@@ -7,7 +7,7 @@ namespace Author.Command.Domain.Models
     {
         //[Required]
         //[Range(0, int.MaxValue, ErrorMessage = "Only positive number allowed")]
-        public string Language { get; set; }
+        public int LanguageId { get; set; }
 
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         [Required]

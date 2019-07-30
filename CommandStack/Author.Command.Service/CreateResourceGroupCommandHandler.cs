@@ -49,7 +49,7 @@ namespace Author.Command.Service
                 {
                     var resourceGroupContent = new ResourceGroupContents();
                     resourceGroupContent.GroupName = langName.Name.Trim();
-                    resourceGroupContent.LanguageId = Convert.ToInt32(_languages.FirstOrDefault(x => x.Locale == langName.Language).LanguageId.ToString());
+                    resourceGroupContent.LanguageId = langName.LanguageId;
                     _resourceGroup.ResourceGroupContents.Add(resourceGroupContent);
                 }
                 _ResourceGroupRepository.Add(_resourceGroup);

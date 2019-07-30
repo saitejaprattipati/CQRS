@@ -42,12 +42,12 @@ namespace Author.Command.Service
 
                 foreach (var content in request.LanguageName)
                 {
-                    var taxGroupContents = taxGroup.TaxTagContents.Where(s => s.LanguageId == (languages.Where(x => x.Locale == content.Language).Select(a => a.LanguageId).FirstOrDefault())).FirstOrDefault();
+                    var taxGroupContents = taxGroup.TaxTagContents.Where(s => s.LanguageId == content.LanguageId).FirstOrDefault();
                     if (taxGroupContents == null)
                     {
                         TaxTagContents objtaxGroupContents = new TaxTagContents();
                         objtaxGroupContents.DisplayName = content.Name;
-                        objtaxGroupContents.LanguageId = (languages.Where(x => x.Locale == content.Language).Select(a => a.LanguageId).FirstOrDefault());
+                        objtaxGroupContents.LanguageId = content.LanguageId;
                         taxGroup.TaxTagContents.Add(objtaxGroupContents);
                     }
                     else
@@ -59,7 +59,7 @@ namespace Author.Command.Service
                 //  List<TaxTagContents> ResourceGroupContents = taxGroup.TaxTagContents.Where(s => s.TaxTagId == request.TagGroupsId).ToList();
                 foreach (var resourceContent in taxGroup.TaxTagContents.ToList())
                 {
-                    if (request.LanguageName.Where(s => s.Language == (languages.Where(x => x.LanguageId == resourceContent.LanguageId).Select(a => a.Locale).FirstOrDefault())).Count() == 0)
+                    if (request.LanguageName.Where(s => s.LanguageId == resourceContent.LanguageId).Count() == 0)
                     {
                         taxGroup.TaxTagContents.Remove(resourceContent);
                         _taxTagsRepository.Delete(resourceContent);
