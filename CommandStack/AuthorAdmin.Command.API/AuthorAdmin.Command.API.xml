@@ -20,6 +20,38 @@
             <param name="command">Update ContentDisclaimer command object</param>
             <returns></returns>
         </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.ContentDisclaimerController.DeleteUser(Author.Command.Domain.Command.DeleteContentDisclaimerCommand)">
+            <summary>
+            Delete ContentDisclaimer
+            </summary>
+            <remarks>This API will delete ContentDisclaimer</remarks>
+            <param name="command">Delete ContentDisclaimer command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.CountryGroupsController.CreateCountryGroups(Author.Command.Domain.Command.CreateCountryGroupsCommand)">
+            <summary>
+            Create Country Groups
+            </summary>
+            <remarks>This API will create Country Groups</remarks>
+            <param name="command">Create Country Groups command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.CountryGroupsController.UpdateCountryGroups(Author.Command.Domain.Command.UpdateCountryGroupsCommand)">
+            <summary>
+            Update Country Groups
+            </summary>
+            <remarks>This API will Update Country Groups</remarks>
+            <param name="command">Update Country Groups command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.CountryGroupsController.ManipulateCountry(Author.Command.Domain.Command.ManipulateCountryGroupsCommand)">
+            <summary>
+            Manipilate Country Groups
+            </summary>
+            <remarks>This API will Manipilate Country Groups</remarks>
+            <param name="command">Manipilate Country Groups command object</param>
+            <returns></returns>
+        </member>
         <member name="M:AuthorAdmin.Command.API.Controllers.SiteDisclaimerController.CreateSiteDisclaimer(Author.Command.Domain.Command.CreateSiteDisclaimerCommand)">
             <summary>
             Create SiteDisclaimer

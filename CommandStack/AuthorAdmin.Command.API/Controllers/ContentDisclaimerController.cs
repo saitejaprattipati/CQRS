@@ -51,5 +51,21 @@ namespace AuthorAdmin.Command.API.Controllers
             var response = await _mediator.Send(command);
             return CreateResponse(response);
         }
+
+        /// <summary>
+        /// Delete ContentDisclaimer
+        /// </summary>
+        /// <remarks>This API will delete ContentDisclaimer</remarks>
+        /// <param name="command">Delete ContentDisclaimer command object</param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Route("deletecontentdisclaimer")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteUser([FromBody] DeleteContentDisclaimerCommand command)
+        {
+            var response = await _mediator.Send(command);
+            return CreateResponse(response);
+        }
     }
 }
