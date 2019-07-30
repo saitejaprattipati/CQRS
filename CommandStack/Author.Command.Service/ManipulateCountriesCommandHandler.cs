@@ -35,8 +35,8 @@ namespace Author.Command.Service
             };
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                List<Countries> countries = _CountryRepository.getCountry(request.ResourceGroupIds);
-                if (request.ResourceGroupIds.Count != countries.Count)
+                List<Countries> countries = _CountryRepository.getCountry(request.CountryIds);
+                if (request.CountryIds.Count != countries.Count)
                     throw new RulesException("Invalid", @"ResourceGroup not found");
 
                 if (request.Operation == "Publish")

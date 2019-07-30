@@ -44,10 +44,10 @@ namespace AuthorAdmin.Command.API.Controllers
             return CreateResponse(response);
         }
         /// <summary>
-        /// Create Country Groups
+        /// Update Country Groups
         /// </summary>
-        /// <remarks>This API will create Country Groups</remarks>
-        /// <param name="command">Create Country Groups command object</param>
+        /// <remarks>This API will Update Country Groups</remarks>
+        /// <param name="command">Update Country Groups command object</param>
         /// <returns></returns>
         [HttpPost]
         [Route("updateCountryGroups")]
@@ -57,6 +57,21 @@ namespace AuthorAdmin.Command.API.Controllers
         {
             var response = await _mediator.Send(command);
             return CreateResponse(response);
-        }        
+        }
+        /// <summary>
+        /// Manipilate Country Groups
+        /// </summary>
+        /// <remarks>This API will Manipilate Country Groups</remarks>
+        /// <param name="command">Manipilate Country Groups command object</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("manipulateCountry")]
+        [ProducesResponseType(typeof(string), 201)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> ManipulateCountry([FromBody] ManipulateCountryGroupsCommand command)
+        {
+            var response = await _mediator.Send(command);
+            return CreateResponse(response);
+        }
     }
 }

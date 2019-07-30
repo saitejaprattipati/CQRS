@@ -6,15 +6,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Author.Command.Domain.Command
 {
-   public class ManipulateCountriesCommand : IRequest<ManipulateCountriesCommandResponse>
+   public class ManipulateCountryGroupsCommand : IRequest<ManipulateCountryGroupsCommandResponse> 
     {
-        [JsonProperty("countryIds")]
-        public List<int> CountryIds { get; set; }
+        [JsonProperty("countryGroupIds")]
+        public List<int> CountryGroupIds { get; set; }
 
         [JsonProperty("operation")]
         public string Operation { get; set; }
     }
-    public class ManipulateCountriesCommandResponse : CommandResponse
+    public class ManipulateCountryGroupsCommandResponse : CommandResponse
     {
         [JsonProperty("UpdatedStatus")]
         public string UpdatedStatus { get; set; }

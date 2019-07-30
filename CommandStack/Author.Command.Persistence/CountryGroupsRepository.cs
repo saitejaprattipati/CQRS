@@ -35,6 +35,10 @@ namespace Author.Command.Persistence
              .Where(a => CountryGroupIds.Contains(a.CountryGroupId)).ToList();
             return objCountrygroups;
         }
+        public void DeleteCountryGroup(CountryGroups countryGroup)
+        {
+            _context.CountryGroups.Remove(countryGroup);
+        }
         public void Update<T>(T obj)
         {
             _context.Entry(obj).State = EntityState.Modified;
