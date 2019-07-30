@@ -35,7 +35,7 @@ namespace Author.Command.Service
                 var disclaimers = await _contentDisclaimerRepository.GetDisclaimerByIds(disclaimerIds);
                 if (disclaimers.Count != disclaimerIds.Count)
                 {
-                    throw new RulesException("Invalid", @"Disclaimer not found");
+                    throw new RulesException("Invalid", @"ContentDisclaimer not found");
                 }
 
                 foreach (var disclaimer in disclaimers)
