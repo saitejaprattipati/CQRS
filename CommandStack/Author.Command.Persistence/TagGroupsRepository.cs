@@ -36,6 +36,7 @@ namespace Author.Command.Persistence
         {
             List<TaxTags> objtaggroups = _context.TaxTags
                  .Include(s => s.TaxTagContents)
+                 .Include(s => s.TaxTagRelatedCountries)
              .Where(a => taxGroupsIds.Contains(a.TaxTagId)).ToList();
             return objtaggroups;
         }
