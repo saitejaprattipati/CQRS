@@ -37,7 +37,7 @@ namespace Author.Command.Service
             };
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                List<Languages> _languages = _ResourceGroupRepository.GetAllLanguages();
+                //List<Languages> _languages = _ResourceGroupRepository.GetAllLanguages();
                 ResourceGroups _resourceGroup = new ResourceGroups();
                 _resourceGroup.IsPublished = true;
                 _resourceGroup.Position = request.Position;

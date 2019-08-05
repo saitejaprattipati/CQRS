@@ -38,7 +38,7 @@ namespace Author.Command.Service
                 //test
                 var resourceGroup = _ResourceGroupRepository.getResourceGroups(objresourceGroupId)[0];
                 resourceGroup.Position = request.Position;
-                List<Languages> languages = _ResourceGroupRepository.GetAllLanguages();
+                //List<Languages> languages = _ResourceGroupRepository.GetAllLanguages();
 
                 foreach (var content in request.LanguageName)
                 {

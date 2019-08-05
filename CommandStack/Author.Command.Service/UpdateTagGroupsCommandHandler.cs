@@ -39,7 +39,7 @@ namespace Author.Command.Service
                 List<int> objTagGroups = new List<int>();
                 objTagGroups.Add(request.TagGroupsId);
                 var taxGroup = _taxTagsRepository.GetTagGroups(objTagGroups)[0];
-                List<Languages> languages = _taxTagsRepository.GetAllLanguages();
+                //List<Languages> languages = _taxTagsRepository.GetAllLanguages();
                 if (request.TagType == "Tag")
                 {
                     if(taxGroup.ParentTagId==null) throw new RulesException("Invalid", @"Tag not Valid");
