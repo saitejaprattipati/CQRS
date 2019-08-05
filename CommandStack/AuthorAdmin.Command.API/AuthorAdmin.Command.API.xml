@@ -28,28 +28,76 @@
             <param name="command">Delete ContentDisclaimer command object</param>
             <returns></returns>
         </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.CountryController.CreateCountry(Author.Command.Domain.Command.CreateCountryCommand)">
+            <summary>
+            Create Country
+            </summary>
+            <remarks>This API will create country</remarks>
+            <param name="command">Create Country command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.CountryController.updateCountry(Author.Command.Domain.Command.UpdateCountryCommand)">
+            <summary>
+            Update Country
+            </summary>
+            <remarks>This API will update Country</remarks>
+            <param name="command">Update Country command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.CountryController.ManipulateCountry(Author.Command.Domain.Command.ManipulateCountriesCommand)">
+            <summary>
+            Manipulate Country
+            </summary>
+            <remarks>This API will manipulate country</remarks>
+            <param name="command">Manipulate Country command object</param>
+            <returns></returns>
+        </member>
         <member name="M:AuthorAdmin.Command.API.Controllers.CountryGroupsController.CreateCountryGroups(Author.Command.Domain.Command.CreateCountryGroupsCommand)">
             <summary>
             Create Country Groups
             </summary>
-            <remarks>This API will create Country Groups</remarks>
-            <param name="command">Create Country Groups command object</param>
+            <remarks>This API will create country groups</remarks>
+            <param name="command">Create country groups command object</param>
             <returns></returns>
         </member>
         <member name="M:AuthorAdmin.Command.API.Controllers.CountryGroupsController.UpdateCountryGroups(Author.Command.Domain.Command.UpdateCountryGroupsCommand)">
             <summary>
             Update Country Groups
             </summary>
-            <remarks>This API will Update Country Groups</remarks>
-            <param name="command">Update Country Groups command object</param>
+            <remarks>This API will Update country groups</remarks>
+            <param name="command">Update country groups command object</param>
             <returns></returns>
         </member>
         <member name="M:AuthorAdmin.Command.API.Controllers.CountryGroupsController.ManipulateCountry(Author.Command.Domain.Command.ManipulateCountryGroupsCommand)">
             <summary>
             Manipilate Country Groups
             </summary>
-            <remarks>This API will Manipilate Country Groups</remarks>
-            <param name="command">Manipilate Country Groups command object</param>
+            <remarks>This API will Manipilate country groups</remarks>
+            <param name="command">Manipilate country groups command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.ResourceGroupController.CreateResourceGroup(Author.Command.Domain.Command.CreateResourceGroupCommand)">
+            <summary>
+            Create Resource Group
+            </summary>
+            <remarks>This API will create resource group</remarks>
+            <param name="command">Create resource group command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.ResourceGroupController.UpdateResourceGroup(Author.Command.Domain.Command.UpdateResourceGroupCommand)">
+            <summary>
+            Update Resource Group
+            </summary>
+            <remarks>This API will update resource group</remarks>
+            <param name="command">Update resource group command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.ResourceGroupController.ManipulateResourceGroup(Author.Command.Domain.Command.ManipulateResourceGroupCommand)">
+            <summary>
+            Manipulate Resource Group
+            </summary>
+            <remarks>This API will manipulate resource group</remarks>
+            <param name="command">Manipulate resource group command object</param>
             <returns></returns>
         </member>
         <member name="M:AuthorAdmin.Command.API.Controllers.SiteDisclaimerController.CreateSiteDisclaimer(Author.Command.Domain.Command.CreateSiteDisclaimerCommand)">
@@ -66,6 +114,62 @@
             </summary>
             <remarks>This API will update SiteDisclaimer</remarks>
             <param name="command">Update SiteDisclaimer command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.SiteDisclaimerController.DeleteUser(Author.Command.Domain.Command.DeleteSiteDisclaimerCommand)">
+            <summary>
+            Delete SiteDisclaimer
+            </summary>
+            <remarks>This API will delete SiteDisclaimer</remarks>
+            <param name="command">Delete SiteDisclaimer command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.TagsController.CreateTagGroup(Author.Command.Domain.Command.CreateTagsCommand)">
+            <summary>
+            Create Tag Group
+            </summary>
+            <remarks>This API will create tag group</remarks>
+            <param name="command">Create tag group command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.TagsController.UpdateTagGroup(Author.Command.Domain.Command.UpdateTagsCommand)">
+            <summary>
+            Update Tag Group
+            </summary>
+            <remarks>This API will update tag group</remarks>
+            <param name="command">Update tag group command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.TagsController.manipulateTagGroup(Author.Command.Domain.Command.ManipulateTaxGroupCommand)">
+            <summary>
+            Manipulate Tag Group
+            </summary>
+            <remarks>This API will manipulate Tag group</remarks>
+            <param name="command">Manipulate Tag group command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.TagsController.CreateTags(Author.Command.Domain.Command.CreateTagsCommand)">
+            <summary>
+            Create Tags
+            </summary>
+            <remarks>This API will create Tags</remarks>
+            <param name="command">Create Tags command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.TagsController.UpdateTags(Author.Command.Domain.Command.UpdateTagsCommand)">
+            <summary>
+            Update Tags
+            </summary>
+            <remarks>This API will update tags</remarks>
+            <param name="command">Update tags command object</param>
+            <returns></returns>
+        </member>
+        <member name="M:AuthorAdmin.Command.API.Controllers.TagsController.ManipulateTags(Author.Command.Domain.Command.ManipulateTaxGroupCommand)">
+            <summary>
+            Manipulate Tags
+            </summary>
+            <remarks>This API will manipulate tags</remarks>
+            <param name="command">Manipulate tags command object</param>
             <returns></returns>
         </member>
         <member name="M:AuthorAdmin.Command.API.Controllers.UserController.CreateUser(Author.Command.Domain.Command.CreateSystemUserCommand)">

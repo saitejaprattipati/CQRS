@@ -59,5 +59,7 @@ namespace Author.Command.Persistence
         Task<Disclaimers> AddAsync(Disclaimers contentDisclaimer);
         void Update<T>(T obj);
         void Delete<T>(T obj);
+        Task<List<Disclaimers>> GetDisclaimerByIds(List<int> disclaimerIds);
+        Task<Disclaimers> GetContentDisclaimer(int disclaimerId);
     }
 }

@@ -2,6 +2,7 @@
 using Author.Core.Framework;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -31,6 +32,21 @@ namespace Author.Command.Persistence
                                                   .FirstOrDefaultAsync(a => a.Type == Convert.ToInt32(ArticleType.Page));
         }
 
+        public async Task<List<Articles>> GetSiteDisclaimerByIds(List<int> siteDisclaimerIds)
+        {
+            var pageType = Convert.ToInt32(ArticleType.Page);
+            return await _context.Articles.Include(ac => ac.ArticleContents)
+                                          .Include(arc=>arc.ArticleRelatedCountries)
+                                          .Include(p => p.ArticleRelatedCountryGroups)
+                                          .Include(h => h.ArticleRelatedTaxTags)
+                                          .Include(k => k.RelatedArticlesArticle)
+                                          .Include(l => l.RelatedResourcesArticle)
+                                          .Include(m => m.UserReadArticles)
+                                          .Include(n => n.UserSavedArticles)
+                                          .Include(o => o.ArticleRelatedContacts)
+                                          .Where(s => siteDisclaimerIds.Contains<int>(s.ArticleId) && s.Type.Equals(pageType)).ToListAsync();
+        }
+
         public Articles Add(Articles article)
         {
             return _context.Articles.Add(article).Entity;
@@ -51,14 +67,30 @@ namespace Author.Command.Persistence
         {
             _context.Entry(obj).State = EntityState.Deleted;
         }
+
+        public void DeleteRelatedArticles(int relatedArticleId)
+        {
+            _context.RelatedArticles.RemoveRange(_context.RelatedArticles.Where(ra => ra.RelatedArticleId.Equals(relatedArticleId)));
+        }
+
+        public void DeleteRelatedResources(int relatedResourceId)
+        {
+            _context.RelatedResources.RemoveRange(_context.RelatedResources.Where(rr=>rr.RelatedArticleId.Equals(relatedResourceId)));
+        }
     }
 
     public interface ISiteDisclaimerRepository : IRepository<Articles>
     {
         Articles GetSiteDisclaimer(int siteDisclaimerId);
 
+        Task<List<Articles>> GetSiteDisclaimerByIds(List<int> siteDisclaimerIds);
+
         Articles Add(Articles article);
 
         Task<Articles> AddAsync(Articles article);
-    } 
+
+        void DeleteRelatedArticles(int relatedArticleId);
+
+        void DeleteRelatedResources(int relatedResourceId);
+    }
 }
