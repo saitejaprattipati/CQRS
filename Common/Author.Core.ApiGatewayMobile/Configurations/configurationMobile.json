@@ -1,0 +1,8 @@
+{
+  "ReRoutes": [
+  ],
+  "GlobalConfiguration": {
+    "RequestIdKey": "OcRequestId",
+    "AdministrationPath": "/administration"
+  }
+}
