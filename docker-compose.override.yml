@@ -11,8 +11,7 @@ services:
       - ServiceBusConnection=rabbitmq
       - UseAzureServiceBus=${UseAzureServiceBus:-false}
     ports:
-      - "50102:80"
-      - "44305:443"
+      - "80"
     volumes:
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
@@ -27,8 +26,25 @@ services:
       - ServiceBusConnection=rabbitmq
       - UseAzureServiceBus=${UseAzureServiceBus:-false}
     ports:
-      - "50103:80"
-      - "44306:443"
+      - "80"
     volumes:
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+
+  author.apigateway.web:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - IdentityUrl=http://identity.api
+    ports:
+      - "32770:80"
+    volumes:
+      - ./Common/Author.Core.ApiGateway/Configurations:/app/configuration
+
+  author.apigateway.mobile:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - IdentityUrl=http://identity.api
+    ports:
+      - "32771:80"
+    volumes:
+      - ./Common/Author.Core.ApiGatewayMobile/Configurations:/app/configuration

@@ -26,7 +26,7 @@ services:
       - rabbitmq
 
   authoradmin.command.api:
-    image: ${DOCKER_REGISTRY-}authorcommandapi
+    image: ${DOCKER_REGISTRY-}authoradmincommandapi
     build:
       context: .
       dockerfile: CommandStack/AuthorAdmin.Command.API/Dockerfile
@@ -34,3 +34,15 @@ services:
       - rabbitmq
     links: 
       - rabbitmq
+
+  author.apigateway.web:
+    image: apigateway:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Common/Author.Core.ApiGateway/Dockerfile
+      
+  author.apigateway.mobile:
+    image: apigateway:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Common/Author.Core.ApiGatewayMobile/Dockerfile
