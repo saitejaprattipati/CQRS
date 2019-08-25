@@ -188,8 +188,6 @@ namespace Author.Command.API
             {
                 app.UseHsts();
             }
-
-            app.UseHttpsRedirection();
             app.UseSwagger();
             app.UseSwaggerUi3();
             app.UseMvc();

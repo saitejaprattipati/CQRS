@@ -28,6 +28,7 @@ namespace AuthorAdmin.Command.API.Controllers
             _log = log;
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
+
         [HttpPost]
         [Route("Image")]
         [ProducesResponseType(typeof(string), 201)]
