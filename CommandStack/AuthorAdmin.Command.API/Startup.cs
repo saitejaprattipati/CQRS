@@ -37,20 +37,20 @@ namespace AuthorAdmin.Command.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private IHostingEnvironment CurrentEnvironment { get; set; }
+
+        public Startup(IHostingEnvironment env,IConfiguration configuration)
         {
             Configuration = configuration;
+            CurrentEnvironment = env;
         }
 
         public IConfiguration Configuration { get; }
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<AuthorConfigurationSettings>(Configuration);
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest).ConfigureApiBehaviorOptions(op =>
-            {
-                op.SuppressUseValidationProblemDetailsForInvalidModelStateResponses = true;
-            });
-
+            ConfigureCSRFValidationByEnvironment(services);
             services.AddCors();
 
           //  services.AddMediatR(CreateUserCommandHandler);
@@ -117,6 +117,29 @@ namespace AuthorAdmin.Command.API
 
             //  services.AddDbContext<TaxatHand_StgContext>(options => options.UseSqlServer(connection));
             AddEventing(services);
+        }
+
+        private void ConfigureCSRFValidationByEnvironment(IServiceCollection services)
+        {
+            if (CurrentEnvironment.EnvironmentName.Equals("Development"))
+            {
+                services.AddMvc()
+                    .SetCompatibilityVersion(CompatibilityVersion.Latest).ConfigureApiBehaviorOptions(op =>
+                    {
+                        op.SuppressUseValidationProblemDetailsForInvalidModelStateResponses = true;
+                    });
+            }
+            else
+            {
+                services.AddMvc(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()))
+                    .SetCompatibilityVersion(CompatibilityVersion.Latest).ConfigureApiBehaviorOptions(op =>
+                    {
+                        op.SuppressUseValidationProblemDetailsForInvalidModelStateResponses = true;
+                    });
+
+                // Angular's default header name for sending the XSRF token.
+                services.AddAntiforgery(options => options.HeaderName = "X-XSRF-TOKEN");
+            }
         }
 
         private void AddEventing(IServiceCollection services)
