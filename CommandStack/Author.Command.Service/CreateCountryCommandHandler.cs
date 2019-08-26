@@ -100,6 +100,14 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
+            var eventSourcing = new CreateArticleCommandEvent()
+            {
+                EventType = "taxathand",
+                Id = "SampleID",
+                ArticleName = "SampleName",
+                ArticleCountry = "SampleCountry"
+            };
+            await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
             return response;
         }
     }

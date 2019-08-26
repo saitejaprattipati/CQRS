@@ -15,7 +15,7 @@ services:
         timeout: 10s
         retries: 5
 
-  author.command.api:
+  authorcommandapi:
     image: ${DOCKER_REGISTRY-}authorcommandapi
     build:
       context: .
@@ -25,7 +25,7 @@ services:
     links: 
       - rabbitmq
 
-  authoradmin.command.api:
+  authoradmincommandapi:
     image: ${DOCKER_REGISTRY-}authoradmincommandapi
     build:
       context: .
@@ -35,14 +35,14 @@ services:
     links: 
       - rabbitmq
 
-  author.apigateway.web:
+  authorapigatewayweb:
     image: apigateway:${TAG:-latest}
     build:
       context: .
       dockerfile: Common/Author.Core.ApiGateway/Dockerfile
       
-  author.apigateway.mobile:
+  authorapigatewaymobile:
     image: apigateway:${TAG:-latest}
     build:
       context: .
-      dockerfile: Common/Author.Core.ApiGatewayMobile/Dockerfile
+      dockerfile: Common/Author.Core.ApiGateway/Dockerfile

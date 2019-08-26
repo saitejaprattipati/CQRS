@@ -37,7 +37,7 @@ namespace Author.Core.ApiGateway
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-            }           
+            }
             app.UseMvc();
             app.UseOcelot().Wait();
         }

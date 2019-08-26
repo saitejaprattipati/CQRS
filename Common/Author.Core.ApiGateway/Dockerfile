@@ -14,6 +14,9 @@ RUN dotnet build "Author.Core.ApiGateway.csproj" -c Release -o /app
 FROM build AS publish
 RUN dotnet publish "Author.Core.ApiGateway.csproj" -c Release -o /app
 
+COPY ["/Common/Author.Core.ApiGateway/configurationMobile/configuration.json", "/app/configuration/"]
+COPY ["/Common/Author.Core.ApiGateway/ConfigurationsWeb/configuration.json", "/app/configuration/"]
+
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .

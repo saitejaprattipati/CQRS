@@ -22,14 +22,6 @@ namespace AuthorAdmin.Command.API.Controllers
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
-        [HttpGet]
-        [Route("get")]
-        public string get()
-        {
-            return "success";
-        }
-
-
         /// <summary>
         /// Create Tag Group
         /// </summary>

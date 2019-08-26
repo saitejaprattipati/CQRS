@@ -7,11 +7,17 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>C:\Users\sapatro\source\repos\taxathand_NextGen\CommandStack\AuthorAdmin.Command.API\AuthorAdmin.Command.API.xml</DocumentationFile>
+    <DocumentationFile>CommandStack\AuthorAdmin.Command.API\AuthorAdmin.Command.API.xml</DocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
     <OutputPath>bin\Debug\netcoreapp2.2\</OutputPath>
   </PropertyGroup>
-
+ 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>CommandStack\AuthorAdmin.Command.API\AuthorAdmin.Command.API.xml</DocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Folder Include="Logs\" />
     <Folder Include="wwwroot\" />
@@ -49,6 +55,12 @@
 
   <ItemGroup>
     <WCFMetadata Include="Connected Services" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="AuthorAdmin.Command.API.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
