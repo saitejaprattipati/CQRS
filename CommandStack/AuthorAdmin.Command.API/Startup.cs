@@ -121,7 +121,7 @@ namespace AuthorAdmin.Command.API
 
         private void ConfigureCSRFValidationByEnvironment(IServiceCollection services)
         {
-            if (CurrentEnvironment.EnvironmentName.Equals("Development"))
+            if (CurrentEnvironment.EnvironmentName.Equals(EnvironmentName.Development))
             {
                 services.AddMvc()
                     .SetCompatibilityVersion(CompatibilityVersion.Latest).ConfigureApiBehaviorOptions(op =>
