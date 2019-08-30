@@ -12,8 +12,8 @@ namespace Author.Core.Services.BlobStorage
     {
         bool _disposed;
         public static CloudBlobClient cloudBlobClient = null;
-        string storageConnectionString = "DefaultEndpointsProtocol=http;AccountName=taxathandsample;AccountKey=13EjvMoEDxYIELZSqzZjTeuW1PxnjCISL/9SEGhYCBSP4AMnKthwsRJCOUtKM0hxsz4OHZiRuLz0nt4+D4azhg==;EndpointSuffix=core.windows.net";
-        public BlobConnection()
+       // string storageConnectionString = "DefaultEndpointsProtocol=http;AccountName=taxathandsample;AccountKey=13EjvMoEDxYIELZSqzZjTeuW1PxnjCISL/9SEGhYCBSP4AMnKthwsRJCOUtKM0hxsz4OHZiRuLz0nt4+D4azhg==;EndpointSuffix=core.windows.net";
+        public BlobConnection(string storageConnectionString)
         {
             CloudStorageAccount storageAccount;
             if (CloudStorageAccount.TryParse(storageConnectionString, out storageAccount))

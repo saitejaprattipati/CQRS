@@ -146,6 +146,7 @@ namespace AuthorAdmin.Command.API
         {
             services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
             var connection = Configuration.GetValue<string>("ServiceBusConnection");
+            var connectionBlob = Configuration.GetValue<string>("BlobConnection");
             if (string.IsNullOrWhiteSpace(connection))
             {
                 //    _logger.LogError("Error configuring eventing. Service Bus connection settings are missing");
@@ -161,7 +162,7 @@ namespace AuthorAdmin.Command.API
             services.AddSingleton<IBlobConnection>(sp =>
             {
                 var logger = sp.GetRequiredService<ILogger<BlobConnection>>();    
-                return new BlobConnection();
+                return new BlobConnection(connectionBlob);
             });
             services.AddSingleton<IEventStorage, EventsBlobStorage>(sp =>
             {
