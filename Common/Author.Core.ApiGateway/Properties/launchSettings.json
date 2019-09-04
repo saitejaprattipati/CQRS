@@ -37,6 +37,13 @@
       "httpPort": 60740,
       "useSSL": true,
       "sslPort": 44351
+    },
+    "Azure Dev Spaces": {
+      "commandName": "AzureDevSpaces",
+      "launchBrowser": true,
+      "resourceGroup": "App0295_POC_RG",
+      "aksName": "TAHAKSCluster",
+      "subscriptionId": "24b11871-bf50-42a3-9545-684eb027e133"
     }
   }
 }
