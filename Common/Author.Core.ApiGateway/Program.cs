@@ -24,7 +24,7 @@ namespace Author.Core.ApiGateway
 
             builder.ConfigureServices(s => s.AddSingleton(builder))
                   .ConfigureAppConfiguration(
-                          ic => ic.AddJsonFile(Path.Combine("configuration",
+                          ic => ic.AddJsonFile(Path.Combine("ConfigurationsWeb",
                                                             "configuration.json"), optional: false, reloadOnChange: true))
                     .UseStartup<Startup>();
             var host = builder.Build();
