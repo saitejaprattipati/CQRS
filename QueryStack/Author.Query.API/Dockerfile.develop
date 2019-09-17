@@ -1,0 +1,20 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2
+ARG BUILD_CONFIGURATION=Debug
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+EXPOSE 80
+
+WORKDIR /src
+COPY ["Common/Author.Core.Services.Persistence.CosmosDB/Author.Core.Services.Persistence.CosmosDB.csproj", "Common/Author.Core.Services.Persistence.CosmosDB/"]
+COPY ["QueryStack/Author.Query.API/Author.Query.API.csproj", "QueryStack/Author.Query.API/"]
+COPY ["QueryStack/Author.Query.Domain/Author.Query.Domain.csproj", "QueryStack/Author.Query.Domain/"]
+COPY ["QueryStack/Author.Query.Persistence/Author.Query.Persistence.csproj", "QueryStack/Author.Query.Persistence/"]
+
+RUN dotnet restore "QueryStack/Author.Query.API/Author.Query.API.csproj"
+COPY . .
+WORKDIR "/src/QueryStack/Author.Query.API"
+RUN dotnet build --no-restore "Author.Query.API.csproj" -c $BUILD_CONFIGURATION
+
+RUN echo "exec dotnet run --no-build --no-launch-profile -c $BUILD_CONFIGURATION --" > /entrypoint.sh
+
+ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
