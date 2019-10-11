@@ -41,9 +41,8 @@ namespace Author.Query.API.Controllers
             pageSize = pageSize == 0 ? 100 : pageSize;
             try
             {
-                var Addresses = _addressRepo.Get(pageNumber, pageSize);
+                var Addresses = await _addressRepo.Get(pageNumber, pageSize);
                 await Task.CompletedTask;
-
                 return Ok(Addresses);
             }
             catch (Exception ex)
@@ -66,23 +65,23 @@ namespace Author.Query.API.Controllers
         /// <response code="404">Object not found error message</response>  
         /// <response code="500">Internal server error message</response> 
         [HttpGet]
-        [Route("{addressId}/{partitionKey}")]
+        [Route("{id}")]
         [ProducesResponseType(typeof(Author.Query.Domain.AddressAggregateDetails), 200)]
         [ProducesResponseType(typeof(string), 404)]
         [ProducesResponseType(typeof(string), 500)]
-        public async Task<IActionResult> GetById(string addressId,string partitionKey)
+        public async Task<IActionResult> GetById(string id,string partitionKey)
         {
             try
             {
-                var address =  await _addressRepo.GetById(addressId, partitionKey);
+                var address =  await _addressRepo.GetById(id, partitionKey);
                 if (address != null)
                     return Ok(address);
                 else
-                    return NotFound($"No address found by id {addressId}");
+                    return NotFound($"No address found by id {id}");
             }
             catch (Exception ex)
             {
-                var error = $"Unable to retrieve address for id {addressId}. {ex.Message}";
+                var error = $"Unable to retrieve address for id {id}. {ex.Message}";
                 _logger.LogError(ex, error);
                 return StatusCode(500, error);
             }

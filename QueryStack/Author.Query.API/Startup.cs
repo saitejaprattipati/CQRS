@@ -11,6 +11,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
 
 namespace Author.Query.API
 {
@@ -26,6 +28,27 @@ namespace Author.Query.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string serviceEndPoint =
+        this.Configuration.GetValue<string>("CosmosDBEndpoint");
+            string authKeyOrResourceToken =
+                this.Configuration.GetValue<string>("CosmosDBAccessKey");
+            string databaseName =
+                this.Configuration.GetValue<string>("CosmosDBName");
+            services
+               .AddEntityFrameworkCosmos();
+            services
+                .AddDbContext<TaxathandDbContext>(
+                         options =>
+            options.UseCosmos(
+                serviceEndPoint,
+                authKeyOrResourceToken,
+                databaseName,
+                contextOptions =>
+                {
+                    contextOptions.ExecutionStrategy(d => new CosmosExecutionStrategy(d));
+                }
+            )
+        );
             services.AddTransient<IAddressRepository, AddressRepository>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }

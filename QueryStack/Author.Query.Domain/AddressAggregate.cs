@@ -1,10 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using Author.Command.Persistence.DBContextAggregate;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace Author.Query.Domain
 {
-    public partial class AddressAggregate
+    public class Address
     {
         /// <summary>gets or sets the id </summary>
         ///// <value>It is of type integer </value>
@@ -20,14 +22,14 @@ namespace Author.Query.Domain
         //[JsonProperty("postCode")]
         public string PostCode { get; set; }
         /// <summary>gets or sets the PostCodeEdited </summary>
-        /// <value>It is of type string </value>
+        /// <value>It is of type bool </value>
         //[JsonProperty("postCodeEdited")]
-        public string PostCodeEdited { get; set; }
+        public bool PostCodeEdited { get; set; }
 
         /// <summary>gets or sets the AddressContentId </summary>
-        /// <value>It is of type string </value>
+        /// <value>It is of type integer </value>
         //[JsonProperty("addressContentId")]
-        public string AddressContentId { get; set; }
+        public int AddressContentId { get; set; }
 
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>
@@ -54,37 +56,32 @@ namespace Author.Query.Domain
         //[JsonProperty("country")]
         public string Country { get; set; }
         /// <summary>gets or sets the StreetEdited </summary>
-        /// <value>It is of type string </value>
+        /// <value>It is of type bool </value>
         //[JsonProperty("streetEdited")]
-        public string StreetEdited { get; set; }
+        public bool StreetEdited { get; set; }
         /// <summary>gets or sets the CityEdited </summary>
-        /// <value>It is of type string </value>
+        /// <value>It is of type bool </value>
         //[JsonProperty("cityEdited")]
-        public string CityEdited { get; set; }
+        public bool CityEdited { get; set; }
         /// <summary>gets or sets the StateEdited </summary>
-        /// <value>It is of type string </value>
+        /// <value>It is of type bool </value>
         //[JsonProperty("stateEdited")]
-        public string StateEdited { get; set; }
+        public bool StateEdited { get; set; }
         /// <summary>gets or sets the CountryEdited </summary>
-        /// <value>It is of type string </value>
+        /// <value>It is of type bool </value>
         //[JsonProperty("countryEdited")]
-        public string CountryEdited { get; set; }
-
+        public bool CountryEdited { get; set; }
     }
     public partial class AddressAggregateDetails
     {
         /// <summary>Gets or sets the Records in page.</summary>
-        /// <value>It is of <see cref="IEnumerable{WorkOfferAggregate}"/> Type </value>
+        /// <value>It is of <see cref="IEnumerable{AddressAggregate}"/> Type </value>
         //[JsonProperty("records")]
-        public IEnumerable<AddressAggregate> Records { get; set; }
+        public IEnumerable<object> Records { get; set; }
 
         /// <summary>Gets or sets the Paging result</summary>
-        /// <value>It is of <see cref="OrderFulfillment.Query.Domain.PagingResult"/> type</value>
+        /// <value>It is of <see cref="Author.Query.Domain.PagingResult"/> type</value>
         //[JsonProperty("pagingResult")]
         public PagingResult PagingResult { get; set; }
-    }
-    public partial class AddressAggregate
-    {
-        public static AddressAggregate FromJson(string json) => JsonConvert.DeserializeObject<AddressAggregate>(json);
     }
 }
