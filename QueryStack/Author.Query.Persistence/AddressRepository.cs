@@ -8,6 +8,7 @@ using Author.Query.Domain;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using Author.Query.Domain.DBAggregate;
 
 namespace Author.Query.Persistence
 {

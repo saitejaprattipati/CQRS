@@ -33,7 +33,7 @@ namespace Author.Query.API.Controllers
         /// <response code="200">Paged list of Address collections</response>
         /// <response code="500">Internal server error message</response> 
         [HttpGet]
-        [ProducesResponseType(typeof(Author.Query.Domain.AddressAggregateDetails), 200)]
+        [ProducesResponseType(typeof(Author.Query.Domain.DBAggregate.AddressAggregateDetails), 200)]
         [ProducesResponseType(typeof(string), 500)]
         public async Task<IActionResult> Get([FromQuery]int pageNumber, [FromQuery]int pageSize)
         {
@@ -66,7 +66,7 @@ namespace Author.Query.API.Controllers
         /// <response code="500">Internal server error message</response> 
         [HttpGet]
         [Route("{id}")]
-        [ProducesResponseType(typeof(Author.Query.Domain.AddressAggregateDetails), 200)]
+        [ProducesResponseType(typeof(Author.Query.Domain.DBAggregate.AddressAggregateDetails), 200)]
         [ProducesResponseType(typeof(string), 404)]
         [ProducesResponseType(typeof(string), 500)]
         public async Task<IActionResult> GetById(string id,string partitionKey)

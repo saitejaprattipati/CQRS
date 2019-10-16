@@ -1,4 +1,5 @@
 ﻿using Author.Query.Domain;
+using Author.Query.Domain.DBAggregate;
 using System;
 using System.Collections.Generic;
 using System.Text;
