@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Author.Query.Domain;
 using System.ComponentModel.DataAnnotations.Schema;
+using Author.Query.Domain.DBAggregate;
 
 namespace Author.Query.Persistence
 {
@@ -21,6 +22,18 @@ namespace Author.Query.Persistence
 
         public DbSet<Address> Address { get; set; }
         public DbSet<Languages> Languages { get; set; }
+        public DbSet<Contacts> Contacts { get; set; }
+        public DbSet<Countries> Countries { get; set; }
+        public DbSet<Disclaimers> Disclaimers { get; set; }
+        public DbSet<Provinces> Provinces { get; set; }
+        public DbSet<ResourceGroups> ResourceGroups { get; set; }
+        public DbSet<SystemUsers> SystemUsers { get; set; }
+        public DbSet<UserActivities> UserActivities { get; set; }
+        public DbSet<WebsiteUsers> WebsiteUsers { get; set; }
+        public DbSet<CountryGroups> CountryGroups { get; set; }
+        public DbSet<TaxTags> TaxTags { get; set; }
+        public DbSet<Articles> Articles { get; set; }
+        public DbSet<Images> Images { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

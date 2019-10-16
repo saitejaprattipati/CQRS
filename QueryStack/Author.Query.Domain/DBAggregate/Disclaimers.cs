@@ -1,12 +1,10 @@
-﻿using Author.Command.Persistence.DBContextAggregate;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
+using System.Text;
 
-namespace Author.Query.Domain
+namespace Author.Query.Domain.DBAggregate
 {
-    public class Address
+   public class Disclaimers
     {
         /// <summary>gets or sets the id </summary>
         ///// <value>It is of type integer </value>
@@ -15,73 +13,53 @@ namespace Author.Query.Domain
         /// <summary>gets or sets the AddressId </summary>
         ///// <value>It is of type integer </value>
         //[JsonProperty("addressId")]
-        public int AddressId { get; set; }
+        public int? DisclaimerId { get; set; }
 
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>
         //[JsonProperty("postCode")]
-        public string PostCode { get; set; }
+        public string Name { get; set; }
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("postCodeEdited")]
-        public bool PostCodeEdited { get; set; }
+        public string CreatedBy { get; set; }
 
         /// <summary>gets or sets the AddressContentId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("addressContentId")]
-        public int AddressContentId { get; set; }
+        public string CreatedDate { get; set; }
 
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("languageId")]
-        public int LanguageId { get; set; }
+        public string UpdatedBy { get; set; }
 
         /// <summary>gets or sets the Street</summary>
         /// <value>It is of type string </value>
         //[JsonProperty("street")]
-        public string Street { get; set; }
+        public string UpdatedDate { get; set; }
 
         /// <summary>gets or sets the City </summary>
         /// <value>It is of type string </value>
         //[JsonProperty("city")]
-        public string City { get; set; }
+        public int? DefaultCountryId { get; set; }
 
         /// <summary>gets or sets the State</summary>
         /// <value>It is of type string</value>
         //[JsonProperty("state")]
-        public string State { get; set; }
+        public int? DisclaimerContentId { get; set; }
 
         /// <summary>gets or sets the Country </summary>
         /// <value>It is of type string </value>
         //[JsonProperty("country")]
-        public string Country { get; set; }
+        public int? LanguageId { get; set; }
         /// <summary>gets or sets the StreetEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("streetEdited")]
-        public bool StreetEdited { get; set; }
+        public string ProviderName { get; set; }
         /// <summary>gets or sets the CityEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("cityEdited")]
-        public bool CityEdited { get; set; }
-        /// <summary>gets or sets the StateEdited </summary>
-        /// <value>It is of type bool </value>
-        //[JsonProperty("stateEdited")]
-        public bool StateEdited { get; set; }
-        /// <summary>gets or sets the CountryEdited </summary>
-        /// <value>It is of type bool </value>
-        //[JsonProperty("countryEdited")]
-        public bool CountryEdited { get; set; }
-    }
-    public partial class AddressAggregateDetails
-    {
-        /// <summary>Gets or sets the Records in page.</summary>
-        /// <value>It is of <see cref="IEnumerable{AddressAggregate}"/> Type </value>
-        //[JsonProperty("records")]
-        public IEnumerable<object> Records { get; set; }
-
-        /// <summary>Gets or sets the Paging result</summary>
-        /// <value>It is of <see cref="Author.Query.Domain.PagingResult"/> type</value>
-        //[JsonProperty("pagingResult")]
-        public PagingResult PagingResult { get; set; }
+        public string ProviderTerms { get; set; }
     }
 }
