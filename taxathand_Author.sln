@@ -42,9 +42,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Core.ApiGateway", "C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Query.Domain", "QueryStack\Author.Query.Domain\Author.Query.Domain.csproj", "{0CD4E06F-33CC-4B25-8428-0783755458EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Author.Query.Persistence", "QueryStack\Author.Query.Persistence\Author.Query.Persistence.csproj", "{EA646495-0BF4-4D8F-8A5A-5D7AA3DEE6CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Query.Persistence", "QueryStack\Author.Query.Persistence\Author.Query.Persistence.csproj", "{EA646495-0BF4-4D8F-8A5A-5D7AA3DEE6CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Author.Core.Services.Persistence.CosmosDB", "Common\Author.Core.Services.Persistence.CosmosDB\Author.Core.Services.Persistence.CosmosDB.csproj", "{151F890A-1AD6-43A7-A3B6-E91902A006E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Core.Services.Persistence.CosmosDB", "Common\Author.Core.Services.Persistence.CosmosDB\Author.Core.Services.Persistence.CosmosDB.csproj", "{151F890A-1AD6-43A7-A3B6-E91902A006E6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

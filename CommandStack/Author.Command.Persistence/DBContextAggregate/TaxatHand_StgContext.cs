@@ -956,11 +956,12 @@ namespace Author.Command.Persistence.DBContextAggregate
             });
         }
 
-        public async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var result = await base.SaveChangesAsync();
+        //public async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default(CancellationToken))
+        //{
+        //    //var result = await base.SaveChangesAsync();
+        //    //return true;
+        //}
 
-            return true;
-        }
+        public async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default(CancellationToken)) => await base.SaveChangesAsync() > 0;
     }
 }

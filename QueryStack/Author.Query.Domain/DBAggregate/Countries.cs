@@ -14,7 +14,7 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the AddressId </summary>
         ///// <value>It is of type integer </value>
         //[JsonProperty("addressId")]
-        public int? CountryId { get; set; }
+        public int CountryId { get; set; }
 
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>
@@ -29,7 +29,7 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the AddressContentId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("addressContentId")]
-        public int? IsPublished { get; set; }
+        public bool IsPublished { get; set; }
 
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>

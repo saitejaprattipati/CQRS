@@ -103,7 +103,7 @@ namespace Author.Core.Services.Persistence.CosmosDB
 
 
             var docs = client.CreateDocumentQuery(UriFactory.CreateDocumentCollectionUri(Connection.DatabaseName, collection), new FeedOptions { EnableCrossPartitionQuery = true, MaxDegreeOfParallelism = 10, MaxBufferedItemCount = 100 })
-                .OrderByDescending(d => d.Timestamp).Take(pageNumber * pageSize);
+                      .OrderByDescending(d => d.Timestamp).Take(pageNumber * pageSize);
             var records = docs.ToList();
 
             return GetRecordsByPaging<Document>(records, pageNumber, pageSize, totalRecordCount);

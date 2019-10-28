@@ -1,8 +1,4 @@
-﻿using Author.Command.Persistence.DBContextAggregate;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
+﻿using System.Collections.Generic;
 
 namespace Author.Query.Domain.DBAggregate
 {
