@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\Author.Core.Framework\Author.Core.Framework.csproj" />
     <ProjectReference Include="..\..\Common\Author.Core.Services.Persistence.CosmosDB\Author.Core.Services.Persistence.CosmosDB.csproj" />
     <ProjectReference Include="..\Author.Query.Domain\Author.Query.Domain.csproj" />
   </ItemGroup>
