@@ -1,12 +1,15 @@
 ﻿using Author.Core.Framework;
 using Author.Query.Persistence.DTO;
 using Author.Query.Persistence.Interfaces;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 
 namespace Author.Query.Persistence
 {
@@ -15,12 +18,14 @@ namespace Author.Query.Persistence
         private readonly TaxathandDbContext _dbContext;
         private readonly ICommonService _commonService;
         private readonly IOptions<AppSettings> _appSettings;
+        private readonly IMapper _mapper;
 
-        public CountryService(TaxathandDbContext dbContext, ICommonService commonService, IOptions<AppSettings> appSettings)
+        public CountryService(TaxathandDbContext dbContext, ICommonService commonService, IOptions<AppSettings> appSettings, IMapper mapper)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _commonService = commonService ?? throw new ArgumentNullException(nameof(commonService));
             _appSettings = appSettings;
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
 
@@ -145,6 +150,59 @@ namespace Author.Query.Persistence
             }
             result.Countries = countries;
             return result;
+        }
+
+        public async Task<CountryResult> GetAllCountriesAsync(LanguageDTO language)
+        {
+            var result = new CountryResult();
+            var localeLangId = language.LanguageId;
+            var dftLanguageId = int.Parse(_appSettings.Value.DefaultLanguageId);
+            
+            result.Countries = await GetCountriesAsync(dftLanguageId, localeLangId);
+            return result;
+        }
+
+        private async Task<List<CountryDTO>> GetCountriesAsync(int dftLanguageId, int localeLangId)
+        {
+            int pageNo = 1, pageSize = 100;
+            var countries = new List<CountryDTO>();
+            if (dftLanguageId.Equals(localeLangId))
+            {
+                //countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(dftLanguageId))
+                //    .Select(dfc => new CountryDTO
+                //    {
+                //        Uuid = dfc.CountryId,
+                //        DisplayName = dfc.DisplayName,
+                //        DisplayNameShort = dfc.DisplayName,
+                //        Name = Helper.ReplaceChars(dfc.DisplayName),
+                //        Path = Helper.ReplaceChars(dfc.DisplayName),
+                //        CompleteResponse = true
+                //    }).Skip((pageNo - 1) * 100).Take(pageSize).ToListAsync();
+
+                countries = await _dbContext.Countries
+                                      .Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(dftLanguageId))
+                                      .ProjectTo<CountryDTO>(_mapper.ConfigurationProvider).ToListAsync();
+            }
+            else
+            {
+                countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(localeLangId))
+                                       .Join(
+                                       _dbContext.Countries.Where(c => c.IsPublished.Equals(true)
+                                                                  && c.LanguageId.Equals(dftLanguageId)),
+                                        lc => lc.CountryId,
+                                        dfc => dfc.CountryId,
+                                        (lc, dfc) => new CountryDTO
+                                        {
+                                            Uuid = lc.CountryId,
+                                            DisplayName = lc.DisplayName,
+                                            DisplayNameShort = lc.DisplayName,
+                                            Name = Helper.ReplaceChars(dfc.DisplayName),
+                                            Path = Helper.ReplaceChars(dfc.DisplayName),
+                                            CompleteResponse = true
+                                        }).Skip((pageNo - 1) * 100).Take(pageSize).ToListAsync();
+            }
+
+            return countries;
         }
     }
 }
