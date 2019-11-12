@@ -10,7 +10,7 @@ namespace Author.Query.Persistence
 {
    public class TaxathandDbContext : DbContext
     {
-        public TaxathandDbContext(DbContextOptions options) : base(options)
+        public TaxathandDbContext(DbContextOptions<TaxathandDbContext> options) : base(options)
         {
             //Database.EnsureCreated();
         }
