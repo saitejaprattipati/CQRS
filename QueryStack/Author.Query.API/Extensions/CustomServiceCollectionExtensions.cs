@@ -1,23 +1,25 @@
 ﻿using Author.Core.Framework;
+using Author.Query.API.GraphQL.Middleware;
 using Author.Query.API.Options;
 using Author.Query.Persistence;
 using Author.Query.Persistence.Mapping;
 using AutoMapper;
 using Boxed.AspNetCore;
 using CorrelationId;
+using GraphQL;
 using GraphQL.Server;
+using GraphQL.Server.Internal;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using System;
-using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 using System.IO.Compression;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Author.Query.API.Extensions
 {
@@ -165,7 +167,37 @@ namespace Author.Query.API.Extensions
 
             return services;
         }
-            
+
+        public static IServiceCollection AddCustomGraphQL(this IServiceCollection services, IHostingEnvironment hostingEnvironment) =>
+            services
+                // Add a way for GraphQL.NET to resolve types.
+                .AddScoped<IDependencyResolver, GraphQLDependencyResolver>()
+                .AddGraphQL(
+                    options =>
+                    {
+                        var configuration = services
+                            .BuildServiceProvider()
+                            .GetRequiredService<IOptions<GraphQLOptions>>()
+                            .Value;
+                        // Set some limits for security, read from configuration.
+                        options.ComplexityConfiguration = configuration.ComplexityConfiguration;
+                        // Enable GraphQL metrics to be output in the response, read from configuration.
+                        ////options.EnableMetrics = configuration.EnableMetrics;
+                        // Show stack traces in exceptions. Don't turn this on in production.
+                        options.ExposeExceptions = hostingEnvironment.IsDevelopment();
+                    })
+                // Adds all graph types in the current assembly with a singleton lifetime.
+                .AddGraphTypes(ServiceLifetime.Scoped)
+                // Adds ConnectionType<T>, EdgeType<T> and PageInfoType.
+                ////.AddRelayGraphTypes()
+                // Add a user context from the HttpContext and make it available in field resolvers.
+                //.AddUserContextBuilder<GraphQLUserContextBuilder>()
+                // Add GraphQL data loader to reduce the number of calls to our repository.
+                .AddDataLoader()
+                // Add WebSockets support for subscriptions.
+                .AddWebSockets()
+                .Services
+                .AddTransient(typeof(IGraphQLExecuter<>), typeof(InstrumentingGraphQLExecutor<>));
 
     }
 }
