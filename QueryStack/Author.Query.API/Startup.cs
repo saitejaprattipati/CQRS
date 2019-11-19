@@ -28,7 +28,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Compression;
 
 namespace Author.Query.API
@@ -100,22 +102,24 @@ namespace Author.Query.API
             ////services.AddSingleton<IDocumentExecuter, DocumentExecuter>();
             ////services.AddSingleton<IDataLoaderContextAccessor, DataLoaderContextAccessor>();
             ////services.AddSingleton<DataLoaderDocumentListener>();
-            services.AddSingleton<IDocumentWriter, DocumentWriter>();
+            ////services.AddSingleton<IDocumentWriter, DocumentWriter>();
 
-            services.AddScoped<IUtilityService, UtilityService>();
-            services.AddScoped<ICommonService, CommonService>();
-            services.AddScoped<ICountryService, CountryService>();
+            services.AddProjectRepositories();
+            ////services.AddScoped<IUtilityService, UtilityService>();
+            ////services.AddScoped<ICommonService, CommonService>();
+            ////services.AddScoped<ICountryService, CountryService>();
 
-            services.AddScoped<CountryResultType>();
-            services.AddScoped<GraphQLQuery>();
-            services.AddScoped<ICountriesResolver, CountriesResolver>();
-            services.AddScoped<CountryType>();
+            ////services.AddScoped<CountryResultType>();
+            ////services.AddScoped<GraphQLQuery>();
+            services.AddGraphQLResolvers();
+            ////services.AddScoped<ICountriesResolver, CountriesResolver>();
+            ////services.AddScoped<CountryType>();
 
             services.AddScoped<Response>();
-            services.AddScoped(typeof(ResponseGraphType<>));
-            services.AddScoped(typeof(ResponseListGraphType<>));
+            ////services.AddScoped(typeof(ResponseGraphType<>));
+            ////services.AddScoped(typeof(ResponseListGraphType<>));
 
-            services.AddTransient<IAddressRepository, AddressRepository>();
+            ////services.AddTransient<IAddressRepository, AddressRepository>();
             services.AddMvcCore()
                     .SetCompatibilityVersion(CompatibilityVersion.Latest)
                     .AddAuthorization()
@@ -124,16 +128,32 @@ namespace Author.Query.API
                     .AddCustomCors()
                     .AddCustomMvcOptions(this.hostingEnvironment);
 
-            services.AddGraphQL(o => { o.ExposeExceptions = true; })
-                    .AddGraphTypes(ServiceLifetime.Scoped)
-                    .AddDataLoader();
+            services.AddCustomGraphQL(this.hostingEnvironment);
+            //services.AddGraphQL(
+            //        options =>
+            //        {
+            //            var configuration = services
+            //                .BuildServiceProvider()
+            //                .GetRequiredService<IOptions<GraphQLOptions>>()
+            //                .Value;
+            //            // Set some limits for security, read from configuration.
+            //            options.ComplexityConfiguration = configuration.ComplexityConfiguration;
+            //            // Enable GraphQL metrics to be output in the response, read from configuration.
+            //            ////options.EnableMetrics = configuration.EnableMetrics;
+            //            // Show stack traces in exceptions. Don't turn this on in production.
+            //            options.ExposeExceptions = hostingEnvironment.IsDevelopment();
+            //        })
+            //.AddGraphTypes(ServiceLifetime.Scoped)
+            //.AddDataLoader();
 
+
+            services.AddProjectSchemas();
             //services.AddSingleton<TaxatHandSchema>();
             //var sp = services.BuildServiceProvider();
             //services.AddSingleton<ISchema>(new TaxatHandSchema(new FuncDependencyResolver(type => sp.GetService(type))));
 
-            services.AddScoped<IDependencyResolver>(s => new FuncDependencyResolver(s.GetRequiredService));
-            services.AddScoped<TaxatHandSchema>();
+            //////services.AddScoped<IDependencyResolver>(s => new FuncDependencyResolver(s.GetRequiredService));
+            ////services.AddScoped<TaxatHandSchema>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -166,7 +186,7 @@ namespace Author.Query.API
             ////app.UseHealthChecksUI();
 
             app.UseGraphQL<TaxatHandSchema>();
-            app.UseGraphQLPlayground(options: new GraphQLPlaygroundOptions());
+            app.UseGraphQLPlayground(options: new GraphQLPlaygroundOptions() { Path = "/" });
             app.UseHttpsRedirection();
             app.UseMvc();
         }

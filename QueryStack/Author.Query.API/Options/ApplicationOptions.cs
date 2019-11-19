@@ -3,6 +3,7 @@ namespace Author.Query.API.Options
     using Author.Core.Framework;
     using global::GraphQL.Server;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Server.Kestrel.Core;
     using System.ComponentModel.DataAnnotations;
 
     /// <summary>
@@ -24,7 +25,7 @@ namespace Author.Query.API.Options
         [Required]
         public AppSettings AppSettings { get; set; }
 
-        //[Required]
-        //public KestrelServerOptions Kestrel { get; set; }
+        [Required]
+        public KestrelServerOptions Kestrel { get; set; }
     }
 }
