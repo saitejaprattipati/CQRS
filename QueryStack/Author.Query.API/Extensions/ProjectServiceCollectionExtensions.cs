@@ -37,5 +37,9 @@ namespace Author.Query.API.Extensions
         public static IServiceCollection AddProjectSchemas(this IServiceCollection services) =>
             services
                 .AddScoped<TaxatHandSchema>();
+
+        public static IServiceCollection AddGraphQLResponse(this IServiceCollection services) =>
+            services
+                .AddScoped<Response>();
     }
 }
