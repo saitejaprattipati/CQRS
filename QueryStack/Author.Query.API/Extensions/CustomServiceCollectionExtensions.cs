@@ -142,31 +142,37 @@ namespace Author.Query.API.Extensions
                         // options.Preload = true;
                     });
 
-        public static IServiceCollection AddCustomHealthChecks(this IServiceCollection services, IConfiguration configuration)
-        {
-            var accountName = configuration.GetValue<string>("AzureStorageAccountName");
-            var accountKey = configuration.GetValue<string>("AzureStorageAccountKey");
+        //public static IServiceCollection AddCustomHealthChecks(this IServiceCollection services, IConfiguration configuration)
+        //{
+        //    var accountName = configuration.GetValue<string>("AzureStorageAccountName");
+        //    var accountKey = configuration.GetValue<string>("AzureStorageAccountKey");
 
-            var cosmosDBServiceEndPoint = configuration.GetValue<string>("CosmosDBEndpoint");
-            var cosmosDBAuthKeyOrResourceToken = configuration.GetValue<string>("CosmosDBAccessKey");
-            var cosmosDBConnectionString = $"AccountEndpoint={cosmosDBServiceEndPoint};AccountKey={cosmosDBAuthKeyOrResourceToken};";
+        //    var cosmosDBServiceEndPoint = configuration.GetValue<string>("CosmosDBEndpoint");
+        //    var cosmosDBAuthKeyOrResourceToken = configuration.GetValue<string>("CosmosDBAccessKey");
+        //    var cosmosDBConnectionString = $"AccountEndpoint={cosmosDBServiceEndPoint};AccountKey={cosmosDBAuthKeyOrResourceToken};";
 
-            var hcBuilder = services.AddHealthChecks();
+        //    var hcBuilder = services.AddHealthChecks();
 
-            hcBuilder
-                .AddCheck("self", () => HealthCheckResult.Healthy())
-                .AddCosmosDb(connectionString: cosmosDBConnectionString,
-                             name: "CosmosDB-check",
-                             failureStatus: HealthStatus.Degraded,
-                             tags: new string[] { "cosmosdb" });
+        //    hcBuilder
+        //        .AddCheck("self", () => HealthCheckResult.Healthy())
+        //        .AddCosmosDb(connectionString: cosmosDBConnectionString,
+        //                     name: "CosmosDB-check",
+        //                     failureStatus: HealthStatus.Degraded,
+        //                     tags: new string[] { "cosmosdb" });
 
-            services.AddHealthChecksUI(setupSettings: setup =>
-            {
-                setup.AddHealthCheckEndpoint("Basic healthcheck", "http://localhost:62665/healthcheck");
-            });
+        //    services.AddHealthChecksUI(setupSettings: setup =>
+        //    {
+        //        setup.AddHealthCheckEndpoint("Basic healthcheck", "http://localhost:62665/healthcheck");
+        //    });
 
-            return services;
-        }
+        //    return services;
+        //}
+
+        public static IServiceCollection AddCustomHealthChecks(this IServiceCollection services) =>
+        services
+            .AddHealthChecks()
+            // Add health checks for external dependencies here. See https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks
+            .Services;
 
         public static IServiceCollection AddCustomGraphQL(this IServiceCollection services, IHostingEnvironment hostingEnvironment) =>
             services
