@@ -7,6 +7,7 @@ WORKDIR /src
 COPY ["QueryStack/Author.Query.API/Author.Query.API.csproj", "QueryStack/Author.Query.API/"]
 COPY ["QueryStack/Author.Query.Persistence/Author.Query.Persistence.csproj", "QueryStack/Author.Query.Persistence/"]
 COPY ["Common/Author.Core.Framework/Author.Core.Framework.csproj", "Common/Author.Core.Framework/"]
+COPY ["Common/Author.Core.Services.Rediscache/Author.Core.Services.Rediscache.csproj", "Common/Author.Core.Services.Rediscache/"]
 COPY ["QueryStack/Author.Query.Domain/Author.Query.Domain.csproj", "QueryStack/Author.Query.Domain/"]
 COPY ["Common/Author.Core.Services.Persistence.CosmosDB/Author.Core.Services.Persistence.CosmosDB.csproj", "Common/Author.Core.Services.Persistence.CosmosDB/"]
 RUN dotnet restore "QueryStack/Author.Query.API/Author.Query.API.csproj"

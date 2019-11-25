@@ -46,6 +46,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Query.Persistence", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Author.Core.Services.Persistence.CosmosDB", "Common\Author.Core.Services.Persistence.CosmosDB\Author.Core.Services.Persistence.CosmosDB.csproj", "{151F890A-1AD6-43A7-A3B6-E91902A006E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Author.Core.Services.Rediscache", "Common\Author.Core.Services.Rediscache\Author.Core.Services.Rediscache.csproj", "{2AE07698-BD49-401A-9617-40812FF2A112}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -120,6 +122,10 @@ Global
 		{151F890A-1AD6-43A7-A3B6-E91902A006E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{151F890A-1AD6-43A7-A3B6-E91902A006E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{151F890A-1AD6-43A7-A3B6-E91902A006E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AE07698-BD49-401A-9617-40812FF2A112}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AE07698-BD49-401A-9617-40812FF2A112}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AE07698-BD49-401A-9617-40812FF2A112}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AE07698-BD49-401A-9617-40812FF2A112}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -141,6 +147,7 @@ Global
 		{0CD4E06F-33CC-4B25-8428-0783755458EC} = {0BB711EB-C31C-45BE-A91C-4BE27F71027F}
 		{EA646495-0BF4-4D8F-8A5A-5D7AA3DEE6CA} = {0BB711EB-C31C-45BE-A91C-4BE27F71027F}
 		{151F890A-1AD6-43A7-A3B6-E91902A006E6} = {C1212B40-72BC-4A19-A5F8-A53823156224}
+		{2AE07698-BD49-401A-9617-40812FF2A112} = {C1212B40-72BC-4A19-A5F8-A53823156224}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7B43F389-6EE9-44DA-99B9-2333DA47F5DF}
