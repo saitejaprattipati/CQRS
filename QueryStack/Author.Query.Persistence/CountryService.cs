@@ -10,11 +10,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Newtonsoft.Json;
+using Author.Query.Domain.DBAggregate;
+using StackExchange.Redis;
+using Author.Core.Services.Rediscache;
+
 
 namespace Author.Query.Persistence
 {
     public class CountryService : ICountryService
     {
+        private readonly RedisConnect _contextRedis;
         private readonly TaxathandDbContext _dbContext;
         private readonly ICommonService _commonService;
         private readonly IOptions<AppSettings> _appSettings;
@@ -22,6 +28,7 @@ namespace Author.Query.Persistence
 
         public CountryService(TaxathandDbContext dbContext, ICommonService commonService, IOptions<AppSettings> appSettings, IMapper mapper)
         {
+            _contextRedis = new RedisConnect();
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _commonService = commonService ?? throw new ArgumentNullException(nameof(commonService));
             _appSettings = appSettings;
@@ -96,7 +103,7 @@ namespace Author.Query.Persistence
         //}
 
         public async Task<CountryResult> GetAllCountriesAsync(string locale)
-        {
+        {          
             int pageNo = 1, pageSize = 100;
             var result = new CountryResult();
             var language = _commonService.GetLanguageFromLocale(locale);
@@ -164,6 +171,21 @@ namespace Author.Query.Persistence
 
         private async Task<List<CountryDTO>> GetCountriesAsync(int dftLanguageId, int localeLangId)
         {
+            //IDatabase cache = RedisConnect.Connection.GetDatabase();
+            //List<Images> objImgList = new List<Images>();
+            //var ImageDetails = cache.StringGet("Images");
+            //if (ImageDetails.IsNull)
+            //{
+            //    var objImgList = _commonService.GetLanguageFromLocale(locale);
+            //    cache.StringSet("Images", JsonConvert.SerializeObject(Image));
+            //}
+            //else
+            //{
+            //    objImgList = JsonConvert.DeserializeObject<List<Images>>(ImageDetails);
+            //}
+
+
+
             int pageNo = 1, pageSize = 100;
             var countries = new List<CountryDTO>();
             if (dftLanguageId.Equals(localeLangId))
