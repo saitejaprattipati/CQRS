@@ -62,7 +62,7 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("languageId")]
-        public int? IsPublished { get; set; }
+        public bool IsPublished { get; set; }
 
 
 

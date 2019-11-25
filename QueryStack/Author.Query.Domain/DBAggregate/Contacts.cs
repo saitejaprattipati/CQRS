@@ -119,17 +119,17 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the State</summary>
         /// <value>It is of type string</value>
         //[JsonProperty("state")]
-        public int? OfficePhoneEdited { get; set; }
+        public bool? OfficePhoneEdited { get; set; }
 
         /// <summary>gets or sets the Country </summary>
         /// <value>It is of type string </value>
         //[JsonProperty("country")]
-        public int? MobilePhoneNumberEdited { get; set; }
+        public bool? MobilePhoneNumberEdited { get; set; }
 
         /// <summary>gets or sets the StreetEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("streetEdited")]
-        public int? ImageIdEdited { get; set; }
+        public bool? ImageIdEdited { get; set; }
 
         /// <summary>gets or sets the CityEdited </summary>
         /// <value>It is of type bool </value>
@@ -194,27 +194,27 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the Country </summary>
         /// <value>It is of type string </value>
         //[JsonProperty("country")]
-        public int? FirstNameEdited { get; set; }
+        public bool? FirstNameEdited { get; set; }
 
         /// <summary>gets or sets the StreetEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("streetEdited")]
-        public int? LastNameEdited { get; set; }
+        public bool? LastNameEdited { get; set; }
 
         /// <summary>gets or sets the CityEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("cityEdited")]
-        public int? TitleEdited { get; set; }
+        public bool? TitleEdited { get; set; }
 
         /// <summary>gets or sets the StateEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("stateEdited")]
-        public int? RoleEdited { get; set; }
+        public bool? RoleEdited { get; set; }
 
         /// <summary>gets or sets the CountryEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("countryEdited")]
-        public int? EmployeeLevelEdited { get; set; }
+        public bool? EmployeeLevelEdited { get; set; }
     }
     public partial class ContactsDetails
     {

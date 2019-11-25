@@ -18,7 +18,7 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>
         //[JsonProperty("postCode")]
-        public int? IsPublished { get; set; }
+        public bool? IsPublished { get; set; }
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("postCodeEdited")]
