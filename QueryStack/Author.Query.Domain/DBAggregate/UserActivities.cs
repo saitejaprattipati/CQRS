@@ -113,6 +113,10 @@ namespace Author.Query.Domain.DBAggregate
         //[JsonProperty("postCode")]
         public int? WebsiteUserId { get; set; }
         /// <summary>gets or sets the PostCodeEdited </summary>
+        /// <value>It is of type string </value>
+        //[JsonProperty("postCode")]
+        public int? UserSubscribedCountryId { get; set; }
+        /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("postCodeEdited")]
         public int? CountryId { get; set; }

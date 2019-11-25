@@ -23,6 +23,18 @@
       ],
       "UpstreamPathTemplate": "/api/au/{everything}",
       "UpstreamHttpMethod": [ "POST", "PUT", "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "authorqueryapi",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/api/auq/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "GET" ]
     }
 
   ],
