@@ -202,8 +202,8 @@ namespace Author.Query.API.Extensions
                 .AddDataLoader()
                 // Add WebSockets support for subscriptions.
                 .AddWebSockets()
-                .Services
-                .AddTransient(typeof(IGraphQLExecuter<>), typeof(InstrumentingGraphQLExecutor<>));
+                .Services;
+                //.AddTransient(typeof(IGraphQLExecuter<>), typeof(InstrumentingGraphQLExecutor<>));
 
     }
 }

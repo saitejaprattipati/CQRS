@@ -4,6 +4,7 @@ using Author.Query.Domain.DBAggregate;
 using Author.Query.Persistence.DTO;
 using Author.Query.Persistence.Interfaces;
 using GraphQL.DataLoader;
+using GraphQL.Types;
 using Microsoft.AspNetCore.Http;
 using System;
 
@@ -52,6 +53,27 @@ namespace Author.Query.API.GraphQL.Resolvers
                     return null;
                 }
                 , description: "All Countries data"
+            );
+
+            graphQLQuery.FieldAsync<ResponseGraphType<CountryType>>(
+                "country",
+                arguments: new QueryArguments(
+                    new QueryArgument<NonNullGraphType<IntGraphType>> { Name = "countryId", Description = "id of the country" }
+                ),
+                resolve: async context => {
+                    var countryId = context.GetArgument<int>("countryId");
+                    var language = _accessor.HttpContext.Items["language"] as LanguageDTO;
+                    if (language != null && countryId > 0)
+                    {
+                        var loader = _dataLoaderContextAccessor.Context.GetOrAddLoader("GetCountry",
+                                                () => _countryService.GetCountryAsync(language, countryId));
+                        var countryDetails = await context.TryAsyncResolve(
+                              async c => await loader.LoadAsync());
+                        return Response(countryDetails);
+                    }
+
+                    return null;
+                }
             );
         }
     }
