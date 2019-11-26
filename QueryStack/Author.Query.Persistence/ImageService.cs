@@ -1,5 +1,4 @@
-﻿using Author.Query.Domain.DBAggregate;
-using Author.Query.Persistence.DTO;
+﻿using Author.Query.Persistence.DTO;
 using Author.Query.Persistence.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -21,6 +20,11 @@ namespace Author.Query.Persistence
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+        public async Task<List<ImageDTO>> GetAllImagesAsync()
+        {
+            return await _dbContext.Images.ProjectTo<ImageDTO>(_mapper.ConfigurationProvider).ToListAsync();
+        }
+
         public async Task<ILookup<int, ImageDTO>> GetImageAsync(IEnumerable<int> imageIds)
         {
             var images = await _dbContext.Images.Where(im => imageIds.Contains(im.ImageId))
@@ -34,5 +38,7 @@ namespace Author.Query.Persistence
             return await _dbContext.Images.ProjectTo<ImageDTO>(_mapper.ConfigurationProvider)
                                           .FirstOrDefaultAsync(c => c.CountryId.Equals(imageId));
         }
+
+
     }
 }

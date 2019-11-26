@@ -17,6 +17,6 @@
         public string UpdatedBy { get; set; }
         public string UpdatedDate { get; set; }
         public string EmpGUID { get; set; }
-        public int? Edited { get; set; }
+        public bool? Edited { get; set; }
     }
 }

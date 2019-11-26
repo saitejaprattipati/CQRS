@@ -9,29 +9,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using Newtonsoft.Json;
-using Author.Query.Domain.DBAggregate;
-using StackExchange.Redis;
-using Author.Core.Services.Rediscache;
-
 
 namespace Author.Query.Persistence
 {
     public class CountryService : ICountryService
     {
-        private readonly RedisConnect _contextRedis;
         private readonly TaxathandDbContext _dbContext;
         private readonly ICommonService _commonService;
         private readonly IImageService _imageService;
         private readonly IOptions<AppSettings> _appSettings;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public CountryService(TaxathandDbContext dbContext, ICommonService commonService, IImageService imageService, IOptions<AppSettings> appSettings, IMapper mapper)
+        public CountryService(TaxathandDbContext dbContext, ICommonService commonService, IImageService imageService, IOptions<AppSettings> appSettings, IMapper mapper, ICacheService cacheService)
         {
-            _contextRedis = new RedisConnect();
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _commonService = commonService ?? throw new ArgumentNullException(nameof(commonService));
             _imageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
+            _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
             _appSettings = appSettings;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
@@ -181,6 +176,7 @@ namespace Author.Query.Persistence
         private async Task<CountryDTO> GetCountryDetailsAsync(int countryId,int dftLanguageId, int localeLangId)
         {
             var country = new CountryDTO();
+            var images = await _cacheService.GetAllImagesAsync();
             if (dftLanguageId.Equals(localeLangId))
             {
                 country = await _dbContext.Countries.Where(c => c.CountryId.Equals(countryId)
@@ -189,16 +185,14 @@ namespace Author.Query.Persistence
                                     .Select(dco => new CountryDTO
                                     {
                                         Uuid = dco.CountryId,
-                                        //PNGImagePath = _imageService.GetImageDetailsAsync(dco.PNGImageId).Result.FilePath,
-                                        //SVGImagePath = _imageService.GetImageDetailsAsync(dco.SVGImageId).Result.FilePath,
+                                        PNGImagePath = images.FirstOrDefault(im=>im.ImageId.Equals(dco.PNGImageId)).FilePath,
+                                        SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dco.SVGImageId)).FilePath,
                                         DisplayName = dco.DisplayName,
                                         DisplayNameShort = dco.DisplayName,
                                         Name = Helper.ReplaceChars(dco.DisplayName),
                                         Path = Helper.ReplaceChars(dco.DisplayName),
                                         CompleteResponse = true
                                     }).FirstOrDefaultAsync();
-
-
 
             }
             else
@@ -213,8 +207,8 @@ namespace Author.Query.Persistence
                                        (lc, dfc) => new CountryDTO
                                        {
                                            Uuid = lc.CountryId,
-                                           //PNGImagePath = _imageService.GetImageDetailsAsync(dfc.PNGImageId).Result.FilePath,
-                                           //SVGImagePath = _imageService.GetImageDetailsAsync(dfc.SVGImageId).Result.FilePath,
+                                           PNGImagePath = images.FirstOrDefault(im=>im.ImageId.Equals(dfc.PNGImageId)).FilePath,
+                                           SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.SVGImageId)).FilePath,
                                            DisplayName = lc.DisplayName,
                                            DisplayNameShort = lc.DisplayName,
                                            Name = Helper.ReplaceChars(dfc.DisplayName),
@@ -228,27 +222,14 @@ namespace Author.Query.Persistence
 
         private async Task<List<CountryDTO>> GetCountriesAsync(int dftLanguageId, int localeLangId)
         {
-            //IDatabase cache = RedisConnect.Connection.GetDatabase();
-            //List<Images> objImgList = new List<Images>();
-            //var ImageDetails = cache.StringGet("Images");
-            //if (ImageDetails.IsNull)
-            //{
-            //    var objImgList = _commonService.GetLanguageFromLocale(locale);
-            //    cache.StringSet("Images", JsonConvert.SerializeObject(Image));
-            //}
-            //else
-            //{
-            //    objImgList = JsonConvert.DeserializeObject<List<Images>>(ImageDetails);
-            //}
-
-
-
             int pageNo = 1, pageSize = 100;
             var countries = new List<CountryDTO>();
 
             // Get all the Flag images
-            var images = await _dbContext.Images.Where(im=>im.ImageType.Equals((int)ImageType.FlagPNG) 
-                                                       || im.ImageType.Equals((int)ImageType.FlagSVG)).ToListAsync();
+            //var images = await _dbContext.Images.Where(im=>im.ImageType.Equals((int)ImageType.FlagPNG) 
+            //                                           || im.ImageType.Equals((int)ImageType.FlagSVG)).ToListAsync();
+
+            var images = await _cacheService.GetAllImagesAsync();
 
             if (dftLanguageId.Equals(localeLangId))
             {
@@ -256,8 +237,10 @@ namespace Author.Query.Persistence
                     .Select(dfc => new CountryDTO
                     {
                         Uuid = dfc.CountryId,
-                        PNGImagePath = images.FirstOrDefault(im=>im.ImageId.Equals(dfc.PNGImageId) && im.ImageType.Equals((int)ImageType.FlagPNG)).FilePath,
-                        SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.SVGImageId) && im.ImageType.Equals((int)ImageType.FlagSVG)).FilePath,
+                        //PNGImagePath = images.FirstOrDefault(im=>im.ImageId.Equals(dfc.PNGImageId) && im.ImageType.Equals((int)ImageType.FlagPNG)).FilePath,
+                        //SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.SVGImageId) && im.ImageType.Equals((int)ImageType.FlagSVG)).FilePath,
+                        PNGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.PNGImageId)).FilePath,
+                        SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.SVGImageId)).FilePath,
                         DisplayName = dfc.DisplayName,
                         DisplayNameShort = dfc.DisplayName,
                         Name = Helper.ReplaceChars(dfc.DisplayName),
@@ -280,8 +263,10 @@ namespace Author.Query.Persistence
                                         (lc, dfc) => new CountryDTO
                                         {
                                             Uuid = lc.CountryId,
-                                            PNGImagePath = images.Where(im => im.ImageId.Equals(dfc.PNGImageId) && im.ImageType.Equals((int)ImageType.FlagPNG)).Select(c => c.FilePath).FirstOrDefault(),
-                                            SVGImagePath = images.Where(im => im.ImageId.Equals(dfc.SVGImageId) && im.ImageType.Equals((int)ImageType.FlagSVG)).Select(c => c.FilePath).FirstOrDefault(),
+                                            //PNGImagePath = images.Where(im => im.ImageId.Equals(dfc.PNGImageId) && im.ImageType.Equals((int)ImageType.FlagPNG)).Select(c => c.FilePath).FirstOrDefault(),
+                                            //SVGImagePath = images.Where(im => im.ImageId.Equals(dfc.SVGImageId) && im.ImageType.Equals((int)ImageType.FlagSVG)).Select(c => c.FilePath).FirstOrDefault(),
+                                            PNGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.PNGImageId)).FilePath,
+                                            SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.SVGImageId)).FilePath,
                                             DisplayName = lc.DisplayName,
                                             DisplayNameShort = lc.DisplayName,
                                             Name = Helper.ReplaceChars(dfc.DisplayName),

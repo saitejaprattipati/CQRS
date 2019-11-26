@@ -25,6 +25,7 @@ namespace Author.Query.API.Extensions
                 .AddScoped<IUtilityService, UtilityService>()
                 .AddScoped<ICommonService, CommonService>()
                 .AddScoped<IImageService, ImageService>()
+                .AddScoped<ICacheService, CacheService>()
                 .AddScoped<ICountryService, CountryService>()
                 .AddScoped<ICountriesResolver, CountriesResolver>();
 

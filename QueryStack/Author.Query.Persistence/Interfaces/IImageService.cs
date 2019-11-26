@@ -11,5 +11,7 @@ namespace Author.Query.Persistence.Interfaces
         Task<ILookup<int, ImageDTO>> GetImageAsync(IEnumerable<int> imageIds);
 
         Task<ImageDTO> GetImageDetailsAsync(int imageId);
+
+        Task<List<ImageDTO>> GetAllImagesAsync();
     }
 }
