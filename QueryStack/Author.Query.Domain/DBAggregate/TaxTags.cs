@@ -22,7 +22,7 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("postCodeEdited")]
-        public int? IsPublished { get; set; }
+        public bool? IsPublished { get; set; }
 
         /// <summary>gets or sets the AddressContentId </summary>
         /// <value>It is of type integer </value>

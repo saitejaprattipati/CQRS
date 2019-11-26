@@ -32,6 +32,10 @@ using Author.Core.Services.BlobStorage.Interfaces;
 using Swashbuckle.AspNetCore.Swagger;
 using System.IO;
 using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.AspNetCore.Authentication.AzureAD.UI;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Linq;
 
 namespace AuthorAdmin.Command.API
 {
@@ -49,11 +53,13 @@ namespace AuthorAdmin.Command.API
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(AzureADDefaults.BearerAuthenticationScheme).AddAzureADBearer(options => Configuration.Bind("AzureActiveDirectory", options));
+
             services.Configure<AuthorConfigurationSettings>(Configuration);
             ConfigureCSRFValidationByEnvironment(services);
-            services.AddCors();
+            services.AddCors((options => { options.AddPolicy("FrontEnd", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials()); }));
 
-          //  services.AddMediatR(CreateUserCommandHandler);
+            //  services.AddMediatR(CreateUserCommandHandler);
 
 
             services.AddMediatR(typeof(CreateArticleCommandHandler).GetTypeInfo().Assembly);
@@ -103,7 +109,18 @@ namespace AuthorAdmin.Command.API
                       ServiceLifetime.Scoped  //Showing explicitly that the DbContext is shared across the HTTP request scope (graph of objects started in the HTTP request)
                   );
 
+            services.Configure<JwtBearerOptions>(AzureADDefaults.JwtBearerAuthenticationScheme, options =>
+            {
+                // This is an Azure AD v2.0 Web API
+                options.Authority += "/v2.0";
 
+                // The valid audiences are both the Client ID (options.Audience) and api://{ClientID}
+                options.TokenValidationParameters.ValidAudiences = new string[] { options.Audience, $"api://{options.Audience}" };
+
+                // Instead of using the default validation (validating against a single tenant, as we do in line of business apps),
+                // we inject our own multitenant validation logic (which even accepts both V1 and V2 tokens)
+                options.TokenValidationParameters.IssuerValidator = AadIssuerValidator.ValidateAadIssuer;
+            });
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             // Auto Mapper Configurations
@@ -270,6 +287,10 @@ namespace AuthorAdmin.Command.API
 
             app.ConfigureExceptionHandler(utilityService);
             app.UseMvc();
+            app.UseCors("FrontEnd");
+            app.UseStaticFiles();
+            app.UseCookiePolicy();
+            app.UseAuthentication();
         }
     }
 }

@@ -14,6 +14,7 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.ServiceBus;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AuthorAdmin.Command.API.Controllers
 {
@@ -52,6 +53,7 @@ namespace AuthorAdmin.Command.API.Controllers
         /// <remarks>This API will create country</remarks>
         /// <param name="command">Create Country command object</param>
         /// <returns></returns>
+       // [Authorize]
         [HttpPost]
         [Route("createCountry")]
         [ProducesResponseType(typeof(string), 201)]
