@@ -8,5 +8,7 @@ namespace Author.Query.Persistence.Interfaces
         Task<CountryResult> GetAllCountriesAsync(string locale);
 
         Task<CountryResult> GetAllCountriesAsync(LanguageDTO language);
+
+        Task<CountryDTO> GetCountryAsync(LanguageDTO language, int countryId);
     }
 }

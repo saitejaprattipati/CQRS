@@ -2,6 +2,7 @@
 using Author.Query.Domain.DBAggregate;
 using Author.Query.Persistence.DTO;
 using AutoMapper;
+using System.Collections.Generic;
 
 namespace Author.Query.Persistence.Mapping
 {
@@ -17,6 +18,8 @@ namespace Author.Query.Persistence.Mapping
                 .ForMember(dest => dest.DisplayNameShort, opt => opt.MapFrom(src => Helper.ReplaceChars(src.DisplayName)))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => Helper.ReplaceChars(src.DisplayName)))
                 .ForMember(dest => dest.Path, opt => opt.MapFrom(src => Helper.ReplaceChars(src.DisplayName)));
+            CreateMap<Images, ImageDTO>();
+            CreateMap<List<Images>, List<ImageDTO>>();
         }
     }
 }

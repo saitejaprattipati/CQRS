@@ -2,7 +2,6 @@
 using Author.Query.Persistence.DTO;
 using Author.Query.Persistence.Interfaces;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
@@ -17,13 +16,15 @@ namespace Author.Query.Persistence
     {
         private readonly TaxathandDbContext _dbContext;
         private readonly ICommonService _commonService;
+        private readonly IImageService _imageService;
         private readonly IOptions<AppSettings> _appSettings;
         private readonly IMapper _mapper;
 
-        public CountryService(TaxathandDbContext dbContext, ICommonService commonService, IOptions<AppSettings> appSettings, IMapper mapper)
+        public CountryService(TaxathandDbContext dbContext, ICommonService commonService, IImageService imageService, IOptions<AppSettings> appSettings, IMapper mapper)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _commonService = commonService ?? throw new ArgumentNullException(nameof(commonService));
+            _imageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
             _appSettings = appSettings;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
@@ -162,26 +163,89 @@ namespace Author.Query.Persistence
             return result;
         }
 
+        public async Task<CountryDTO> GetCountryAsync(LanguageDTO language,int countryId)
+        {
+            var localeLangId = language.LanguageId;
+            var dftLanguageId = int.Parse(_appSettings.Value.DefaultLanguageId);
+
+            return await GetCountryDetailsAsync(countryId,dftLanguageId, localeLangId);
+        }
+
+        private async Task<CountryDTO> GetCountryDetailsAsync(int countryId,int dftLanguageId, int localeLangId)
+        {
+            var country = new CountryDTO();
+            if (dftLanguageId.Equals(localeLangId))
+            {
+                country = await _dbContext.Countries.Where(c => c.CountryId.Equals(countryId)
+                                                                            && c.IsPublished.Equals(true)
+                                                                            && c.LanguageId.Equals(dftLanguageId))
+                                    .Select(dco => new CountryDTO
+                                    {
+                                        Uuid = dco.CountryId,
+                                        //PNGImagePath = _imageService.GetImageDetailsAsync(dco.PNGImageId).Result.FilePath,
+                                        //SVGImagePath = _imageService.GetImageDetailsAsync(dco.SVGImageId).Result.FilePath,
+                                        DisplayName = dco.DisplayName,
+                                        DisplayNameShort = dco.DisplayName,
+                                        Name = Helper.ReplaceChars(dco.DisplayName),
+                                        Path = Helper.ReplaceChars(dco.DisplayName),
+                                        CompleteResponse = true
+                                    }).FirstOrDefaultAsync();
+
+
+
+            }
+            else
+            {
+                country = await _dbContext.Countries.Where(cc => cc.CountryId.Equals(countryId) &&
+                                                           cc.IsPublished.Equals(true) && cc.LanguageId.Equals(localeLangId))
+                                      .Join(
+                                      _dbContext.Countries.Where(c => c.CountryId.Equals(countryId) && c.IsPublished.Equals(true)
+                                                                 && c.LanguageId.Equals(dftLanguageId)),
+                                       lc => lc.CountryId,
+                                       dfc => dfc.CountryId,
+                                       (lc, dfc) => new CountryDTO
+                                       {
+                                           Uuid = lc.CountryId,
+                                           //PNGImagePath = _imageService.GetImageDetailsAsync(dfc.PNGImageId).Result.FilePath,
+                                           //SVGImagePath = _imageService.GetImageDetailsAsync(dfc.SVGImageId).Result.FilePath,
+                                           DisplayName = lc.DisplayName,
+                                           DisplayNameShort = lc.DisplayName,
+                                           Name = Helper.ReplaceChars(dfc.DisplayName),
+                                           Path = Helper.ReplaceChars(dfc.DisplayName),
+                                           CompleteResponse = true
+                                       }).FirstOrDefaultAsync();
+            }
+
+            return country;
+        }
+
         private async Task<List<CountryDTO>> GetCountriesAsync(int dftLanguageId, int localeLangId)
         {
             int pageNo = 1, pageSize = 100;
             var countries = new List<CountryDTO>();
+
+            // Get all the Flag images
+            var images = await _dbContext.Images.Where(im=>im.ImageType.Equals((int)ImageType.FlagPNG) 
+                                                       || im.ImageType.Equals((int)ImageType.FlagSVG)).ToListAsync();
+
             if (dftLanguageId.Equals(localeLangId))
             {
-                //countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(dftLanguageId))
-                //    .Select(dfc => new CountryDTO
-                //    {
-                //        Uuid = dfc.CountryId,
-                //        DisplayName = dfc.DisplayName,
-                //        DisplayNameShort = dfc.DisplayName,
-                //        Name = Helper.ReplaceChars(dfc.DisplayName),
-                //        Path = Helper.ReplaceChars(dfc.DisplayName),
-                //        CompleteResponse = true
-                //    }).Skip((pageNo - 1) * 100).Take(pageSize).ToListAsync();
+                countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(dftLanguageId))
+                    .Select(dfc => new CountryDTO
+                    {
+                        Uuid = dfc.CountryId,
+                        PNGImagePath = images.FirstOrDefault(im=>im.ImageId.Equals(dfc.PNGImageId) && im.ImageType.Equals((int)ImageType.FlagPNG)).FilePath,
+                        SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.SVGImageId) && im.ImageType.Equals((int)ImageType.FlagSVG)).FilePath,
+                        DisplayName = dfc.DisplayName,
+                        DisplayNameShort = dfc.DisplayName,
+                        Name = Helper.ReplaceChars(dfc.DisplayName),
+                        Path = Helper.ReplaceChars(dfc.DisplayName),
+                        CompleteResponse = true
+                    }).Skip((pageNo - 1) * 100).Take(pageSize).ToListAsync();
 
-                countries = await _dbContext.Countries
-                                      .Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(dftLanguageId))
-                                      .ProjectTo<CountryDTO>(_mapper.ConfigurationProvider).ToListAsync();
+                ////countries = await _dbContext.Countries
+                ////                      .Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(dftLanguageId))
+                ////                      .ProjectTo<CountryDTO>(_mapper.ConfigurationProvider).ToListAsync();
             }
             else
             {
@@ -194,6 +258,8 @@ namespace Author.Query.Persistence
                                         (lc, dfc) => new CountryDTO
                                         {
                                             Uuid = lc.CountryId,
+                                            PNGImagePath = images.Where(im => im.ImageId.Equals(dfc.PNGImageId) && im.ImageType.Equals((int)ImageType.FlagPNG)).Select(c => c.FilePath).FirstOrDefault(),
+                                            SVGImagePath = images.Where(im => im.ImageId.Equals(dfc.SVGImageId) && im.ImageType.Equals((int)ImageType.FlagSVG)).Select(c => c.FilePath).FirstOrDefault(),
                                             DisplayName = lc.DisplayName,
                                             DisplayNameShort = lc.DisplayName,
                                             Name = Helper.ReplaceChars(dfc.DisplayName),

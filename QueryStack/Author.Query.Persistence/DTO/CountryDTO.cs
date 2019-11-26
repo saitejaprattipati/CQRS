@@ -16,9 +16,11 @@ namespace Author.Query.Persistence.DTO
 
     public class CountryDTO
     {
+        public int PNGImageId { get; set; }
         [JsonProperty("pngimagePath")]
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         public string PNGImagePath { get; set; } = "";
+        public int SVGImageId { get; set; }
         [JsonProperty("svgimagePath")]
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         public string SVGImagePath { get; set; } = "";
