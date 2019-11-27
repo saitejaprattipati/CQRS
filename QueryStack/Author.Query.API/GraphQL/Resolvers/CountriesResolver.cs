@@ -1,6 +1,5 @@
 ﻿using Author.Core.Framework.Utilities;
 using Author.Query.API.GraphQL.Types;
-using Author.Query.Domain.DBAggregate;
 using Author.Query.Persistence.DTO;
 using Author.Query.Persistence.Interfaces;
 using GraphQL.DataLoader;
@@ -28,22 +27,13 @@ namespace Author.Query.API.GraphQL.Resolvers
 
         public void Resolve(GraphQLQuery graphQLQuery)
         {
+            var language = _accessor.HttpContext.Items["language"] as LanguageDTO;
             graphQLQuery.FieldAsync<ResponseGraphType<CountryResultType>>(
                 "countriesresponse",
                 resolve: async context =>
                 {
-                    //var locale = _utilityService.GetLocale(_accessor.HttpContext.Request.Headers);
-                    var language = _accessor.HttpContext.Items["language"] as LanguageDTO;
                     if (language != null)
                     {
-                        //var list = _countryService.GetAllCountriesAsync(locale).GetAwaiter().GetResult();
-                        ////var list = _countryService.GetAllCountriesAsync(language).GetAwaiter().GetResult();
-
-                        ////var loader = _dataLoaderContextAccessor.Context.GetOrAddLoader("GetAllCountries",
-                        ////                                        () => _countryService.GetAllCountriesAsync(language));
-                        ////var list = loader.LoadAsync();
-                        ////return Response(list);
-
                         var loader = _dataLoaderContextAccessor.Context.GetOrAddLoader("GetAllCountries",
                                                 () => _countryService.GetAllCountriesAsync(language));
                         var list = await context.TryAsyncResolve(
@@ -62,7 +52,6 @@ namespace Author.Query.API.GraphQL.Resolvers
                 ),
                 resolve: async context => {
                     var countryId = context.GetArgument<int>("countryId");
-                    var language = _accessor.HttpContext.Items["language"] as LanguageDTO;
                     if (language != null && countryId > 0)
                     {
                         var loader = _dataLoaderContextAccessor.Context.GetOrAddLoader("GetCountry",
