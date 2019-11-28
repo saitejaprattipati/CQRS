@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Author.Query.Persistence.Interfaces
 {
-    public interface IImageService
+    public interface IImageService 
     {
         Task<ILookup<int, ImageDTO>> GetImageAsync(IEnumerable<int> imageIds);
 
