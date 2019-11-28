@@ -1,4 +1,5 @@
 ﻿using Author.Core.Framework;
+using Author.Query.Domain.DBAggregate;
 using Author.Query.Persistence.DTO;
 using Author.Query.Persistence.Interfaces;
 using AutoMapper;
@@ -19,9 +20,10 @@ namespace Author.Query.Persistence
         private readonly IImageService _imageService;
         private readonly IOptions<AppSettings> _appSettings;
         private readonly IMapper _mapper;
-        private readonly ICacheService _cacheService;
+        private readonly ICacheService<Images,ImageDTO> _cacheService;
 
-        public CountryService(TaxathandDbContext dbContext, ICommonService commonService, IImageService imageService, IOptions<AppSettings> appSettings, IMapper mapper, ICacheService cacheService)
+        public CountryService(TaxathandDbContext dbContext, ICommonService commonService, IImageService imageService, IOptions<AppSettings> appSettings, IMapper mapper, 
+            ICacheService<Images, ImageDTO> cacheService)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _commonService = commonService ?? throw new ArgumentNullException(nameof(commonService));
@@ -176,7 +178,7 @@ namespace Author.Query.Persistence
         private async Task<CountryDTO> GetCountryDetailsAsync(int countryId,int dftLanguageId, int localeLangId)
         {
             var country = new CountryDTO();
-            var images = await _cacheService.GetAllImagesAsync();
+            var images = await _cacheService.GetAllAsync("imagesCacheKey");
             if (dftLanguageId.Equals(localeLangId))
             {
                 country = await _dbContext.Countries.Where(c => c.CountryId.Equals(countryId)
@@ -229,7 +231,7 @@ namespace Author.Query.Persistence
             //var images = await _dbContext.Images.Where(im=>im.ImageType.Equals((int)ImageType.FlagPNG) 
             //                                           || im.ImageType.Equals((int)ImageType.FlagSVG)).ToListAsync();
 
-            var images = await _cacheService.GetAllImagesAsync();
+            var images = await _cacheService.GetAllAsync("imagesCacheKey");
 
             if (dftLanguageId.Equals(localeLangId))
             {
