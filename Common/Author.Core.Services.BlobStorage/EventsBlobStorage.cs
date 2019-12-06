@@ -39,6 +39,11 @@ namespace Author.Core.Services.BlobStorage
             {
                 byte[] imageBytes = Convert.FromBase64String(imgData.JPGData);
                 CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(imgData.JPGName);
+
+                //SAS Generation
+                string SAS = GetBlobSasUri(cloudBlockBlob, null);
+                cloudBlockBlob = new CloudBlockBlob(new Uri(SAS));
+
                 cloudBlockBlob.Properties.ContentType = "jpg";
                 await cloudBlockBlob.UploadFromByteArrayAsync(imageBytes, 0, imageBytes.Length);
                 objURLs.Add(cloudBlockBlob.Uri.AbsoluteUri);
@@ -53,11 +58,40 @@ namespace Author.Core.Services.BlobStorage
             {
                 byte[] imageBytes = Convert.FromBase64String(imgData.SVGData);
                 CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(imgData.SVGName);
+
+                //SAS Generation
+                string SAS = GetBlobSasUri(cloudBlockBlob, null);
+                cloudBlockBlob = new CloudBlockBlob(new Uri(SAS));
+
                 cloudBlockBlob.Properties.ContentType = "svg";
                 await cloudBlockBlob.UploadFromByteArrayAsync(imageBytes, 0, imageBytes.Length);
                 objURLs.Add(cloudBlockBlob.Uri.AbsoluteUri);
             }
             return objURLs;
+        }
+        private static string GetBlobSasUri(CloudBlockBlob blob, string policyName = null)
+        {
+            string sasBlobToken;
+            if (policyName == null)
+            {
+                SharedAccessBlobPolicy adHocSAS = new SharedAccessBlobPolicy()
+                {
+                    SharedAccessExpiryTime = DateTime.UtcNow.AddHours(1),
+                    Permissions = SharedAccessBlobPermissions.Read | SharedAccessBlobPermissions.Write | SharedAccessBlobPermissions.Create
+                };
+                sasBlobToken = blob.GetSharedAccessSignature(adHocSAS, null, null, SharedAccessProtocol.HttpsOnly, null);
+
+                Console.WriteLine("SAS for blob (ad hoc): {0}", sasBlobToken);
+                Console.WriteLine();
+            }
+            else
+            {
+                sasBlobToken = blob.GetSharedAccessSignature(null, policyName);
+
+                Console.WriteLine("SAS for blob (stored access policy): {0}", sasBlobToken);
+                Console.WriteLine();
+            }
+            return blob.Uri + sasBlobToken;
         }
     }
     public class ImageData
