@@ -13,6 +13,7 @@ namespace Author.Core.Services.BlobStorage
     {
         private readonly IBlobConnection _blobConnection;
         private readonly ILogger<EventsBlobStorage> _logger;
+        private string SAS;
 
         public EventsBlobStorage(IBlobConnection blobConnection, ILogger<EventsBlobStorage> logger)
         {
@@ -41,7 +42,7 @@ namespace Author.Core.Services.BlobStorage
                 CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(imgData.JPGName);
 
                 //SAS Generation
-                string SAS = GetBlobSasUri(cloudBlockBlob, null);
+                SAS = GetBlobSasUri(cloudBlockBlob, null);
                 cloudBlockBlob = new CloudBlockBlob(new Uri(SAS));
 
                 cloudBlockBlob.Properties.ContentType = "jpg";
@@ -60,7 +61,7 @@ namespace Author.Core.Services.BlobStorage
                 CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(imgData.SVGName);
 
                 //SAS Generation
-                string SAS = GetBlobSasUri(cloudBlockBlob, null);
+                SAS = GetBlobSasUri(cloudBlockBlob, null);
                 cloudBlockBlob = new CloudBlockBlob(new Uri(SAS));
 
                 cloudBlockBlob.Properties.ContentType = "svg";
