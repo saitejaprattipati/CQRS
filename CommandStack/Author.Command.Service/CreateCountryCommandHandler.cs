@@ -99,9 +99,9 @@ namespace Author.Command.Service
                 await _CountryRepository.UnitOfWork
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
-                //scope.Complete();
-                //}
-                foreach (var content in _Country.CountryContents)
+                scope.Complete();
+            }
+            foreach (var content in _Country.CountryContents)
                 {
                     var eventSourcing = new CountryCommandEvent()
                     {
@@ -122,8 +122,7 @@ namespace Author.Command.Service
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }
-                scope.Complete();
-            }
+            
             return response;
         }
     }
