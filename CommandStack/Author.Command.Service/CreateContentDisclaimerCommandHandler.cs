@@ -1,6 +1,8 @@
 ﻿using Author.Command.Domain.Command;
+using Author.Command.Events;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
+using Author.Core.Framework;
 using AutoMapper;
 using MediatR;
 using System;
@@ -30,9 +32,9 @@ namespace Author.Command.Service
                 IsSuccessful = false
             };
 
+            var contentDisclaimer = _mapper.Map<Disclaimers>(request);
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var contentDisclaimer = _mapper.Map<Disclaimers>(request);
                 contentDisclaimer.CreatedBy = "CMS Admin";
                 contentDisclaimer.CreatedDate = DateTime.UtcNow;
                 contentDisclaimer.UpdatedBy = "CMS Admin";
@@ -44,6 +46,26 @@ namespace Author.Command.Service
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+            foreach (var content in contentDisclaimer.DisclaimerContents)
+            {
+                var eventSourcing = new DisclaimerCommandEvent()
+                {
+                    EventType = (int)ServiceBusEventType.Create,
+                    Name = contentDisclaimer.Name,
+                    DisclaimerId = contentDisclaimer.DisclaimerId,
+                    CreatedBy = contentDisclaimer.CreatedBy,
+                    CreatedDate = contentDisclaimer.CreatedDate,
+                    UpdatedBy = contentDisclaimer.UpdatedBy,
+                    UpdatedDate = contentDisclaimer.UpdatedDate,
+                    DefaultCountryId = contentDisclaimer.DefaultCountryId,
+                    ProviderName = content.ProviderName,
+                    ProviderTerms = content.ProviderTerms,
+                    LanguageId = content.LanguageId,
+                    DisclaimerContentId = content.DisclaimerContentId,
+                    Discriminator = Constants.DisclaimersDiscriminator
+                };
+                await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
             }
 
             return response;

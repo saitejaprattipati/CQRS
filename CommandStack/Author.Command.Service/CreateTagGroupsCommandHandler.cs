@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using System.Transactions;
+using Author.Core.Framework;
 
 namespace Author.Command.Service
 {
@@ -33,9 +34,11 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
+
+            TaxTags _taxTag = new TaxTags();
+
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                TaxTags _taxTag = new TaxTags();
                 _taxTag.IsPublished = true;
                 _taxTag.CreatedBy = "";
                 _taxTag.CreatedDate = DateTime.Now;
@@ -64,6 +67,26 @@ namespace Author.Command.Service
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+            foreach(var content in _taxTag.TaxTagContents)
+            {
+                var eventSourcing = new TagGroupCommandEvent()
+                {
+                    EventType = (int)ServiceBusEventType.Create,
+                    Discriminator = Constants.TaxTagsDiscriminator,
+                    TagId = _taxTag.TaxTagId,
+                    ParentTagId = _taxTag.ParentTagId,
+                    IsPublished = _taxTag.IsPublished,
+                    CreatedBy = _taxTag.CreatedBy,
+                    CreatedDate = _taxTag.CreatedDate,
+                    UpdatedBy = _taxTag.UpdatedBy,
+                    UpdatedDate = _taxTag.UpdatedDate,
+                    RelatedCountryIds = (from rc in _taxTag.TaxTagRelatedCountries where rc != null select rc.CountryId).ToList(),
+                    TagContentId = content.TaxTagContentId,
+                    LanguageId = content.LanguageId,
+                    DisplayName = content.DisplayName
+                };
+                await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
             }
             return response;
         }

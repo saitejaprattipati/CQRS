@@ -37,10 +37,12 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
+
+            CountryGroups _countryGroup = new CountryGroups();
+
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
              //   List<Languages> _languages = _ResourceGroupRepository.GetAllLanguages();
-                CountryGroups _countryGroup = new CountryGroups();
                 _countryGroup.IsPublished = true;
                 _countryGroup.CreatedBy = "";
                 _countryGroup.CreatedDate = DateTime.Now;
@@ -64,6 +66,25 @@ namespace Author.Command.Service
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+            foreach(var content in _countryGroup.CountryGroupContents)
+            {
+                var eventSourcing = new CountryGroupCommandEvent()
+                {
+                    EventType = (int)ServiceBusEventType.Create,
+                    CountryGroupId = _countryGroup.CountryGroupId,
+                    IsPublished = _countryGroup.IsPublished,
+                    CreatedBy = _countryGroup.CreatedBy,
+                    CreatedDate = _countryGroup.CreatedDate,
+                    UpdatedBy = _countryGroup.UpdatedBy,
+                    UpdatedDate = _countryGroup.UpdatedDate,
+                    GroupName = content.GroupName,
+                    CountryGroupContentId = content.CountryGroupContentId,
+                    LanguageId = content.LanguageId,
+                    AssociatedCountryIds = (from cg in _countryGroup.CountryGroupAssociatedCountries where cg != null select cg.CountryId).ToList(),
+                    Discriminator = Constants.CountryGroupsDiscriminator
+                };
+                await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
             }
             return response;
         }

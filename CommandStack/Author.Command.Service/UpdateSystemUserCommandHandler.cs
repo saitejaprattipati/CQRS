@@ -1,7 +1,9 @@
 ﻿using Author.Command.Domain.Command;
+using Author.Command.Events;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
 using Author.Core.Framework.ExceptionHandling;
+using Author.Core.Framework;
 using AutoMapper;
 using MediatR;
 using System;
@@ -33,17 +35,16 @@ namespace Author.Command.Service
                 IsSuccessful = false
             };
 
-            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            var userExists = _systemUserRepository.UserExists(request.Email, request.SystemUserId);
+
+            if (!userExists)
             {
-                var userExists =
-                   _systemUserRepository.UserExists(request.Email,request.SystemUserId);
+                throw new RulesException("email", $"User with SystemuserId: {request.SystemUserId} and email address: {request.Email} does not exists");
+            }
 
-                if (!userExists)
-                {
-                    throw new RulesException("email", $"User with SystemuserId: {request.SystemUserId} and email address: {request.Email} does not exists");
-                }
-
-                var user = _mapper.Map<SystemUsers>(request);
+            var user = _mapper.Map<SystemUsers>(request);
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {                
                 user.UpdatedBy = "CMS Admin";
                 user.UpdatedDate = DateTime.UtcNow;
                 _systemUserRepository.Update(user);
@@ -74,6 +75,32 @@ namespace Author.Command.Service
                 await _systemUserRepository.UnitOfWork.SaveEntitiesAsync();
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+            foreach (var content in user.SystemUserAssociatedCountries)
+            {
+                var eventSourcing = new SystemUserCommandEvent()
+                {
+                    EventType = (int)ServiceBusEventType.Update,
+                    Discriminator = Constants.SystemUsersDiscriminator,
+                    SystemUserId = user.SystemUserId,
+                    CreatedBy = user.CreatedBy,
+                    CreatedDate = user.CreatedDate,
+                    UpdatedBy = user.UpdatedBy,
+                    UpdatedDate = user.UpdatedDate,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    WorkPhoneNumber = user.WorkPhoneNumber,
+                    MobilePhoneNumber = user.MobilePhoneNumber,
+                    Level = user.Level,
+                    Role = user.Role,
+                    Location = user.Location,
+                    Email = user.Email,
+                    TimeZone = user.TimeZone,
+                    CountryId = content.CountryId,
+                    IsPrimary = content.IsPrimary,
+                    SystemUserAssociatedCountryId = content.SystemUserAssociatedCountryId
+                };
+                await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
             }
             return response;
         }

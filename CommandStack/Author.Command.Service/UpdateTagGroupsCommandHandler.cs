@@ -13,6 +13,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using System.Transactions;
 using Author.Core.Framework.ExceptionHandling;
+using Author.Core.Framework;
 
 namespace Author.Command.Service
 {
@@ -34,11 +35,12 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
+            List<int> objTagGroups = new List<int>();
+            objTagGroups.Add(request.TagGroupsId);
+            var taxGroup = _taxTagsRepository.GetTagGroups(objTagGroups)[0];
+
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                List<int> objTagGroups = new List<int>();
-                objTagGroups.Add(request.TagGroupsId);
-                var taxGroup = _taxTagsRepository.GetTagGroups(objTagGroups)[0];
                 //List<Languages> languages = _taxTagsRepository.GetAllLanguages();
                 if (request.TagType == "Tag")
                 {
@@ -99,6 +101,26 @@ namespace Author.Command.Service
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+            foreach (var content in taxGroup.TaxTagContents)
+            {
+                var eventSourcing = new TagGroupCommandEvent()
+                {
+                    EventType = (int)ServiceBusEventType.Update,
+                    Discriminator = Constants.TaxTagsDiscriminator,
+                    TagId = taxGroup.TaxTagId,
+                    ParentTagId = taxGroup.ParentTagId,
+                    IsPublished = taxGroup.IsPublished,
+                    CreatedBy = taxGroup.CreatedBy,
+                    CreatedDate = taxGroup.CreatedDate,
+                    UpdatedBy = taxGroup.UpdatedBy,
+                    UpdatedDate = taxGroup.UpdatedDate,
+                    RelatedCountryIds = (from rc in taxGroup.TaxTagRelatedCountries where rc != null select rc.CountryId).ToList(),
+                    TagContentId = content.TaxTagContentId,
+                    LanguageId = content.LanguageId,
+                    DisplayName = content.DisplayName
+                };
+                await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
             }
             return response;
         }

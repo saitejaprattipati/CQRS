@@ -38,15 +38,12 @@ namespace Author.Command.Service
                 IsSuccessful = false
             };
 
-
-
+            List<int> objresourceGroupId = new List<int>();
+            objresourceGroupId.Add(request.CountryGroupsId);
+            var countryGroup = _CountryGroupsRepository.getCountryGroups(objresourceGroupId)[0];
 
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                List<int> objresourceGroupId = new List<int>();
-                objresourceGroupId.Add(request.CountryGroupsId);
-                //test
-                var countryGroup = _CountryGroupsRepository.getCountryGroups(objresourceGroupId)[0];
                 countryGroup.CreatedBy = "";
                 countryGroup.CreatedDate = DateTime.Now;
                 countryGroup.UpdatedBy = "";
@@ -101,6 +98,25 @@ namespace Author.Command.Service
                       .SaveEntitiesAsync();
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+            foreach (var content in countryGroup.CountryGroupContents)
+            {
+                var eventSourcing = new CountryGroupCommandEvent()
+                {
+                    EventType = (int)ServiceBusEventType.Update,
+                    CountryGroupId = countryGroup.CountryGroupId,
+                    IsPublished = countryGroup.IsPublished,
+                    CreatedBy = countryGroup.CreatedBy,
+                    CreatedDate = countryGroup.CreatedDate,
+                    UpdatedBy = countryGroup.UpdatedBy,
+                    UpdatedDate = countryGroup.UpdatedDate,
+                    GroupName = content.GroupName,
+                    CountryGroupContentId = content.CountryGroupContentId,
+                    LanguageId = content.LanguageId,
+                    AssociatedCountryIds = (from cg in countryGroup.CountryGroupAssociatedCountries where cg != null select cg.CountryId).ToList(),
+                    Discriminator = Constants.CountryGroupsDiscriminator
+                };
+                await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
             }
             return response;
         }

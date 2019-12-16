@@ -1,6 +1,8 @@
 ﻿using Author.Command.Domain.Command;
+using Author.Command.Events;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
+using Author.Core.Framework;
 using Author.Core.Framework.ExceptionHandling;
 using AutoMapper;
 using MediatR;
@@ -31,16 +33,16 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
+            var disclaimer = await _contentDisclaimerRepository.GetContentDisclaimer(request.DisclaimerId);
+
+            if (disclaimer == null)
+            {
+                throw new RulesException("contentDisclaimer", $"ContentDisclaimer with DisclaimerId: {request.DisclaimerId}  not found");
+            }
 
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 //Update existing Content disclaimer
-                var disclaimer = await _contentDisclaimerRepository.GetContentDisclaimer(request.DisclaimerId);
-
-                if (disclaimer == null)
-                {
-                    throw new RulesException("contentDisclaimer", $"ContentDisclaimer with DisclaimerId: {request.DisclaimerId}  not found");
-                }
 
                 disclaimer.Name = request.GroupName;
                 disclaimer.UpdatedBy = "CMS Admin";
@@ -72,7 +74,7 @@ namespace Author.Command.Service
 
                 foreach (var item in disclaimer.DisclaimerContents.ToList())
                 {
-                    if (request.DisclaimerContent.Where(dc=>dc.LanguageId.Equals(item.LanguageId)).Count() == 0)
+                    if (request.DisclaimerContent.Where(dc => dc.LanguageId.Equals(item.LanguageId)).Count() == 0)
                     {
                         disclaimer.DisclaimerContents.Remove(item);
                         _contentDisclaimerRepository.Delete(item);
@@ -82,6 +84,26 @@ namespace Author.Command.Service
                 await _contentDisclaimerRepository.UnitOfWork.SaveEntitiesAsync();
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+            foreach (var content in disclaimer.DisclaimerContents)
+            {
+                var eventSourcing = new DisclaimerCommandEvent()
+                {
+                    EventType = (int)ServiceBusEventType.Update,
+                    DisclaimerId = disclaimer.DisclaimerId,
+                    Name = disclaimer.Name,
+                    CreatedBy = disclaimer.CreatedBy,
+                    CreatedDate = disclaimer.CreatedDate,
+                    UpdatedBy = disclaimer.UpdatedBy,
+                    UpdatedDate = disclaimer.UpdatedDate,
+                    DefaultCountryId = disclaimer.DefaultCountryId,
+                    ProviderName = content.ProviderName,
+                    ProviderTerms = content.ProviderTerms,
+                    LanguageId = content.LanguageId,
+                    DisclaimerContentId = content.DisclaimerContentId,
+                    Discriminator = Constants.DisclaimersDiscriminator
+                };
+                await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
             }
             return response;
         }

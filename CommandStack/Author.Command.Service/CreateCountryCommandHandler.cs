@@ -73,12 +73,13 @@ namespace Author.Command.Service
             _CountryRepository.AddImage(_imagesSVG);
             await _CountryRepository.UnitOfWork
                 .SaveEntitiesAsync();
+            Countries _Country = new Countries();
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 int pngImageId = _imagesPNG.ImageId > 0 ? _imagesPNG.ImageId : throw new NullReferenceException(nameof(request));
                 int svgImageId = _imagesSVG.ImageId > 0 ? _imagesSVG.ImageId : throw new NullReferenceException(nameof(request));
                 //  List<Languages> _languages = _CountryRepository.GetAllLanguages();
-                Countries _Country = new Countries();
+
                 _Country.PngimageId = pngImageId;
                 _Country.SvgimageId = svgImageId;
                 _Country.IsPublished = false;
@@ -98,16 +99,31 @@ namespace Author.Command.Service
                 await _CountryRepository.UnitOfWork
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
+                //scope.Complete();
+                //}
+                foreach (var content in _Country.CountryContents)
+                {
+                    var eventSourcing = new CountryCommandEvent()
+                    {
+                        EventType = (int)ServiceBusEventType.Create,
+                        CountryId = _Country.CountryId,
+                        SVGImageId = _Country.SvgimageId,
+                        PNGImageId = _Country.PngimageId,
+                        IsPublished = _Country.IsPublished,
+                        CreatedBy = _Country.CreatedBy,
+                        CreatedDate = _Country.CreatedDate,
+                        UpdatedBy = _Country.UpdatedBy,
+                        UpdatedDate = _Country.UpdatedDate,
+                        CountryContentId = content.CountryContentId,
+                        DisplayName = content.DisplayName,
+                        DsiplayNameShort = content.DisplayNameShort,
+                        LanguageId = content.LanguageId,
+                        Discriminator = Constants.CountriesDiscriminator
+                    };
+                    await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                }
                 scope.Complete();
             }
-            var eventSourcing = new CreateArticleCommandEvent()
-            {
-                EventType = "taxathand",
-                Id = "SampleID",
-                ArticleName = "SampleName",
-                ArticleCountry = "SampleCountry"
-            };
-            await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
             return response;
         }
     }

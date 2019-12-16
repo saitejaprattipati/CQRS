@@ -48,19 +48,19 @@ namespace Author.Command.Service
                 Article.CreatedDate = DateTime.Now;
                 _ArticleRepository.Add(Article);
                 //  var Status = await _context.CreateArticleDetails();
-                var eventSourcing = new CreateArticleCommandEvent()
-                {
-                    EventType = "ArticleCreation",
-                    Id = request.Id,
-                    ArticleName = request.ArticleName,
-                    ArticleCountry = request.ArticleCountry
-                };
+                //var eventSourcing = new CreateArticleCommandEvent()
+                //{
+                //    EventType = "ArticleCreation",
+                //    Id = request.Id,
+                //    ArticleName = request.ArticleName,
+                //    ArticleCountry = request.ArticleCountry
+                //};
                 //   using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 //  {
                 await _ArticleRepository.UnitOfWork
                    .SaveEntitiesAsync();
                //     throw new Exception(string.Format("Unable to find a client by id"));
-                    await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    //await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                     response.IsSuccessful = true;
 
                 //    scope.Complete();
