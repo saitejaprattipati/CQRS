@@ -18,11 +18,14 @@ namespace Author.Query.Persistence
         private readonly TaxathandDbContext _dbContext;
         private readonly IOptions<AppSettings> _appSettings;
         private readonly IMapper _mapper;
-        public CommonService(TaxathandDbContext dbContext, IOptions<AppSettings> appSettings, IMapper mapper)
+        private readonly ICacheService<Languages, LanguageDTO> _cacheService;
+        public CommonService(TaxathandDbContext dbContext, IOptions<AppSettings> appSettings, IMapper mapper,
+            ICacheService<Languages, LanguageDTO> cacheService)
         {
             _dbContext = dbContext ??  throw new ArgumentNullException(nameof(dbContext));
             _appSettings = appSettings;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
         }
 
 
@@ -46,15 +49,18 @@ namespace Author.Query.Persistence
 
                     //Languages[] languages;
 
-                    var s = filters.First(); // requred by EF
+                    ////var s = filters.First(); // requred by EF
 
-                    var query = _dbContext.Languages.Where(v => v.LocalisationIdentifier.Contains(s));
-                    foreach (var item in filters.Where(v => v != filters[0]).Distinct())
-                    {
-                        query = query.Union(_dbContext.Languages.Where(v => v.LocalisationIdentifier.Contains(item)));
-                    }
+                    // Get all Languages
+                    var langData = await _cacheService.GetAllAsync("languagesCacheKey");
 
-                    languages = await query.ToListAsync();
+                    ////var query = _dbContext.Languages.Where(v => v.LocalisationIdentifier.Contains(s));
+                    ////foreach (var item in filters.Where(v => v != filters[0]).Distinct())
+                    ////{
+                    ////    query = query.Union(_dbContext.Languages.Where(v => v.LocalisationIdentifier.Contains(item)));
+                    ////}
+
+                    ////languages = await query.ToListAsync();
 
                     //var languagesList = _mapper.Map<List<Languages>,List<LanguageDTO>>(languages);
 
@@ -72,20 +78,25 @@ namespace Author.Query.Persistence
                         //    return lang;
                         //}
 
-                        var lang = languages.FirstOrDefault(
+                        ////var lang = languages.FirstOrDefault(
+                        ////        l => l.LocalisationIdentifier
+                        ////            .Split(',')
+                        ////            .Any(i => i.Equals(filter, StringComparison.OrdinalIgnoreCase))
+                        ////    );
+
+                        var lang = langData.FirstOrDefault(
                                 l => l.LocalisationIdentifier
                                     .Split(',')
                                     .Any(i => i.Equals(filter, StringComparison.OrdinalIgnoreCase))
                             );
 
-
                         if (lang != null)
                         {
-                            lang.LocalisationIdentifier = lang.Locale ?? filter;
+                            ////lang.LocalisationIdentifier = lang.Locale ?? filter;
 
-                            var langDTO= _mapper.Map<LanguageDTO>(lang);
+                            ////var langDTO = _mapper.Map<LanguageDTO>(lang);
 
-                            return langDTO;
+                            return lang;
                         }
                     }
                 }

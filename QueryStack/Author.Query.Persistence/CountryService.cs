@@ -17,7 +17,6 @@ namespace Author.Query.Persistence
     {
         private readonly TaxathandDbContext _dbContext;
         private readonly ICommonService _commonService;
-        private readonly IImageService _imageService;
         private readonly IOptions<AppSettings> _appSettings;
         private readonly IMapper _mapper;
         private readonly ICacheService<Images,ImageDTO> _cacheService;
@@ -27,7 +26,6 @@ namespace Author.Query.Persistence
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _commonService = commonService ?? throw new ArgumentNullException(nameof(commonService));
-            _imageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
             _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
             _appSettings = appSettings;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
