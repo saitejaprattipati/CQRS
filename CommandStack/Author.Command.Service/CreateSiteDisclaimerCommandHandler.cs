@@ -1,4 +1,5 @@
 ﻿using Author.Command.Domain.Command;
+using Author.Command.Events;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
 using Author.Core.Framework;
@@ -28,21 +29,20 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
+            var siteDisclaimer = new Articles
+            {
+                PublishedDate = DateTime.ParseExact(request.PublishedDate, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture).ToUniversalTime(),
+                Author = request.Author,
+                Type = Convert.ToInt32(ArticleType.Page),
+                SubType = request.ArticleType,
+                IsPublished = true,
+                CreatedBy = "CMS Admin",
+                CreatedDate = DateTime.UtcNow,
+                UpdatedDate = DateTime.UtcNow
+            };
 
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-            {
-                var siteDisclaimer = new Articles
-                {
-                    PublishedDate = DateTime.ParseExact(request.PublishedDate, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture).ToUniversalTime(),
-                    Author = request.Author,
-                    Type = Convert.ToInt32(ArticleType.Page),
-                    SubType = request.ArticleType,
-                    IsPublished = true,
-                    CreatedBy = "CMS Admin",
-                    CreatedDate = DateTime.UtcNow,
-                    UpdatedDate = DateTime.UtcNow
-                };
-
+            {                
                 foreach (var item in request.LanguageContent)
                 {
                     var siteDisclaimerContent = new ArticleContents
@@ -61,6 +61,19 @@ namespace Author.Command.Service
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+            foreach(var content in siteDisclaimer.ArticleContents)
+            {
+                var eventSourcing = new DisclaimerCommandEvent()
+                {
+                    EventType = (int)ServiceBusEventType.Create,
+                    Discriminator = Constants.DisclaimersDiscriminator,
+                    CreatedBy = siteDisclaimer.CreatedBy,
+                    CreatedDate = siteDisclaimer.CreatedDate,
+                    UpdatedBy = siteDisclaimer.UpdatedBy,
+                    UpdatedDate = siteDisclaimer.UpdatedDate,
+
+                };
             }
 
             return response;

@@ -1,4 +1,5 @@
 ﻿using Author.Command.Domain.Command;
+using Author.Command.Events;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
 using Author.Core.Framework.ExceptionHandling;
@@ -29,15 +30,15 @@ namespace Author.Command.Service
                 IsSuccessful = false
             };
 
-            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            var disclaimerIds = request.DisclaimerIds.Distinct().ToList();
+            var disclaimers = await _contentDisclaimerRepository.GetDisclaimerByIds(disclaimerIds);
+            if (disclaimers.Count != disclaimerIds.Count)
             {
-                var disclaimerIds = request.DisclaimerIds.Distinct().ToList();
-                var disclaimers = await _contentDisclaimerRepository.GetDisclaimerByIds(disclaimerIds);
-                if (disclaimers.Count != disclaimerIds.Count)
-                {
-                    throw new RulesException("Invalid", @"ContentDisclaimer not found");
-                }
+                throw new RulesException("Invalid", @"ContentDisclaimer not found");
+            }
 
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {                
                 foreach (var disclaimer in disclaimers)
                 {
                     foreach (var disclaimerContent in disclaimer.DisclaimerContents.ToList())
@@ -52,6 +53,13 @@ namespace Author.Command.Service
 
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+            foreach(var content in disclaimers)
+            {
+                var eventSourcing = new DisclaimerCommandEvent()
+                {
+
+                };
             }
             return response;
         }

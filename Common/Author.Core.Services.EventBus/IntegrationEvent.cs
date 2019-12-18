@@ -7,13 +7,14 @@ namespace Author.Core.Services.EventBus
     {
         public IntegrationEvent()
         {
-            Id = Guid.NewGuid();
+            id = Guid.NewGuid();
             CreationDate = DateTime.UtcNow;
         }
 
-        public Guid Id { get; }
+        public Guid id { get; }
         public DateTime CreationDate { get; }
-        public string EventType { get; set; }
+        public int EventType { get; set; }
+        public string Discriminator { get; set; }
 
     }
 }

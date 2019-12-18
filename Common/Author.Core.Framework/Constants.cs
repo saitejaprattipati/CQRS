@@ -6,6 +6,13 @@ namespace Author.Core.Framework
     {
         //Validation
         public const string GeneralStringRegularExpression = @"^([\w\W]*)$"; //This is to pass VeraCode checks
+        public const string DisclaimersDiscriminator = "Disclaimers";
+        public const string CountriesDiscriminator = "Countries";
+        public const string CountryGroupsDiscriminator = "CountryGroups";
+        public const string ResourceGroupsDiscriminator = "ResourceGroups";
+        public const string SystemUsersDiscriminator = "SystemUsers";
+        public const string TaxTagsDiscriminator = "TaxTags";
+        public const string Discriminator = "";
     }
 
     public enum SystemUserRole
@@ -78,5 +85,12 @@ namespace Author.Core.Framework
         [Description("Flag SVG")]
         FlagSVG,
         Profile
+    }
+
+    public enum ServiceBusEventType
+    {
+        Create = 1,
+        Update,
+        Delete
     }
 }

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using System.Transactions;
+using Author.Core.Framework;
 
 namespace Author.Command.Service
 {
@@ -27,18 +28,18 @@ namespace Author.Command.Service
             _Eventcontext = Eventcontext;
                 _logger = logger;
         }
-
-
+        
         public async Task<CreateResourceGroupCommandResponse> Handle(CreateResourceGroupCommand request, CancellationToken cancellationToken)
         {
             CreateResourceGroupCommandResponse response = new CreateResourceGroupCommandResponse()
             {
                 IsSuccessful = false
             };
+            ResourceGroups _resourceGroup = new ResourceGroups();
+
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 //List<Languages> _languages = _ResourceGroupRepository.GetAllLanguages();
-                ResourceGroups _resourceGroup = new ResourceGroups();
                 _resourceGroup.IsPublished = true;
                 _resourceGroup.Position = request.Position;
                 _resourceGroup.CreatedBy = "";
@@ -58,7 +59,26 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-                return response;
+            foreach(var contnet in _resourceGroup.ResourceGroupContents)
+            {
+                var eventSourcing = new ResourceGroupCommandEvent()
+                {
+                    EventType = (int)ServiceBusEventType.Create,
+                    Discriminator = Constants.ResourceGroupsDiscriminator,
+                    ResourceGroupId = _resourceGroup.ResourceGroupId,
+                    IsPublished = _resourceGroup.IsPublished,
+                    CreatedBy = _resourceGroup.CreatedBy,
+                    CreatedDate = _resourceGroup.CreatedDate,
+                    UpdatedBy = _resourceGroup.UpdatedBy,
+                    UpdatedDate = _resourceGroup.UpdatedDate,
+                    Position = _resourceGroup.Position,
+                    ResourceGroupContentId = contnet.ResourceGroupContentId,
+                    LanguageId = contnet.LanguageId,
+                    GroupName = contnet.GroupName
+                };
+                await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+            }
+            return response;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Author.Command.Domain.Command;
+using Author.Command.Events;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
 using Author.Core.Framework.ExceptionHandling;
@@ -10,6 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
+using Author.Core.Framework;
 
 namespace Author.Command.Service
 {
@@ -31,12 +33,12 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
+            List<int> objresourceGroupId = new List<int>();
+            objresourceGroupId.Add(request.ResourceGroupId);
+            var resourceGroup = _ResourceGroupRepository.getResourceGroups(objresourceGroupId)[0];
+
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                List<int> objresourceGroupId = new List<int>();
-                objresourceGroupId.Add(request.ResourceGroupId);
-                //test
-                var resourceGroup = _ResourceGroupRepository.getResourceGroups(objresourceGroupId)[0];
                 resourceGroup.Position = request.Position;
                 //List<Languages> languages = _ResourceGroupRepository.GetAllLanguages();
 
@@ -71,6 +73,25 @@ namespace Author.Command.Service
                       .SaveEntitiesAsync();
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+            foreach (var contnet in resourceGroup.ResourceGroupContents)
+            {
+                var eventSourcing = new ResourceGroupCommandEvent()
+                {
+                    EventType = (int)ServiceBusEventType.Update,
+                    Discriminator = Constants.ResourceGroupsDiscriminator,
+                    ResourceGroupId = resourceGroup.ResourceGroupId,
+                    IsPublished = resourceGroup.IsPublished,
+                    CreatedBy = resourceGroup.CreatedBy,
+                    CreatedDate = resourceGroup.CreatedDate,
+                    UpdatedBy = resourceGroup.UpdatedBy,
+                    UpdatedDate = resourceGroup.UpdatedDate,
+                    Position = resourceGroup.Position,
+                    ResourceGroupContentId = contnet.ResourceGroupContentId,
+                    LanguageId = contnet.LanguageId,
+                    GroupName = contnet.GroupName
+                };
+                await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
             }
             return response;
         }

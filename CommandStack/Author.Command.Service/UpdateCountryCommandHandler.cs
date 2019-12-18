@@ -38,24 +38,13 @@ namespace Author.Command.Service
                 IsSuccessful = false
             };
 
+            var country = new Countries();
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-
-
                 List<int> objCountryId = new List<int>();
             objCountryId.Add(request.CountryId);
-            var country = _CountryRepository.getCountry(objCountryId)[0];
+            country = _CountryRepository.getCountry(objCountryId)[0];
             List<Images> images = _CountryRepository.getImages(new List<int?> { country.PngimageId, country.SvgimageId });
-
-
-
-
-
-
-
-
-
-
 
             if (request.ImagesData.JPGData == "" || request.ImagesData.JPGName == "" || request.ImagesData.SVGData == "" || request.ImagesData.SVGData == "")
             { throw new ArgumentNullException(nameof(request)); }
@@ -124,6 +113,27 @@ namespace Author.Command.Service
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+            foreach (var content in country.CountryContents)
+            {
+                var eventSourcing = new CountryCommandEvent()
+                {
+                    EventType = (int)ServiceBusEventType.Update,
+                    CountryId = country.CountryId,
+                    SVGImageId = country.SvgimageId,
+                    PNGImageId = country.PngimageId,
+                    IsPublished = country.IsPublished,
+                    CreatedBy = country.CreatedBy,
+                    CreatedDate = country.CreatedDate,
+                    UpdatedBy = country.UpdatedBy,
+                    UpdatedDate = country.UpdatedDate,
+                    CountryContentId = content.CountryContentId,
+                    DisplayName = content.DisplayName,
+                    DsiplayNameShort = content.DisplayNameShort,
+                    LanguageId = content.LanguageId,
+                    Discriminator = Constants.CountriesDiscriminator
+                };
+                await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
             }
             return response;
         }
