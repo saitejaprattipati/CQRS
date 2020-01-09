@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -42,7 +43,8 @@ namespace Author.Query.New.API
         /// </summary>
         public virtual void ConfigureServices(IServiceCollection services) =>
             services
-            .Configure<IISServerOptions>(options=>options.AllowSynchronousIO=true)
+            //.Configure<IISServerOptions>(options=>options.AllowSynchronousIO=true)
+            .Configure<KestrelServerOptions>(options => { options.AllowSynchronousIO = true; })
             .AddCosmosDBConfiguration(this.configuration)
             .AddAutoMapperConfiguration()
             .AddCustomResponseCompression(this.configuration)
@@ -59,7 +61,6 @@ namespace Author.Query.New.API
             .Services
             .AddCustomGraphQL(this.configuration, this.webHostEnvironment)
             .AddGraphQLResolvers()
-            //.AddGraphQLResponse()
             .AddProjectRepositories()
             .AddProjectSchemas();
 
