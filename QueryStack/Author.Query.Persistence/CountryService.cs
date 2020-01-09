@@ -19,9 +19,9 @@ namespace Author.Query.Persistence
         private readonly ICommonService _commonService;
         private readonly IOptions<AppSettings> _appSettings;
         private readonly IMapper _mapper;
-        private readonly ICacheService<Images,ImageDTO> _cacheService;
+        private readonly ICacheService<Images, ImageDTO> _cacheService;
 
-        public CountryService(TaxathandDbContext dbContext, ICommonService commonService, IImageService imageService, IOptions<AppSettings> appSettings, IMapper mapper, 
+        public CountryService(TaxathandDbContext dbContext, ICommonService commonService, IImageService imageService, IOptions<AppSettings> appSettings, IMapper mapper,
             ICacheService<Images, ImageDTO> cacheService)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
@@ -99,7 +99,7 @@ namespace Author.Query.Persistence
         //}
 
         public async Task<CountryResult> GetAllCountriesAsync(string locale)
-        {          
+        {
             int pageNo = 1, pageSize = 100;
             var result = new CountryResult();
             var language = _commonService.GetLanguageFromLocale(locale);
@@ -160,20 +160,20 @@ namespace Author.Query.Persistence
             var result = new CountryResult();
             var localeLangId = language.LanguageId;
             var dftLanguageId = int.Parse(_appSettings.Value.DefaultLanguageId);
-            
+
             result.Countries = await GetCountriesAsync(dftLanguageId, localeLangId);
             return result;
         }
 
-        public async Task<CountryDTO> GetCountryAsync(LanguageDTO language,int countryId)
+        public async Task<CountryDTO> GetCountryAsync(LanguageDTO language, int countryId)
         {
             var localeLangId = language.LanguageId;
             var dftLanguageId = int.Parse(_appSettings.Value.DefaultLanguageId);
 
-            return await GetCountryDetailsAsync(countryId,dftLanguageId, localeLangId);
+            return await GetCountryDetailsAsync(countryId, dftLanguageId, localeLangId);
         }
 
-        private async Task<CountryDTO> GetCountryDetailsAsync(int countryId,int dftLanguageId, int localeLangId)
+        private async Task<CountryDTO> GetCountryDetailsAsync(int countryId, int dftLanguageId, int localeLangId)
         {
             var country = new CountryDTO();
             var images = await _cacheService.GetAllAsync("imagesCacheKey");
@@ -185,7 +185,7 @@ namespace Author.Query.Persistence
                                     .Select(dco => new CountryDTO
                                     {
                                         Uuid = dco.CountryId,
-                                        PNGImagePath = images.FirstOrDefault(im=>im.ImageId.Equals(dco.PNGImageId)).FilePath,
+                                        PNGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dco.PNGImageId)).FilePath,
                                         SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dco.SVGImageId)).FilePath,
                                         DisplayName = dco.DisplayName,
                                         DisplayNameShort = dco.DisplayName,
@@ -207,7 +207,7 @@ namespace Author.Query.Persistence
                                        (lc, dfc) => new CountryDTO
                                        {
                                            Uuid = lc.CountryId,
-                                           PNGImagePath = images.FirstOrDefault(im=>im.ImageId.Equals(dfc.PNGImageId)).FilePath,
+                                           PNGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.PNGImageId)).FilePath,
                                            SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.SVGImageId)).FilePath,
                                            DisplayName = lc.DisplayName,
                                            DisplayNameShort = lc.DisplayName,
@@ -222,60 +222,36 @@ namespace Author.Query.Persistence
 
         private async Task<List<CountryDTO>> GetCountriesAsync(int dftLanguageId, int localeLangId)
         {
-            int pageNo = 1, pageSize = 100;
             var countries = new List<CountryDTO>();
 
-            // Get all the Flag images
-            //var images = await _dbContext.Images.Where(im=>im.ImageType.Equals((int)ImageType.FlagPNG) 
-            //                                           || im.ImageType.Equals((int)ImageType.FlagSVG)).ToListAsync();
+            // By default pick the localLanguage value
+            countries = await GetCountriesDataAsync(localeLangId);
 
-            var images = await _cacheService.GetAllAsync("imagesCacheKey");
-
-            if (dftLanguageId.Equals(localeLangId))
+            // If localLanguage data is not available then pull the data based on default language
+            if (countries.Count == 0)
             {
-                countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(dftLanguageId))
-                    .Select(dfc => new CountryDTO
-                    {
-                        Uuid = dfc.CountryId,
-                        //PNGImagePath = images.FirstOrDefault(im=>im.ImageId.Equals(dfc.PNGImageId) && im.ImageType.Equals((int)ImageType.FlagPNG)).FilePath,
-                        //SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.SVGImageId) && im.ImageType.Equals((int)ImageType.FlagSVG)).FilePath,
-                        PNGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.PNGImageId)).FilePath,
-                        SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.SVGImageId)).FilePath,
-                        DisplayName = dfc.DisplayName,
-                        DisplayNameShort = dfc.DisplayName,
-                        Name = Helper.ReplaceChars(dfc.DisplayName),
-                        Path = Helper.ReplaceChars(dfc.DisplayName),
-                        CompleteResponse = true
-                    }).Skip((pageNo - 1) * 100).Take(pageSize).ToListAsync();
-
-                ////countries = await _dbContext.Countries
-                ////                      .Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(dftLanguageId))
-                ////                      .ProjectTo<CountryDTO>(_mapper.ConfigurationProvider).ToListAsync();
-            }
-            else
-            {
-                countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(localeLangId))
-                                       .Join(
-                                       _dbContext.Countries.Where(c => c.IsPublished.Equals(true)
-                                                                  && c.LanguageId.Equals(dftLanguageId)),
-                                        lc => lc.CountryId,
-                                        dfc => dfc.CountryId,
-                                        (lc, dfc) => new CountryDTO
-                                        {
-                                            Uuid = lc.CountryId,
-                                            //PNGImagePath = images.Where(im => im.ImageId.Equals(dfc.PNGImageId) && im.ImageType.Equals((int)ImageType.FlagPNG)).Select(c => c.FilePath).FirstOrDefault(),
-                                            //SVGImagePath = images.Where(im => im.ImageId.Equals(dfc.SVGImageId) && im.ImageType.Equals((int)ImageType.FlagSVG)).Select(c => c.FilePath).FirstOrDefault(),
-                                            PNGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.PNGImageId)).FilePath,
-                                            SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(dfc.SVGImageId)).FilePath,
-                                            DisplayName = lc.DisplayName,
-                                            DisplayNameShort = lc.DisplayName,
-                                            Name = Helper.ReplaceChars(dfc.DisplayName),
-                                            Path = Helper.ReplaceChars(dfc.DisplayName),
-                                            CompleteResponse = true
-                                        }).Skip((pageNo - 1) * 100).Take(pageSize).ToListAsync();
+                countries = await GetCountriesDataAsync(dftLanguageId);
             }
 
             return countries;
+        }
+        private async Task<List<CountryDTO>> GetCountriesDataAsync(int languageId)
+        {
+            int pageNo = 1, pageSize = 100;
+            var images = await _cacheService.GetAllAsync("imagesCacheKey");
+
+            return await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(languageId))
+                    .Select(co => new CountryDTO
+                    {
+                        Uuid = co.CountryId,
+                        PNGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(co.PNGImageId)).FilePath,
+                        SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(co.SVGImageId)).FilePath,
+                        DisplayName = co.DisplayName,
+                        DisplayNameShort = co.DisplayName,
+                        Name = Helper.ReplaceChars(co.DisplayName),
+                        Path = Helper.ReplaceChars(co.DisplayName),
+                        CompleteResponse = true
+                    }).Skip((pageNo - 1) * 100).Take(pageSize).ToListAsync();
         }
     }
 }
