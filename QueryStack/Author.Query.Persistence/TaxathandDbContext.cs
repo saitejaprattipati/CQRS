@@ -48,7 +48,8 @@ namespace Author.Query.Persistence
             foreach (var dbSet in dbSets)
             {
                 var metadata = modelBuilder.Entity(dbSet.PropertyType.GetGenericArguments()[0]).Metadata;
-                metadata.Cosmos().ContainerName = dbSet.Name;
+                //metadata.Cosmos().ContainerName = dbSet.Name;
+                metadata.SetContainer(dbSet.Name);
             }
         }
     }
