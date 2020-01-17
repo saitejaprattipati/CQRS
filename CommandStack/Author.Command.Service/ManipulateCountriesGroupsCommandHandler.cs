@@ -13,6 +13,8 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using Author.Core.Framework.ExceptionHandling;
 using System.Transactions;
+using Author.Core.Framework;
+using Author.Core.Services.Persistence.CosmosDB;
 
 namespace Author.Command.Service
 {
@@ -21,11 +23,14 @@ namespace Author.Command.Service
         private readonly IIntegrationEventPublisherServiceService _Eventcontext;
         private readonly CountryGroupsRepository _CountryGroupsRepository;
         private readonly ILogger _logger;
+        private readonly CosmosDBContext _context;
+
         public ManipulateCountriesGroupsCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<ManipulateCountriesGroupsCommandHandler> logger)
         {
             _CountryGroupsRepository = new CountryGroupsRepository(new TaxatHand_StgContext());
             _Eventcontext = Eventcontext;
             _logger = logger;
+            _context = new CosmosDBContext();
         }
 
         public async Task<ManipulateCountryGroupsCommandResponse> Handle(ManipulateCountryGroupsCommand request, CancellationToken cancellationToken)
@@ -33,13 +38,14 @@ namespace Author.Command.Service
             ManipulateCountryGroupsCommandResponse response = new ManipulateCountryGroupsCommandResponse()
             {
                 IsSuccessful = false
-            };
+            }; 
+            
+            List<CountryGroups> countryGroups = _CountryGroupsRepository.getCountryGroups(request.CountryGroupIds);
+            if (request.CountryGroupIds.Count != countryGroups.Count)
+                throw new RulesException("Invalid", @"CountryGroup not found");
+            
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                List<CountryGroups> countryGroups = _CountryGroupsRepository.getCountryGroups(request.CountryGroupIds);
-                if (request.CountryGroupIds.Count != countryGroups.Count)
-                    throw new RulesException("Invalid", @"CountryGroup not found");
-
                 if (request.Operation == "Publish")
                 {
                     foreach (var countryGroup in countryGroups)
@@ -82,6 +88,42 @@ namespace Author.Command.Service
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                if (request.Operation == "Publish" || request.Operation == "UnPublish")
+                {
+                    var countrygrpDocs = _context.GetAll(Constants.CountryGroupsDiscriminator).Records as IEnumerable<CountryGroupCommandEvent>;
+                    foreach (var countrygrp in countryGroups)
+                    {
+                        foreach (var doc in countrygrpDocs.Where(d => d.CountryGroupId == countrygrp.CountryGroupId))
+                        {
+                            var eventsource = new CountryGroupCommandEvent()
+                            {
+                                id = doc.id,
+                                EventType = ServiceBusEventType.Update,
+                                Discriminator = Constants.CountryGroupsDiscriminator,
+                                CountryGroupId = countrygrp.CountryGroupId,
+                                IsPublished = countrygrp.IsPublished
+                            };
+                            await _Eventcontext.PublishThroughEventBusAsync(eventsource);
+                        }
+                    }
+                }
+                else if (request.Operation == "Delete")
+                {
+                    foreach (var countrygrp in countryGroups)
+                    {
+                        var countryevent = new CountryGroupCommandEvent()
+                        {
+                            EventType = ServiceBusEventType.Delete,
+                            Discriminator = Constants.CountryGroupsDiscriminator,
+                            CountryGroupId = countrygrp.CountryGroupId
+                        };
+                        await _Eventcontext.PublishThroughEventBusAsync(countryevent);
+                    }
+                }
             }
             return response;
         }

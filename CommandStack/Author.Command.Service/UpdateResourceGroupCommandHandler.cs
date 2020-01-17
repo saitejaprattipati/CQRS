@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
 using Author.Core.Framework;
+using Author.Core.Services.Persistence.CosmosDB;
 
 namespace Author.Command.Service
 {
@@ -20,12 +21,14 @@ namespace Author.Command.Service
         private readonly IIntegrationEventPublisherServiceService _eventcontext;
         private readonly ResourceGroupRepository _ResourceGroupRepository;
         private readonly IMapper _mapper;
+        private readonly CosmosDBContext _context;
 
         public UpdateResourceGroupCommandHandler(IIntegrationEventPublisherServiceService eventcontext, IMapper mapper)
         {
             _ResourceGroupRepository = new ResourceGroupRepository(new TaxatHand_StgContext());
             _eventcontext = eventcontext;
             _mapper = mapper;
+            _context = new CosmosDBContext();
         }
         public async Task<UpdateResourceGroupCommandResponse> Handle(UpdateResourceGroupCommand request, CancellationToken cancellationToken)
         {
@@ -74,11 +77,14 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
+
+            var resourcegroupDocs = _context.GetAll(Constants.ResourceGroupsDiscriminator).Records as IEnumerable<ResourceGroupCommandEvent>;
             foreach (var contnet in resourceGroup.ResourceGroupContents)
             {
                 var eventSourcing = new ResourceGroupCommandEvent()
                 {
-                    EventType = (int)ServiceBusEventType.Update,
+                    id = resourcegroupDocs.ToList().Find(d => d.ResourceGroupId == resourceGroup.ResourceGroupId && d.LanguageId == contnet.LanguageId).id,
+                    EventType = ServiceBusEventType.Update,
                     Discriminator = Constants.ResourceGroupsDiscriminator,
                     ResourceGroupId = resourceGroup.ResourceGroupId,
                     IsPublished = resourceGroup.IsPublished,

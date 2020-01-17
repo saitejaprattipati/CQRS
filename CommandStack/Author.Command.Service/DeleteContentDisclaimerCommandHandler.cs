@@ -2,6 +2,7 @@
 using Author.Command.Events;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
+using Author.Core.Framework;
 using Author.Core.Framework.ExceptionHandling;
 using MediatR;
 using System.Collections.Generic;
@@ -58,8 +59,11 @@ namespace Author.Command.Service
             {
                 var eventSourcing = new DisclaimerCommandEvent()
                 {
-
+                    EventType = ServiceBusEventType.Delete,
+                    Discriminator = Constants.DisclaimersDiscriminator,
+                    DisclaimerId = content.DisclaimerId
                 };
+                await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
             }
             return response;
         }

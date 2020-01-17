@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using System.Transactions;
 using Author.Core.Framework.ExceptionHandling;
 using Author.Core.Framework;
+using Author.Core.Services.Persistence.CosmosDB;
 
 namespace Author.Command.Service
 {
@@ -22,12 +23,15 @@ namespace Author.Command.Service
         private readonly IIntegrationEventPublisherServiceService _Eventcontext;
         private readonly TagGroupsRepository _taxTagsRepository;
         private readonly ILogger _logger;
+        private readonly CosmosDBContext _context;
+
 
         public UpdateTagGroupsCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<CreateTagGroupsCommandHandler> logger)
         {
             _taxTagsRepository = new TagGroupsRepository(new TaxatHand_StgContext());
             _Eventcontext = Eventcontext;
             _logger = logger;
+            _context = new CosmosDBContext();
         }
         public async Task<UpdateTagGroupsCommandResponse> Handle(UpdateTagsCommand request, CancellationToken cancellationToken)
         {
@@ -102,11 +106,14 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
+
+            var taggroupDocs = _context.GetAll(Constants.TaxTagsDiscriminator).Records as IEnumerable<TagGroupCommandEvent>;
             foreach (var content in taxGroup.TaxTagContents)
             {
                 var eventSourcing = new TagGroupCommandEvent()
                 {
-                    EventType = (int)ServiceBusEventType.Update,
+                    id = taggroupDocs.ToList().Find(d => d.TagId == taxGroup.TaxTagId && d.LanguageId == content.LanguageId).id,
+                    EventType = ServiceBusEventType.Update,
                     Discriminator = Constants.TaxTagsDiscriminator,
                     TagId = taxGroup.TaxTagId,
                     ParentTagId = taxGroup.ParentTagId,

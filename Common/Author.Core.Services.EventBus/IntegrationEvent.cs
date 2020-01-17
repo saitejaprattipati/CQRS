@@ -11,9 +11,9 @@ namespace Author.Core.Services.EventBus
             CreationDate = DateTime.UtcNow;
         }
 
-        public Guid id { get; }
+        public Guid id { get; set; }
         public DateTime CreationDate { get; }
-        public int EventType { get; set; }
+        public string EventType { get; set; }
         public string Discriminator { get; set; }
 
     }

@@ -14,6 +14,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using System.Transactions;
 using Author.Core.Framework;
+using Author.Core.Services.Persistence.CosmosDB;
 
 namespace Author.Command.Service
 {
@@ -23,6 +24,7 @@ namespace Author.Command.Service
         private readonly IIntegrationEventPublisherServiceService _Eventcontext;
         private readonly CountryGroupsRepository _CountryGroupsRepository;
         private readonly ILogger _logger;
+        private readonly CosmosDBContext _context;
 
         public UpdateCountryGroupsCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<UpdateCountryGroupsCommandHandler> logger, IIntegrationEventBlobService Eventblobcontext)
         {
@@ -30,6 +32,7 @@ namespace Author.Command.Service
             _Eventcontext = Eventcontext;
             _Eventblobcontext = Eventblobcontext;
             _logger = logger;
+            _context = new CosmosDBContext();
         }
         public async Task<UpdateCountryGroupsCommandResponse> Handle(UpdateCountryGroupsCommand request, CancellationToken cancellationToken)
         {
@@ -99,11 +102,14 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
+
+            var countryGroupDocs = _context.GetAll(Constants.CountryGroupsDiscriminator).Records as IEnumerable<CountryGroupCommandEvent>;
             foreach (var content in countryGroup.CountryGroupContents)
             {
                 var eventSourcing = new CountryGroupCommandEvent()
                 {
-                    EventType = (int)ServiceBusEventType.Update,
+                    id = countryGroupDocs.ToList().Find(d => d.CountryGroupId == countryGroup.CountryGroupId && d.LanguageId == content.LanguageId).id,
+                    EventType = ServiceBusEventType.Update,
                     CountryGroupId = countryGroup.CountryGroupId,
                     IsPublished = countryGroup.IsPublished,
                     CreatedBy = countryGroup.CreatedBy,

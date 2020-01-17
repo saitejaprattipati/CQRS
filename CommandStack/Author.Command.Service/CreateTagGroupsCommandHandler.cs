@@ -72,7 +72,7 @@ namespace Author.Command.Service
             {
                 var eventSourcing = new TagGroupCommandEvent()
                 {
-                    EventType = (int)ServiceBusEventType.Create,
+                    EventType = ServiceBusEventType.Create,
                     Discriminator = Constants.TaxTagsDiscriminator,
                     TagId = _taxTag.TaxTagId,
                     ParentTagId = _taxTag.ParentTagId,

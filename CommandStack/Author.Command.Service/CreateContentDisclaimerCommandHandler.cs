@@ -51,7 +51,7 @@ namespace Author.Command.Service
             {
                 var eventSourcing = new DisclaimerCommandEvent()
                 {
-                    EventType = (int)ServiceBusEventType.Create,
+                    EventType = ServiceBusEventType.Create,
                     Name = contentDisclaimer.Name,
                     DisclaimerId = contentDisclaimer.DisclaimerId,
                     CreatedBy = contentDisclaimer.CreatedBy,

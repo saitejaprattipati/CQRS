@@ -1,6 +1,8 @@
 ﻿using Author.Command.Domain.Command;
+using Author.Command.Events;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
+using Author.Core.Framework;
 using Author.Core.Framework.ExceptionHandling;
 using MediatR;
 using System.Linq;
@@ -28,15 +30,15 @@ namespace Author.Command.Service
                 IsSuccessful = false
             };
 
-            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            var systemUserIds = request.SystemUserIds.Distinct().ToList();
+            var systemusers = await _systemUserRepository.GetSystemUsersByIds(systemUserIds);
+            if (systemusers.Count != systemUserIds.Count)
             {
-                var systemUserIds = request.SystemUserIds.Distinct().ToList();
-                var systemusers = await _systemUserRepository.GetSystemUsersByIds(systemUserIds);
-                if (systemusers.Count != systemUserIds.Count)
-                {
-                    throw new RulesException("Invalid", @"User not found");
-                }
+                throw new RulesException("Invalid", @"User not found");
+            }
 
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {                
                 foreach (var sysuser in systemusers)
                 {
                     foreach (var sysuserassociatedcountry in sysuser.SystemUserAssociatedCountries.ToList())
@@ -51,6 +53,17 @@ namespace Author.Command.Service
 
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+
+            foreach(var user in systemusers)
+            {
+                var eventsourcing = new SystemUserCommandEvent()
+                {
+                    EventType = ServiceBusEventType.Delete,
+                    Discriminator = Constants.SystemUsersDiscriminator,
+                    SystemUserId = user.SystemUserId
+                };
+                await _eventcontext.PublishThroughEventBusAsync(eventsourcing);
             }
             return response;
         }

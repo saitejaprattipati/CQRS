@@ -78,7 +78,7 @@ namespace Author.Command.Service
             {
                 var eventSourcing = new SystemUserCommandEvent()
                 {
-                    EventType = (int)ServiceBusEventType.Create,
+                    EventType = ServiceBusEventType.Create,
                     Discriminator = Constants.SystemUsersDiscriminator,
                     SystemUserId = user.SystemUserId,
                     CreatedBy = user.CreatedBy,

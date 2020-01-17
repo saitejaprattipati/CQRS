@@ -11,6 +11,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
+using Author.Core.Services.Persistence.CosmosDB;
+using System.Collections.Generic;
 
 namespace Author.Command.Service
 {
@@ -19,13 +21,14 @@ namespace Author.Command.Service
         private readonly IIntegrationEventPublisherServiceService _eventcontext;
         private readonly SystemUserRepository _systemUserRepository;
         private readonly IMapper _mapper;
-
+        private readonly CosmosDBContext _context;
 
         public UpdateSystemUserCommandHandler(IIntegrationEventPublisherServiceService eventcontext, IMapper mapper)
         {
             _systemUserRepository = new SystemUserRepository(new TaxatHand_StgContext());
             _eventcontext = eventcontext;
             _mapper = mapper;
+            _context = new CosmosDBContext();
         }
 
         public async Task<UpdateSystemUserCommandResponse> Handle(UpdateSystemUserCommand request, CancellationToken cancellationToken)
@@ -76,11 +79,14 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
+
+            var systemuserDocs = _context.GetAll(Constants.SystemUsersDiscriminator).Records as IEnumerable<SystemUserCommandEvent>;
             foreach (var content in user.SystemUserAssociatedCountries)
             {
                 var eventSourcing = new SystemUserCommandEvent()
                 {
-                    EventType = (int)ServiceBusEventType.Update,
+                    id = systemuserDocs.ToList().Find(d => d.SystemUserId == user.SystemUserId && d.SystemUserAssociatedCountryId == content.SystemUserAssociatedCountryId).id,
+                    EventType = ServiceBusEventType.Update,
                     Discriminator = Constants.SystemUsersDiscriminator,
                     SystemUserId = user.SystemUserId,
                     CreatedBy = user.CreatedBy,

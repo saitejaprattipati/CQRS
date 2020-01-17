@@ -63,7 +63,7 @@ namespace Author.Command.Service
             {
                 var eventSourcing = new ResourceGroupCommandEvent()
                 {
-                    EventType = (int)ServiceBusEventType.Create,
+                    EventType = ServiceBusEventType.Create,
                     Discriminator = Constants.ResourceGroupsDiscriminator,
                     ResourceGroupId = _resourceGroup.ResourceGroupId,
                     IsPublished = _resourceGroup.IsPublished,

@@ -1,10 +1,13 @@
 ﻿using Author.Command.Domain.Command;
+using Author.Command.Events;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
 using Author.Core.Framework;
 using Author.Core.Framework.ExceptionHandling;
+using Author.Core.Services.Persistence.CosmosDB;
 using MediatR;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -17,12 +20,13 @@ namespace Author.Command.Service
     {
         private readonly IIntegrationEventPublisherServiceService _eventcontext;
         private readonly SiteDisclaimerRepository _siteDisclaimerRepository;
-
+        private readonly CosmosDBContext _context;
 
         public UpdateSiteDisclaimerCommandHandler(IIntegrationEventPublisherServiceService eventcontext)
         {
             _siteDisclaimerRepository = new SiteDisclaimerRepository(new TaxatHand_StgContext());
             _eventcontext = eventcontext;
+            _context = new CosmosDBContext();
         }
 
         public async Task<UpdateSiteDisclaimerCommandResponse> Handle(UpdateSiteDisclaimerCommand request, CancellationToken cancellationToken)
@@ -32,16 +36,17 @@ namespace Author.Command.Service
                 IsSuccessful = false
             };
 
+            var siteDisclaimer = await _siteDisclaimerRepository.GetSiteDisclaimer(request.SiteDisclaimerId);
+
+            if (siteDisclaimer == null)
+            {
+                throw new RulesException("siteDisclaimer", $"SiteDisclaimer with SiteDisclaimerId: {request.SiteDisclaimerId}  not found");
+            }
+
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 //Update existing disclaimer
-                var siteDisclaimer = await _siteDisclaimerRepository.GetSiteDisclaimer(request.SiteDisclaimerId);
-
-                if (siteDisclaimer == null)
-                {
-                    throw new RulesException("siteDisclaimer",$"SiteDisclaimer with SiteDisclaimerId: {request.SiteDisclaimerId}  not found");
-                }
-
+                
                 siteDisclaimer.Type = Convert.ToInt32(ArticleType.Page);
                 siteDisclaimer.SubType = request.ArticleType;
                 siteDisclaimer.Author = request.Author;
@@ -79,6 +84,34 @@ namespace Author.Command.Service
                 await _siteDisclaimerRepository.UnitOfWork.SaveEntitiesAsync();
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+
+            using(TransactionScope scope =new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var disclaimerdocs = _context.GetAll(Constants.ArticlesDiscriminator).Records as IEnumerable<ArticleCommandEvent>;
+                foreach(var item in siteDisclaimer.ArticleContents)
+                {
+                    foreach(var doc in disclaimerdocs.Where(d => d.ArticleID == item.ArticleId && d.LanguageId == item.LanguageId))
+                    {
+                        var eventSource = new ArticleCommandEvent
+                        {
+                            id = doc.id,
+                            EventType = ServiceBusEventType.Update,
+                            Discriminator = Constants.ArticlesDiscriminator,
+                            Type = siteDisclaimer.Type,
+                            SubType = siteDisclaimer.SubType,
+                            Author = siteDisclaimer.Author,
+                            PublishedDate = siteDisclaimer.PublishedDate,
+                            Title = item.Title,
+                            TeaserText = item.TeaserText,
+                            Content = item.Content,
+                            LanguageId = item.LanguageId,
+                            UpdatedBy = siteDisclaimer.UpdatedBy,
+                            UpdatedDate = siteDisclaimer.UpdatedDate
+                        };
+                        await _eventcontext.PublishThroughEventBusAsync(eventSource);
+                    }
+                }
             }
 
             return response;

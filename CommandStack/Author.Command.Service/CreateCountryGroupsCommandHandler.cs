@@ -71,7 +71,7 @@ namespace Author.Command.Service
             {
                 var eventSourcing = new CountryGroupCommandEvent()
                 {
-                    EventType = (int)ServiceBusEventType.Create,
+                    EventType = ServiceBusEventType.Create,
                     CountryGroupId = _countryGroup.CountryGroupId,
                     IsPublished = _countryGroup.IsPublished,
                     CreatedBy = _countryGroup.CreatedBy,

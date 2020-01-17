@@ -1,6 +1,8 @@
 ﻿using Author.Command.Domain.Command;
+using Author.Command.Events;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
+using Author.Core.Framework;
 using Author.Core.Framework.ExceptionHandling;
 using MediatR;
 using System.Collections.Generic;
@@ -29,15 +31,15 @@ namespace Author.Command.Service
                 IsSuccessful = false
             };
 
-            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            var siteDisclaimerIds = request.SiteDisclaimerIds.Distinct().ToList();
+            var siteDisclaimers = await _siteDisclaimerRepository.GetSiteDisclaimerByIds(siteDisclaimerIds);
+            if (siteDisclaimers.Count != siteDisclaimerIds.Count)
             {
-                var siteDisclaimerIds = request.SiteDisclaimerIds.Distinct().ToList();
-                var siteDisclaimers = await _siteDisclaimerRepository.GetSiteDisclaimerByIds(siteDisclaimerIds);
-                if (siteDisclaimers.Count != siteDisclaimerIds.Count)
-                {
-                    throw new RulesException("Invalid", @"SiteDisclaimer not found");
-                }
+                throw new RulesException("Invalid", @"SiteDisclaimer not found");
+            }
 
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {                
                 foreach (var siteDisclaimer in siteDisclaimers)
                 {
                     foreach (var sitedisclaimerContent in siteDisclaimer.ArticleContents.ToList())
@@ -101,6 +103,20 @@ namespace Author.Command.Service
 
                 response.IsSuccessful = true;
                 scope.Complete();
+            }
+
+            using(TransactionScope scope=new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                foreach(var sitedisclaimer in siteDisclaimers)
+                {
+                    var eventSource = new ArticleCommandEvent
+                    {
+                        EventType = ServiceBusEventType.Delete,
+                        Discriminator = Constants.ArticlesDiscriminator,
+                        DisclaimerId = sitedisclaimer.DisclaimerId
+                    };
+                    await _eventcontext.PublishThroughEventBusAsync(eventSource);
+                }
             }
             return response;
         }

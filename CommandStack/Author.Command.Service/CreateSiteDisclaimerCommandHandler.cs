@@ -64,16 +64,25 @@ namespace Author.Command.Service
             }
             foreach(var content in siteDisclaimer.ArticleContents)
             {
-                var eventSourcing = new DisclaimerCommandEvent()
+                var eventSourcing = new ArticleCommandEvent()
                 {
-                    EventType = (int)ServiceBusEventType.Create,
-                    Discriminator = Constants.DisclaimersDiscriminator,
+                    EventType = ServiceBusEventType.Create,
+                    Discriminator = Constants.ArticlesDiscriminator,
                     CreatedBy = siteDisclaimer.CreatedBy,
                     CreatedDate = siteDisclaimer.CreatedDate,
                     UpdatedBy = siteDisclaimer.UpdatedBy,
                     UpdatedDate = siteDisclaimer.UpdatedDate,
-
+                    PublishedDate = siteDisclaimer.PublishedDate,
+                    IsPublished = siteDisclaimer.IsPublished,
+                    Author = siteDisclaimer.Author,
+                    Type = siteDisclaimer.Type,
+                    SubType = siteDisclaimer.SubType,
+                    LanguageId = content.LanguageId,
+                    Title = content.Title,
+                    TeaserText = content.TeaserText,
+                    Content = content.Content
                 };
+                await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
             }
 
             return response;
