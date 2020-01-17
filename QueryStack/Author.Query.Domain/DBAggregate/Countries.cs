@@ -59,7 +59,7 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the StreetEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("streetEdited")]
-        public int? LanguageId { get; set; }
+        public int LanguageId { get; set; }
 
         /// <summary>gets or sets the CityEdited </summary>
         /// <value>It is of type bool </value>

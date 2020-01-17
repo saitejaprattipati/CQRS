@@ -23,7 +23,10 @@ namespace Author.Query.New.API.Middleware
             var locale = utilityService.GetLocale(httpContext.Request.Headers);
             var language = await commonService.GetLanguageFromLocaleAsync(locale);
 
-            httpContext.Items.Add("language", language);
+            if (language != null)
+            {
+                httpContext.Items.Add("language", language);
+            }
             await _next(httpContext);
         }
     }

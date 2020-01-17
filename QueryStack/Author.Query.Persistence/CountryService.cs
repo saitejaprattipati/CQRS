@@ -157,12 +157,22 @@ namespace Author.Query.Persistence
 
         public async Task<CountryResult> GetAllCountriesAsync(LanguageDTO language)
         {
-            var result = new CountryResult();
             var localeLangId = language.LanguageId;
             var dftLanguageId = int.Parse(_appSettings.Value.DefaultLanguageId);
+            var countries = new CountryResult();
 
-            result.Countries = await GetCountriesAsync(dftLanguageId, localeLangId);
-            return result;
+            //return await GetCountriesAsync(dftLanguageId, localeLangId);
+
+            // By default pick the localLanguage value
+            countries = await GetAllCountriesDataAsync(localeLangId);
+
+            // If localLanguage data is not available then pull the data based on default language
+            if (countries.Countries.Count == 0)
+            {
+                countries = await GetAllCountriesDataAsync(dftLanguageId);
+            }
+
+            return countries;
         }
 
         public async Task<CountryDTO> GetCountryAsync(LanguageDTO language, int countryId)
@@ -220,38 +230,34 @@ namespace Author.Query.Persistence
             return country;
         }
 
-        private async Task<List<CountryDTO>> GetCountriesAsync(int dftLanguageId, int localeLangId)
+        private async Task<CountryResult> GetAllCountriesDataAsync(int languageId)
         {
-            var countries = new List<CountryDTO>();
-
-            // By default pick the localLanguage value
-            countries = await GetCountriesDataAsync(localeLangId);
-
-            // If localLanguage data is not available then pull the data based on default language
-            if (countries.Count == 0)
-            {
-                countries = await GetCountriesDataAsync(dftLanguageId);
-            }
-
-            return countries;
-        }
-        private async Task<List<CountryDTO>> GetCountriesDataAsync(int languageId)
-        {
+            var countryList = new CountryResult();
             int pageNo = 1, pageSize = 100;
             var images = await _cacheService.GetAllAsync("imagesCacheKey");
 
-            return await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(languageId))
-                    .Select(co => new CountryDTO
-                    {
-                        Uuid = co.CountryId,
-                        PNGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(co.PNGImageId)).FilePath,
-                        SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(co.SVGImageId)).FilePath,
-                        DisplayName = co.DisplayName,
-                        DisplayNameShort = co.DisplayName,
-                        Name = Helper.ReplaceChars(co.DisplayName),
-                        Path = Helper.ReplaceChars(co.DisplayName),
-                        CompleteResponse = true
-                    }).Skip((pageNo - 1) * 100).Take(pageSize).ToListAsync();
+            var countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(languageId))
+                                    .Select(c => new { c.CountryId, c.DisplayName, c.PNGImageId, c.SVGImageId, })
+                                    .Skip((pageNo - 1) * 100).Take(pageSize).AsNoTracking().ToListAsync();
+
+            if (countries.Count == 0)
+            {
+                return null;
+            }
+
+            countryList.Countries.AddRange(countries.Select(co => new CountryDTO
+            {
+                Uuid = co.CountryId,
+                PNGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(co.PNGImageId)).FilePath,
+                SVGImagePath = images.FirstOrDefault(im => im.ImageId.Equals(co.SVGImageId)).FilePath,
+                DisplayName = co.DisplayName,
+                DisplayNameShort = co.DisplayName,
+                Name = Helper.ReplaceChars(co.DisplayName),
+                Path = Helper.ReplaceChars(co.DisplayName),
+                CompleteResponse = true
+            }));
+
+            return countryList;
         }
     }
 }

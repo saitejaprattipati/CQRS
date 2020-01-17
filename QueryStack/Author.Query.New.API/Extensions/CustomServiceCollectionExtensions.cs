@@ -84,7 +84,7 @@ namespace Author.Query.New.API.Extensions
 
             services.AddEntityFrameworkCosmos();
             services
-                .AddDbContext<TaxathandDbContext>(
+                .AddDbContextPool<TaxathandDbContext>(
                          options =>
             options.UseCosmos(
                 serviceEndPoint,

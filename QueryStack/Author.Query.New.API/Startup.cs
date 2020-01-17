@@ -9,7 +9,6 @@ using GraphQL.Server.Ui.Voyager;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,7 +42,7 @@ namespace Author.Query.New.API
         /// </summary>
         public virtual void ConfigureServices(IServiceCollection services) =>
             services
-            //.Configure<IISServerOptions>(options=>options.AllowSynchronousIO=true)
+            //.Configure<IISServerOptions>(options => options.AllowSynchronousIO = true)
             .Configure<KestrelServerOptions>(options => { options.AllowSynchronousIO = true; })
             .AddCosmosDBConfiguration(this.configuration)
             .AddAutoMapperConfiguration()
@@ -88,10 +87,13 @@ namespace Author.Query.New.API
                     builder =>
                     {
                         builder
-                            .MapHealthChecks("/status")
+                            .MapHealthChecks("/status", new HealthCheckOptions() { AllowCachingResponses = false })
                             .RequireCors(CorsPolicyName.AllowAny);
                         builder
-                            .MapHealthChecks("/status/self", new HealthCheckOptions() { Predicate = _ => false })
+                            .MapHealthChecks("/status/self", new HealthCheckOptions()
+                            {
+                                Predicate = _ => false
+                            })
                             .RequireCors(CorsPolicyName.AllowAny);
                     })
             .UseWebSockets()
