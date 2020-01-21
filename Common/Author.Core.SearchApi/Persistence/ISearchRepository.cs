@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Search;
+﻿using Author.Core.SearchApi.Domain;
+using Microsoft.Azure.Search;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,8 +7,10 @@ using System.Threading.Tasks;
 
 namespace Author.Core.SearchApi.Persistence
 {
-    interface ISearchRepository
+   public interface ISearchRepository
     {
-        public void CreateIndex(string indexName, SearchServiceClient serviceClient);
+        public void CreateIndex(string indexName);
+        public void DeleteIndex(string indexName);
+        public void UploadIndexData(List<publicindex> data);
     }
 }

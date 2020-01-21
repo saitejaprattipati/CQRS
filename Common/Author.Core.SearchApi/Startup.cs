@@ -32,7 +32,7 @@ namespace Author.Core.SearchApi
                 var SSName = Configuration[""];
                 var SSQueryApiKey = Configuration[""];
                 var SSIndex = Configuration[""];                
-                return new SearchRepository(new SearchIndexClient(SSName, SSIndex, new SearchCredentials(SSQueryApiKey)));
+                return new SearchRepository(new SearchServiceClient(SSName, new SearchCredentials(SSQueryApiKey)),new SearchIndexClient(SSName, SSIndex, new SearchCredentials(SSQueryApiKey)));
             });
         }
 

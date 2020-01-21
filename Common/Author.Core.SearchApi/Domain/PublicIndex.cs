@@ -1,24 +1,25 @@
-﻿using System;
-using Microsoft.Azure.Search;
+﻿using Microsoft.Azure.Search;
 using Microsoft.Azure.Search.Models;
-using Microsoft.Spatial;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Author.Core.SearchApi.Domain
 {
-    public class PublicIndex
+    public class publicindex
     {
         [IsFilterable, IsSearchable, IsSortable, IsFacetable]
-        [System.ComponentModel.DataAnnotations.Key]        
-        public string ImageId { get; set; }
-      
+        [System.ComponentModel.DataAnnotations.Key]
+        public string Image_Id { get; set; }
+
         [IsFilterable, IsSearchable, IsSortable, IsFacetable]
         [Analyzer(AnalyzerName.AsString.EnLucene)]
         public string Title { get; set; }
 
         [IsFilterable, IsSearchable, IsSortable, IsFacetable]
         [Analyzer(AnalyzerName.AsString.EnLucene)]
-        public string TeaserText { get; set; }       
+        public string TeaserText { get; set; }
 
         [IsFilterable, IsSearchable, IsSortable, IsFacetable]
         [Analyzer(AnalyzerName.AsString.FrLucene)]
