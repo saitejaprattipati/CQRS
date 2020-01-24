@@ -8,7 +8,7 @@ using Author.Query.Domain.DBAggregate;
 
 namespace Author.Query.Persistence
 {
-   public class TaxathandDbContext : DbContext
+    public class TaxathandDbContext : DbContext
     {
         public TaxathandDbContext(DbContextOptions<TaxathandDbContext> options) : base(options)
         {
@@ -37,9 +37,17 @@ namespace Author.Query.Persistence
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-                {                    
-                    OneCollectionPerDbSet(modelBuilder);
-                }
+        {
+            // For CountryGroups
+            modelBuilder.Entity<CountryGroups>().OwnsMany(p => p.AssociatedCountryIds, a =>
+            {
+                a.WithOwner().HasForeignKey("CountryGroupsid");
+                a.Property<int>("id");
+                a.Property(o => o.IdVal);
+            });
+
+            OneCollectionPerDbSet(modelBuilder);
+        }
 
         private void OneCollectionPerDbSet(ModelBuilder modelBuilder)
         {
@@ -53,7 +61,7 @@ namespace Author.Query.Persistence
             }
         }
     }
-  
+
     //public class Languages
     //{
     //    /// <summary>gets or sets the id </summary>
