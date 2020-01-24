@@ -13,15 +13,13 @@ namespace Author.Query.New.API.GraphQL.Resolvers
     {
         private readonly ICountryService _countryService;
         private readonly IHttpContextAccessor _accessor;
-        private readonly IUtilityService _utilityService;
         private readonly IDataLoaderContextAccessor _dataLoaderContextAccessor;
 
-        public CountriesResolver(ICountryService countryService, IHttpContextAccessor accessor, IUtilityService utilityService,
+        public CountriesResolver(ICountryService countryService, IHttpContextAccessor accessor,
                                 IDataLoaderContextAccessor dataLoaderContextAccessor)
         {
             _countryService = countryService ?? throw new ArgumentNullException(nameof(countryService));
             _accessor = accessor;
-            _utilityService = utilityService ?? throw new ArgumentNullException(nameof(utilityService));
             _dataLoaderContextAccessor = dataLoaderContextAccessor;
         }
 
@@ -30,12 +28,19 @@ namespace Author.Query.New.API.GraphQL.Resolvers
             var language = _accessor.HttpContext.Items["language"] as LanguageDTO;
             graphQLQuery.FieldAsync<ResponseGraphType<CountryResultType>>(
                 "countriesresponse",
+                arguments: new QueryArguments
+                (
+                    new QueryArgument<IdGraphType> { Name = "pageNo", Description = "page number" },
+                    new QueryArgument<IdGraphType> { Name = "pageSize", Description = "page size" }
+                ),
                 resolve: async context =>
                 {
+                    var pageNo = context.GetArgument<int>("pageNo") == 0 ? 1 : context.GetArgument<int>("pageNo");
+                    var pageSize = context.GetArgument<int>("pageSize") == 0 ? 100: context.GetArgument<int>("pageSize");
                     if (language != null)
                     {
                         var loader = _dataLoaderContextAccessor.Context.GetOrAddLoader("GetAllCountries",
-                                                () => _countryService.GetAllCountriesAsync(language));
+                                                () => _countryService.GetAllCountriesAsync(language, pageNo, pageSize));
                         var list = await context.TryAsyncResolve(
                               async c => await loader.LoadAsync());
                         return Response(list);
@@ -50,7 +55,8 @@ namespace Author.Query.New.API.GraphQL.Resolvers
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<IntGraphType>> { Name = "countryId", Description = "id of the country" }
                 ),
-                resolve: async context => {
+                resolve: async context =>
+                {
                     var countryId = context.GetArgument<int>("countryId");
                     if (language != null && countryId > 0)
                     {

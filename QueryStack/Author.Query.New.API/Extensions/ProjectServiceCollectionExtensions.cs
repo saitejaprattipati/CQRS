@@ -27,11 +27,13 @@ namespace Author.Query.New.API.Extensions
                 .AddScoped<IImageService, ImageService>()
                 .AddScoped(typeof(ICacheService<,>), typeof(CacheService<,>))
                 .AddScoped<ICountryService, CountryService>()
-                .AddScoped<ICountriesResolver, CountriesResolver>();
+                .AddScoped<ICountryGroupService, CountryGroupService>();
+                
 
         public static IServiceCollection AddGraphQLResolvers(this IServiceCollection services) =>
            services
-               .AddScoped<ICountriesResolver, CountriesResolver>();
+               .AddScoped<ICountriesResolver, CountriesResolver>()
+               .AddScoped<ICountryGroupsResolver, CountryGroupsResolver>();
 
         /// <summary>
         /// Add project GraphQL schema and web socket types.
