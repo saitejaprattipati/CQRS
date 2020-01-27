@@ -13,7 +13,7 @@ namespace Author.Command.Domain.Command
         //[JsonProperty("name")]
         //public string Name { get; set; }
 
-        [JsonProperty("imagesData")]
+        [JsonProperty("countryIds")]
         public List<int> CountryIds { get; set; }
     }
     public class CreateCountryGroupsCommandResponse : CommandResponse

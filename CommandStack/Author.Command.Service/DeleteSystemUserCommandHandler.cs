@@ -4,7 +4,9 @@ using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
 using Author.Core.Framework;
 using Author.Core.Framework.ExceptionHandling;
+using Author.Core.Services.Persistence.CosmosDB;
 using MediatR;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,11 +18,13 @@ namespace Author.Command.Service
     {
         private readonly IIntegrationEventPublisherServiceService _eventcontext;
         private readonly SystemUserRepository _systemUserRepository;
+        private readonly CosmosDBContext _context;
 
         public DeleteSystemUserCommandHandler(IIntegrationEventPublisherServiceService eventcontext)
         {
             _systemUserRepository = new SystemUserRepository(new TaxatHand_StgContext());
             _eventcontext = eventcontext;
+            _context = new CosmosDBContext();
         }
 
         public async Task<DeleteSystemUserCommandResponse> Handle(DeleteSystemUserCommand request, CancellationToken cancellationToken)
@@ -54,16 +58,24 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-
-            foreach(var user in systemusers)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventsourcing = new SystemUserCommandEvent()
+                var userDocs = _context.GetAll(Constants.SystemUsersDiscriminator);
+                foreach (var user in systemusers)
                 {
-                    EventType = ServiceBusEventType.Delete,
-                    Discriminator = Constants.SystemUsersDiscriminator,
-                    SystemUserId = user.SystemUserId
-                };
-                await _eventcontext.PublishThroughEventBusAsync(eventsourcing);
+                    //foreach (var country in user.SystemUserAssociatedCountries)
+                    //{
+                        var eventsourcing = new SystemUserCommandEvent()
+                        {
+                            id = userDocs.FirstOrDefault(d => d.GetPropertyValue<int>("SystemUserId") == user.SystemUserId).GetPropertyValue<Guid>("id"),
+                            EventType = ServiceBusEventType.Delete,
+                            Discriminator = Constants.SystemUsersDiscriminator,
+                            SystemUserId = user.SystemUserId
+                        };
+                        await _eventcontext.PublishThroughEventBusAsync(eventsourcing);
+                    //}
+                }
+                scope.Complete();
             }
             return response;
         }

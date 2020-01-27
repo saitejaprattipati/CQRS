@@ -96,20 +96,30 @@ namespace Author.Command.Service
 
             using(TransactionScope scope=new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                if(request.Operation == "Publish" || request.Operation == "UnPublish")
+                var taxtagDocs = _context.GetAll(Constants.TaxTagsDiscriminator);
+
+                if (request.Operation == "Publish" || request.Operation == "UnPublish")
                 {
-                    var taxtagDocs = _context.GetAll(Constants.TaxTagsDiscriminator).Records as IEnumerable<TagGroupCommandEvent>;
                     foreach(var tagGrp in tagGroups)
                     {
-                        foreach(var doc in taxtagDocs.Where(d => d.TagId == tagGrp.TaxTagId))
+                        foreach(var doc in taxtagDocs.Where(d => d.GetPropertyValue<int>("TaxTagId") == tagGrp.TaxTagId))
                         {
                             var eventSource = new TagGroupCommandEvent
                             {
-                                id = doc.id,
+                                id = doc.GetPropertyValue<Guid>("id"),
                                 EventType = ServiceBusEventType.Update,
                                 Discriminator = Constants.TaxTagsDiscriminator,
                                 IsPublished = tagGrp.IsPublished,
-                                TagId = tagGrp.TaxTagId
+                                TagId = tagGrp.TaxTagId,
+                                UpdatedDate = doc.GetPropertyValue<DateTime>("UpdatedDate"),
+                                UpdatedBy = doc.GetPropertyValue<string>("UpdatedBy"),
+                                CreatedDate = doc.GetPropertyValue<DateTime>("CreatedDate"),
+                                CreatedBy = doc.GetPropertyValue<string>("CreatedBy"),
+                                DisplayName = doc.GetPropertyValue<string>("DisplayName"),
+                                LanguageId = doc.GetPropertyValue<int?>("LanguageId"),
+                                ParentTagId = doc.GetPropertyValue<int?>("ParentTagId"),
+                                RelatedCountryIds = doc.GetPropertyValue<List<int>>("RelatedCountryIds"),
+                                TagContentId = doc.GetPropertyValue<int>("TaxTagContentId")
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(eventSource);
                         }
@@ -117,17 +127,21 @@ namespace Author.Command.Service
                 }
                 else if (request.Operation == "Delete")
                 {
-                    foreach(var tagGrp in tagGroups)
+                    foreach (var tagGrp in tagGroups)
                     {
-                        var eventSrc = new TagGroupCommandEvent
+                        foreach (var doc in taxtagDocs.Where(d => d.GetPropertyValue<int>("TaxTagId") == tagGrp.TaxTagId))
                         {
-                            EventType = ServiceBusEventType.Delete,
-                            Discriminator = Constants.TaxTagsDiscriminator,
-                            TagId = tagGrp.TaxTagId
-                        };
-                        await _Eventcontext.PublishThroughEventBusAsync(eventSrc);
+                            var eventSrc = new TagGroupCommandEvent
+                            {
+                                id = doc.GetPropertyValue<Guid>("id"),
+                                EventType = ServiceBusEventType.Delete,
+                                Discriminator = Constants.TaxTagsDiscriminator
+                            };
+                            await _Eventcontext.PublishThroughEventBusAsync(eventSrc);
+                        }
                     }
                 }
+                scope.Complete();
             }
             return response;
         }

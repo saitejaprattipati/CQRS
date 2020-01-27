@@ -79,34 +79,38 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-
-            var systemuserDocs = _context.GetAll(Constants.SystemUsersDiscriminator).Records as IEnumerable<SystemUserCommandEvent>;
-            foreach (var content in user.SystemUserAssociatedCountries)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventSourcing = new SystemUserCommandEvent()
+                var systemuserDocs = _context.GetAll(Constants.SystemUsersDiscriminator);
+                foreach (var content in user.SystemUserAssociatedCountries)
                 {
-                    id = systemuserDocs.ToList().Find(d => d.SystemUserId == user.SystemUserId && d.SystemUserAssociatedCountryId == content.SystemUserAssociatedCountryId).id,
-                    EventType = ServiceBusEventType.Update,
-                    Discriminator = Constants.SystemUsersDiscriminator,
-                    SystemUserId = user.SystemUserId,
-                    CreatedBy = user.CreatedBy,
-                    CreatedDate = user.CreatedDate,
-                    UpdatedBy = user.UpdatedBy,
-                    UpdatedDate = user.UpdatedDate,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    WorkPhoneNumber = user.WorkPhoneNumber,
-                    MobilePhoneNumber = user.MobilePhoneNumber,
-                    Level = user.Level,
-                    Role = user.Role,
-                    Location = user.Location,
-                    Email = user.Email,
-                    TimeZone = user.TimeZone,
-                    CountryId = content.CountryId,
-                    IsPrimary = content.IsPrimary,
-                    SystemUserAssociatedCountryId = content.SystemUserAssociatedCountryId
-                };
-                await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    var eventSourcing = new SystemUserCommandEvent()
+                    {
+                        id = systemuserDocs.FirstOrDefault(d => d.GetPropertyValue<int>("SystemUserId") == user.SystemUserId 
+                            && d.GetPropertyValue<int>("SystemUserAssociatedCountryId") == content.SystemUserAssociatedCountryId).GetPropertyValue<Guid>("id"),
+                        EventType = ServiceBusEventType.Update,
+                        Discriminator = Constants.SystemUsersDiscriminator,
+                        SystemUserId = user.SystemUserId,
+                        CreatedBy = user.CreatedBy,
+                        CreatedDate = user.CreatedDate,
+                        UpdatedBy = user.UpdatedBy,
+                        UpdatedDate = user.UpdatedDate,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        WorkPhoneNumber = user.WorkPhoneNumber,
+                        MobilePhoneNumber = user.MobilePhoneNumber,
+                        Level = user.Level,
+                        Role = user.Role,
+                        Location = user.Location,
+                        Email = user.Email,
+                        TimeZone = user.TimeZone,
+                        CountryId = content.CountryId,
+                        IsPrimary = content.IsPrimary,
+                        SystemUserAssociatedCountryId = content.SystemUserAssociatedCountryId
+                    };
+                    await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                }
+                scope.Complete();
             }
             return response;
         }

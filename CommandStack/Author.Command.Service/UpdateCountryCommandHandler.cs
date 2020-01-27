@@ -44,8 +44,9 @@ namespace Author.Command.Service
             var country = new Countries();
             Images pngImage = new Images();
             Images svgImage = new Images();
-            var countryDocs = _context.GetAll(Constants.CountriesDiscriminator).Records as IEnumerable<CountryCommandEvent>;
-            var imageDocs = _context.GetAll(Constants.ImagesDiscriminator).Records as IEnumerable<ImageCommandEvent>;
+            var countryDocs = _context.GetAll(Constants.CountriesDiscriminator);
+            var imageDocs = _context.GetAll(Constants.ImagesDiscriminator);
+            var contentToDelete = new List<int>();
 
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -113,6 +114,7 @@ namespace Author.Command.Service
                 {
                     if (request.LanguageNames.Where(s => s.LanguageID == resourceContent.LanguageId).Count() == 0)
                     {
+                        contentToDelete.Add((int)resourceContent.LanguageId);
                         country.CountryContents.Remove(resourceContent);
                         _CountryRepository.Delete(resourceContent);
                     }
@@ -129,58 +131,60 @@ namespace Author.Command.Service
             {
                 var pngImageEvent = new ImageCommandEvent()
                 {
-                    id = imageDocs.ToList().Find(d => d.ImageId == pngImage.ImageId).id,
-                    EventType = ServiceBusEventType.Update,//(int)ServiceBusEventType.Update,
+                    id = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == pngImage.ImageId).GetPropertyValue<Guid>("id"),
+                    EventType = ServiceBusEventType.Update,
                     Discriminator = Constants.ImagesDiscriminator,
                     ImageId = pngImage.ImageId,
                     ImageType = pngImage.ImageType,
                     Name = pngImage.Name,
                     CountryId = pngImage.CountryId,
-                    Keyword = pngImage.Keyword,
-                    Source = pngImage.Source,
-                    Description = pngImage.Description,
-                    Copyright = pngImage.Copyright,
+                    Keyword = pngImage.Keyword ?? string.Empty,
+                    Source = pngImage.Source ?? string.Empty,
+                    Description = pngImage.Description ?? string.Empty,
+                    Copyright = pngImage.Copyright ?? string.Empty,
                     FilePath = pngImage.FilePath,
                     FileType = pngImage.FileType,
                     CreatedBy = pngImage.CreatedBy,
                     CreatedDate = pngImage.CreatedDate,
                     UpdatedBy = pngImage.UpdatedBy,
                     UpdatedDate = pngImage.UpdatedDate,
-                    EmpGuid = pngImage.EmpGuid,
+                    EmpGuid = pngImage.EmpGuid ?? string.Empty,
                     IsEdited = true
                 };
                 await _Eventcontext.PublishThroughEventBusAsync(pngImageEvent);
 
                 var svgImageEvent = new ImageCommandEvent()
                 {
-                    id = imageDocs.ToList().Find(d => d.ImageId == svgImage.ImageId).id,
+                    id = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == svgImage.ImageId).GetPropertyValue<Guid>("id"),
                     EventType = ServiceBusEventType.Update,
                     Discriminator = Constants.ImagesDiscriminator,
                     ImageId = svgImage.ImageId,
                     ImageType = svgImage.ImageType,
                     Name = svgImage.Name,
                     CountryId = svgImage.CountryId,
-                    Keyword = svgImage.Keyword,
-                    Source = svgImage.Source,
-                    Description = svgImage.Description,
-                    Copyright = svgImage.Copyright,
+                    Keyword = svgImage.Keyword ?? string.Empty,
+                    Source = svgImage.Source ?? string.Empty,
+                    Description = svgImage.Description ??string.Empty,
+                    Copyright = svgImage.Copyright ?? string.Empty,
                     FilePath = svgImage.FilePath,
                     FileType = svgImage.FileType,
                     CreatedBy = svgImage.CreatedBy,
                     CreatedDate = svgImage.CreatedDate,
                     UpdatedBy = svgImage.UpdatedBy,
                     UpdatedDate = svgImage.UpdatedDate,
-                    EmpGuid = svgImage.EmpGuid,
+                    EmpGuid = svgImage.EmpGuid ?? string.Empty,
                     IsEdited = true
                 };
                 await _Eventcontext.PublishThroughEventBusAsync(svgImageEvent);
 
-                foreach (var content in country.CountryContents)
+                foreach (var item in country.CountryContents)
                 {
+                    var doc = countryDocs.FirstOrDefault(d => d.GetPropertyValue<int>("CountryId") == country.CountryId
+                             && d.GetPropertyValue<int?>("LanguageId") == item.LanguageId);
                     var eventSourcing = new CountryCommandEvent()
                     {
-                        id = countryDocs.ToList().Find(d => d.CountryId == country.CountryId && d.LanguageId == content.LanguageId).id,
-                        EventType = ServiceBusEventType.Update,
+                        id = doc != null ? doc.GetPropertyValue<Guid>("id") : Guid.NewGuid(),
+                        EventType = doc != null ? ServiceBusEventType.Update : ServiceBusEventType.Create,
                         CountryId = country.CountryId,
                         SVGImageId = country.SvgimageId,
                         PNGImageId = country.PngimageId,
@@ -189,14 +193,26 @@ namespace Author.Command.Service
                         CreatedDate = country.CreatedDate,
                         UpdatedBy = country.UpdatedBy,
                         UpdatedDate = country.UpdatedDate,
-                        CountryContentId = content.CountryContentId,
-                        DisplayName = content.DisplayName,
-                        DsiplayNameShort = content.DisplayNameShort,
-                        LanguageId = content.LanguageId,
+                        CountryContentId = item.CountryContentId,
+                        DisplayName = item.DisplayName,
+                        DisplayNameShort = item.DisplayNameShort,
+                        LanguageId = item.LanguageId,
                         Discriminator = Constants.CountriesDiscriminator
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }
+                foreach(int i in contentToDelete)
+                {
+                    var deleteEvt = new CountryCommandEvent()
+                    {
+                        id = countryDocs.FirstOrDefault(d => d.GetPropertyValue<int>("CountryId") == country.CountryId &&
+                                 d.GetPropertyValue<int>("LanguageId") == i).GetPropertyValue<Guid>("id"),
+                        EventType = ServiceBusEventType.Delete,
+                        Discriminator = Constants.CountriesDiscriminator
+                    };
+                    await _Eventcontext.PublishThroughEventBusAsync(deleteEvt);
+                }
+                scope.Complete();
             }
             return response;
         }

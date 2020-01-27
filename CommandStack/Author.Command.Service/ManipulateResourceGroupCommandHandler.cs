@@ -84,20 +84,29 @@ namespace Author.Command.Service
 
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
+                var resourcegrpDocs = _context.GetAll(Constants.ResourceGroupsDiscriminator);
+
                 if (request.Operation == "Publish" || request.Operation == "UnPublish")
                 {
-                    var resourcegrpDocs = _context.GetAll(Constants.ResourceGroupsDiscriminator).Records as IEnumerable<ResourceGroupCommandEvent>;
                     foreach (var resourcegrp in resourceGroups)
                     {
-                        foreach (var doc in resourcegrpDocs.Where(d => d.ResourceGroupId == resourcegrp.ResourceGroupId))
+                        foreach (var doc in resourcegrpDocs.Where(d => d.GetPropertyValue<int>("ResourceGroupId") == resourcegrp.ResourceGroupId))
                         {
                             var eventsource = new ResourceGroupCommandEvent()
                             {
-                                id = doc.id,
+                                id = doc.GetPropertyValue<Guid>("id"),
                                 EventType = ServiceBusEventType.Update,
                                 Discriminator = Constants.ResourceGroupsDiscriminator,
                                 ResourceGroupId = resourcegrp.ResourceGroupId,
-                                IsPublished = resourcegrp.IsPublished
+                                IsPublished = resourcegrp.IsPublished,
+                                LanguageId = doc.GetPropertyValue<int?>("LanguageId"),
+                                GroupName = doc.GetPropertyValue<string>("GroupName"),
+                                Position = doc.GetPropertyValue<int>("Position"),
+                                ResourceGroupContentId = doc.GetPropertyValue<int>("ResourceGroupContentId"),
+                                CreatedBy = doc.GetPropertyValue<string>("CreatedBy"),
+                                CreatedDate = doc.GetPropertyValue<DateTime>("CreatedDate"),
+                                UpdatedBy = doc.GetPropertyValue<string>("UpdatedBy"),
+                                UpdatedDate = doc.GetPropertyValue<DateTime>("UpdatedDate")
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(eventsource);
                         }
@@ -107,15 +116,19 @@ namespace Author.Command.Service
                 {
                     foreach (var resourcegrp in resourceGroups)
                     {
-                        var resourceEvent = new ResourceGroupCommandEvent()
+                        foreach (var doc in resourcegrpDocs.Where(d => d.GetPropertyValue<int>("ResourceGroupId") == resourcegrp.ResourceGroupId))
                         {
-                            EventType = ServiceBusEventType.Delete,
-                            Discriminator = Constants.ResourceGroupsDiscriminator,
-                            ResourceGroupId = resourcegrp.ResourceGroupId
-                        };
-                        await _Eventcontext.PublishThroughEventBusAsync(resourceEvent);
+                            var resourceEvent = new ResourceGroupCommandEvent()
+                            {
+                                id = doc.GetPropertyValue<Guid>("id"),
+                                EventType = ServiceBusEventType.Delete,
+                                Discriminator = Constants.ResourceGroupsDiscriminator
+                            };
+                            await _Eventcontext.PublishThroughEventBusAsync(resourceEvent);
+                        }
                     }
                 }
+                scope.Complete();
             }
             return response;
         }

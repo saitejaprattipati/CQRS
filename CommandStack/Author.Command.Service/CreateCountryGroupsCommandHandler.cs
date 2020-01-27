@@ -67,24 +67,28 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-            foreach(var content in _countryGroup.CountryGroupContents)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventSourcing = new CountryGroupCommandEvent()
+                foreach (var content in _countryGroup.CountryGroupContents)
                 {
-                    EventType = ServiceBusEventType.Create,
-                    CountryGroupId = _countryGroup.CountryGroupId,
-                    IsPublished = _countryGroup.IsPublished,
-                    CreatedBy = _countryGroup.CreatedBy,
-                    CreatedDate = _countryGroup.CreatedDate,
-                    UpdatedBy = _countryGroup.UpdatedBy,
-                    UpdatedDate = _countryGroup.UpdatedDate,
-                    GroupName = content.GroupName,
-                    CountryGroupContentId = content.CountryGroupContentId,
-                    LanguageId = content.LanguageId,
-                    AssociatedCountryIds = (from cg in _countryGroup.CountryGroupAssociatedCountries where cg != null select cg.CountryId).ToList(),
-                    Discriminator = Constants.CountryGroupsDiscriminator
-                };
-                await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    var eventSourcing = new CountryGroupCommandEvent()
+                    {
+                        EventType = ServiceBusEventType.Create,
+                        CountryGroupId = _countryGroup.CountryGroupId,
+                        IsPublished = _countryGroup.IsPublished,
+                        CreatedBy = _countryGroup.CreatedBy,
+                        CreatedDate = _countryGroup.CreatedDate,
+                        UpdatedBy = _countryGroup.UpdatedBy,
+                        UpdatedDate = _countryGroup.UpdatedDate,
+                        GroupName = content.GroupName,
+                        CountryGroupContentId = content.CountryGroupContentId,
+                        LanguageId = content.LanguageId,
+                        AssociatedCountryIds = (from cg in _countryGroup.CountryGroupAssociatedCountries where cg != null select cg.CountryId).ToList(),
+                        Discriminator = Constants.CountryGroupsDiscriminator
+                    };
+                    await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                }
+                scope.Complete();
             }
             return response;
         }

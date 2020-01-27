@@ -4,7 +4,9 @@ using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
 using Author.Core.Framework;
 using Author.Core.Framework.ExceptionHandling;
+using Author.Core.Services.Persistence.CosmosDB;
 using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,11 +19,13 @@ namespace Author.Command.Service
     {
         private readonly IIntegrationEventPublisherServiceService _eventcontext;
         private readonly SiteDisclaimerRepository _siteDisclaimerRepository;
+        private readonly CosmosDBContext _context;
 
         public DeleteSiteDisclaimerCommandHandler(IIntegrationEventPublisherServiceService eventcontext)
         {
             _eventcontext = eventcontext;
             _siteDisclaimerRepository = new SiteDisclaimerRepository(new TaxatHand_StgContext());
+            _context = new CosmosDBContext();
         }
 
         public async Task<DeleteSiteDisclaimerCommandResponse> Handle(DeleteSiteDisclaimerCommand request, CancellationToken cancellationToken)
@@ -105,18 +109,23 @@ namespace Author.Command.Service
                 scope.Complete();
             }
 
-            using(TransactionScope scope=new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            using(TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                foreach(var sitedisclaimer in siteDisclaimers)
+                var disclaimerDocs = _context.GetAll(Constants.ArticlesDiscriminator);
+                foreach (var sitedisclaimer in siteDisclaimers)
                 {
-                    var eventSource = new ArticleCommandEvent
+                    foreach (var doc in disclaimerDocs.Where(d => d.GetPropertyValue<int>("ArticleId") == sitedisclaimer.ArticleId))
                     {
-                        EventType = ServiceBusEventType.Delete,
-                        Discriminator = Constants.ArticlesDiscriminator,
-                        DisclaimerId = sitedisclaimer.DisclaimerId
-                    };
-                    await _eventcontext.PublishThroughEventBusAsync(eventSource);
+                        var eventSource = new ArticleCommandEvent
+                        {
+                            id = doc.GetPropertyValue<Guid>("id"),
+                            EventType = ServiceBusEventType.Delete,
+                            Discriminator = Constants.ArticlesDiscriminator
+                        };
+                        await _eventcontext.PublishThroughEventBusAsync(eventSource);
+                    }
                 }
+                scope.Complete();
             }
             return response;
         }

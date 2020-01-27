@@ -42,6 +42,7 @@ namespace Author.Command.Service
             {
                 throw new RulesException("siteDisclaimer", $"SiteDisclaimer with SiteDisclaimerId: {request.SiteDisclaimerId}  not found");
             }
+            var contentToDelete = new List<int>();
 
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -74,6 +75,7 @@ namespace Author.Command.Service
                 {
                     if (request.LanguageContent.Where(s => s.LanguageId == item.LanguageId).Count() == 0)
                     {
+                        contentToDelete.Add((int)item.LanguageId);
                         siteDisclaimer.ArticleContents.Remove(item);
                         _siteDisclaimerRepository.Delete(item);
                     }
@@ -88,30 +90,47 @@ namespace Author.Command.Service
 
             using(TransactionScope scope =new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var disclaimerdocs = _context.GetAll(Constants.ArticlesDiscriminator).Records as IEnumerable<ArticleCommandEvent>;
+                var disclaimerdocs = _context.GetAll(Constants.ArticlesDiscriminator);
                 foreach(var item in siteDisclaimer.ArticleContents)
                 {
-                    foreach(var doc in disclaimerdocs.Where(d => d.ArticleID == item.ArticleId && d.LanguageId == item.LanguageId))
+                    var doc = disclaimerdocs.FirstOrDefault(d => d.GetPropertyValue<int>("ArticleId") == siteDisclaimer.ArticleId
+                                    && d.GetPropertyValue<int?>("LanguageId") == item.LanguageId);
+
+                    var eventSource = new ArticleCommandEvent
                     {
-                        var eventSource = new ArticleCommandEvent
-                        {
-                            id = doc.id,
-                            EventType = ServiceBusEventType.Update,
-                            Discriminator = Constants.ArticlesDiscriminator,
-                            Type = siteDisclaimer.Type,
-                            SubType = siteDisclaimer.SubType,
-                            Author = siteDisclaimer.Author,
-                            PublishedDate = siteDisclaimer.PublishedDate,
-                            Title = item.Title,
-                            TeaserText = item.TeaserText,
-                            Content = item.Content,
-                            LanguageId = item.LanguageId,
-                            UpdatedBy = siteDisclaimer.UpdatedBy,
-                            UpdatedDate = siteDisclaimer.UpdatedDate
-                        };
-                        await _eventcontext.PublishThroughEventBusAsync(eventSource);
-                    }
+                        id = doc != null ? doc.GetPropertyValue<Guid>("id") : Guid.NewGuid(),
+                        EventType = doc != null ? ServiceBusEventType.Update : ServiceBusEventType.Create,
+                        Discriminator = Constants.ArticlesDiscriminator,
+                        Type = siteDisclaimer.Type,
+                        SubType = siteDisclaimer.SubType,
+                        Author = siteDisclaimer.Author ?? string.Empty,
+                        PublishedDate = siteDisclaimer.PublishedDate,
+                        Title = item.Title,
+                        TeaserText = item.TeaserText,
+                        Content = item.Content,
+                        LanguageId = item.LanguageId,
+                        UpdatedBy = siteDisclaimer.UpdatedBy ?? string.Empty,
+                        UpdatedDate = siteDisclaimer.UpdatedDate,
+                        CreatedBy = siteDisclaimer.CreatedBy ?? string.Empty,
+                        CreatedDate = siteDisclaimer.CreatedDate,
+                        ArticleContentId = item.ArticleContentId,
+                        IsPublished = siteDisclaimer.IsPublished,
+                        ArticleId = siteDisclaimer.ArticleId
+                    };
+                    await _eventcontext.PublishThroughEventBusAsync(eventSource);                    
                 }
+                foreach(int i in contentToDelete)
+                {
+                    var deleteEvt = new ArticleCommandEvent()
+                    {
+                        id = disclaimerdocs.FirstOrDefault(d => d.GetPropertyValue<int>("ArticleId") == siteDisclaimer.ArticleId
+                                             && d.GetPropertyValue<int?>("LanguageId") == i).GetPropertyValue<Guid>("id"),
+                        EventType = ServiceBusEventType.Delete,
+                        Discriminator = Constants.ArticlesDiscriminator
+                    };
+                    await _eventcontext.PublishThroughEventBusAsync(deleteEvt);
+                }
+                scope.Complete();
             }
 
             return response;

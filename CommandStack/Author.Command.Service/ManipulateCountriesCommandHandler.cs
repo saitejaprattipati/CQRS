@@ -64,7 +64,6 @@ namespace Author.Command.Service
                 }
                 else if (request.Operation == "Delete")
                 {
-
                     foreach (Countries country in countries)
                     {
                         List<Images> images = _CountryRepository.getImages(new List<int?> { country.PngimageId, country.SvgimageId });
@@ -90,22 +89,33 @@ namespace Author.Command.Service
                 scope.Complete();
             }
 
+            var countryDocs = _context.GetAll(Constants.CountriesDiscriminator);
+            var imageDocs = _context.GetAll(Constants.ImagesDiscriminator);
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 if (request.Operation == "Publish" || request.Operation == "UnPublish")
                 {
-                    var countryDocs = _context.GetAll(Constants.CountriesDiscriminator).Records as IEnumerable<CountryCommandEvent>;
                     foreach (var country in countries)
                     {
-                        foreach (var doc in countryDocs.Where(d => d.CountryId == country.CountryId))
+                        foreach (var doc in countryDocs.Where(d => d.GetPropertyValue<int>("CountryId") == country.CountryId))
                         {
                             var eventsource = new CountryCommandEvent()
                             {
-                                id = doc.id,
+                                id = doc.GetPropertyValue<Guid>("id"),
                                 EventType = ServiceBusEventType.Update,
                                 Discriminator = Constants.CountriesDiscriminator,
                                 CountryId = country.CountryId,
-                                IsPublished = country.IsPublished
+                                IsPublished = country.IsPublished,
+                                CreatedBy = doc.GetPropertyValue<string>("CreatedBy"),
+                                CreatedDate = doc.GetPropertyValue<DateTime>("CreatedDate"),
+                                UpdatedBy = doc.GetPropertyValue<string>("UpdatedBy"),
+                                UpdatedDate = doc.GetPropertyValue<DateTime>("UpdatedDate"),
+                                PNGImageId = doc.GetPropertyValue<int?>("PNGImageId"),
+                                SVGImageId = doc.GetPropertyValue<int?>("SVGImageId"),
+                                CountryContentId = doc.GetPropertyValue<int>("CountryContentId"),
+                                DisplayName = doc.GetPropertyValue<string>("DisplayName"),
+                                DisplayNameShort = doc.GetPropertyValue<string>("DisplayNameShort"),
+                                LanguageId = doc.GetPropertyValue<int?>("LanguageId")
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(eventsource);
                         }
@@ -113,27 +123,36 @@ namespace Author.Command.Service
                 }
                 else if (request.Operation == "Delete")
                 {
-                    foreach (var country in countries)
-                    {
-                        foreach (var img in country.Images)
+                    foreach (var item in countries)
+                    {                        
+                        var pngimgevent = new ImageCommandEvent()
                         {
-                            var imgevent = new ImageCommandEvent()
-                            {
-                                EventType = ServiceBusEventType.Delete,
-                                Discriminator = Constants.ImagesDiscriminator,
-                                ImageId = img.ImageId
-                            };
-                            await _Eventcontext.PublishThroughEventBusAsync(imgevent);
-                        }
-                        var countryevent = new CountryCommandEvent()
-                        {
+                            id = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == item.PngimageId).GetPropertyValue<Guid>("id"),
                             EventType = ServiceBusEventType.Delete,
-                            Discriminator = Constants.CountriesDiscriminator,
-                            CountryId = country.CountryId
+                            Discriminator = Constants.ImagesDiscriminator
                         };
-                        await _Eventcontext.PublishThroughEventBusAsync(countryevent);
+                        await _Eventcontext.PublishThroughEventBusAsync(pngimgevent);
+                        var svgimgevent = new ImageCommandEvent()
+                        {
+                            id = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == item.SvgimageId).GetPropertyValue<Guid>("id"),
+                            EventType = ServiceBusEventType.Delete,
+                            Discriminator = Constants.ImagesDiscriminator
+                        };
+                        await _Eventcontext.PublishThroughEventBusAsync(svgimgevent);
+
+                        foreach (var doc in countryDocs.Where(d => d.GetPropertyValue<int>("CountryId") == item.CountryId)) 
+                        {
+                            var countryevent = new CountryCommandEvent()
+                            {
+                                id = doc.GetPropertyValue<Guid>("id"),
+                                EventType = ServiceBusEventType.Delete,
+                                Discriminator = Constants.CountriesDiscriminator
+                            };
+                            await _Eventcontext.PublishThroughEventBusAsync(countryevent);
+                        }
                     }
                 }
+                scope.Complete();
             }
             return response;
         }

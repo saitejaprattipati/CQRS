@@ -47,25 +47,29 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-            foreach (var content in contentDisclaimer.DisclaimerContents)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventSourcing = new DisclaimerCommandEvent()
+                foreach (var content in contentDisclaimer.DisclaimerContents)
                 {
-                    EventType = ServiceBusEventType.Create,
-                    Name = contentDisclaimer.Name,
-                    DisclaimerId = contentDisclaimer.DisclaimerId,
-                    CreatedBy = contentDisclaimer.CreatedBy,
-                    CreatedDate = contentDisclaimer.CreatedDate,
-                    UpdatedBy = contentDisclaimer.UpdatedBy,
-                    UpdatedDate = contentDisclaimer.UpdatedDate,
-                    DefaultCountryId = contentDisclaimer.DefaultCountryId,
-                    ProviderName = content.ProviderName,
-                    ProviderTerms = content.ProviderTerms,
-                    LanguageId = content.LanguageId,
-                    DisclaimerContentId = content.DisclaimerContentId,
-                    Discriminator = Constants.DisclaimersDiscriminator
-                };
-                await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    var eventSourcing = new DisclaimerCommandEvent()
+                    {
+                        EventType = ServiceBusEventType.Create,
+                        Name = contentDisclaimer.Name,
+                        DisclaimerId = contentDisclaimer.DisclaimerId,
+                        CreatedBy = contentDisclaimer.CreatedBy,
+                        CreatedDate = contentDisclaimer.CreatedDate,
+                        UpdatedBy = contentDisclaimer.UpdatedBy,
+                        UpdatedDate = contentDisclaimer.UpdatedDate,
+                        DefaultCountryId = contentDisclaimer.DefaultCountryId,
+                        ProviderName = content.ProviderName ?? string.Empty,
+                        ProviderTerms = content.ProviderTerms ?? string.Empty,
+                        LanguageId = content.LanguageId,
+                        DisclaimerContentId = content.DisclaimerContentId,
+                        Discriminator = Constants.DisclaimersDiscriminator
+                    };
+                    await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                }
+                scope.Complete();
             }
 
             return response;

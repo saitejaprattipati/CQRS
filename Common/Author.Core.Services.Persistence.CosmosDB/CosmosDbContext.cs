@@ -94,14 +94,15 @@ namespace Author.Core.Services.Persistence.CosmosDB
             return null;
         }
 
-        public PagingBase<Document> GetAll(string collection, int pageNumber = 1, int pageSize = 1)
+        public List<Document> GetAll(string collection, int pageNumber = 1, int pageSize = 1)
         {
             var client = this.Client;
             var docs = client.CreateDocumentQuery(UriFactory.CreateDocumentCollectionUri(Connection.DatabaseName, collection), new FeedOptions { EnableCrossPartitionQuery = true, MaxDegreeOfParallelism = 10, MaxBufferedItemCount = 100 })
                       .OrderByDescending(d => d.Timestamp);
-            var records = docs.ToList();
-            var totalRecordCount = records.Count(); pageSize = totalRecordCount;
-            return GetRecordsByPaging<Document>(records, pageNumber, pageSize, totalRecordCount);
+            return docs.ToList();
+            //var records = docs.ToList();
+            //var totalRecordCount = records.Count(); pageSize = totalRecordCount;
+            //return GetRecordsByPaging<Document>(records, pageNumber, pageSize, totalRecordCount);
         }
 
         public PagingBase<Document> Get(string collection, int pageNumber = 1, int pageSize = 100)

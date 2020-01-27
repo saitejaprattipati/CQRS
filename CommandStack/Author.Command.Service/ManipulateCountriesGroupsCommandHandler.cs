@@ -92,20 +92,29 @@ namespace Author.Command.Service
 
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
+                var countrygrpDocs = _context.GetAll(Constants.CountryGroupsDiscriminator);
+
                 if (request.Operation == "Publish" || request.Operation == "UnPublish")
                 {
-                    var countrygrpDocs = _context.GetAll(Constants.CountryGroupsDiscriminator).Records as IEnumerable<CountryGroupCommandEvent>;
                     foreach (var countrygrp in countryGroups)
                     {
-                        foreach (var doc in countrygrpDocs.Where(d => d.CountryGroupId == countrygrp.CountryGroupId))
+                        foreach (var doc in countrygrpDocs.Where(d => d.GetPropertyValue<int>("CountryGroupId") == countrygrp.CountryGroupId))
                         {
                             var eventsource = new CountryGroupCommandEvent()
                             {
-                                id = doc.id,
+                                id = doc.GetPropertyValue<Guid>("id"),
                                 EventType = ServiceBusEventType.Update,
                                 Discriminator = Constants.CountryGroupsDiscriminator,
                                 CountryGroupId = countrygrp.CountryGroupId,
-                                IsPublished = countrygrp.IsPublished
+                                IsPublished = countrygrp.IsPublished,
+                                AssociatedCountryIds = doc.GetPropertyValue<List<int>>("AssociatedCountryIds"),
+                                CountryGroupContentId = doc.GetPropertyValue<int>("CountryGroupContentId"),
+                                CreatedBy = doc.GetPropertyValue<string>("CreatedBy"),
+                                CreatedDate = doc.GetPropertyValue<DateTime>("CreatedDate"),
+                                UpdatedBy = doc.GetPropertyValue<string>("UpdatedBy"),
+                                UpdatedDate = doc.GetPropertyValue<DateTime>("UpdatedDate"),
+                                GroupName = doc.GetPropertyValue<string>("GroupName"),
+                                LanguageId = doc.GetPropertyValue<int?>("LanguageId")
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(eventsource);
                         }
@@ -115,15 +124,19 @@ namespace Author.Command.Service
                 {
                     foreach (var countrygrp in countryGroups)
                     {
-                        var countryevent = new CountryGroupCommandEvent()
+                        foreach (var doc in countrygrpDocs.Where(d => d.GetPropertyValue<int>("CountryGroupId") == countrygrp.CountryGroupId))
                         {
-                            EventType = ServiceBusEventType.Delete,
-                            Discriminator = Constants.CountryGroupsDiscriminator,
-                            CountryGroupId = countrygrp.CountryGroupId
-                        };
-                        await _Eventcontext.PublishThroughEventBusAsync(countryevent);
+                            var countryevent = new CountryGroupCommandEvent()
+                            {
+                                id = doc.GetPropertyValue<Guid>("id"),
+                                EventType = ServiceBusEventType.Delete,
+                                Discriminator = Constants.CountryGroupsDiscriminator
+                            };
+                            await _Eventcontext.PublishThroughEventBusAsync(countryevent);
+                        }
                     }
                 }
+                scope.Complete();
             }
             return response;
         }

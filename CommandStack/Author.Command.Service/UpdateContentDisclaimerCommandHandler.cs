@@ -44,6 +44,8 @@ namespace Author.Command.Service
                 throw new RulesException("contentDisclaimer", $"ContentDisclaimer with DisclaimerId: {request.DisclaimerId}  not found");
             }
 
+            var contentToDelete = new List<int>();
+
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 //Update existing Content disclaimer
@@ -80,6 +82,7 @@ namespace Author.Command.Service
                 {
                     if (request.DisclaimerContent.Where(dc => dc.LanguageId.Equals(item.LanguageId)).Count() == 0)
                     {
+                        contentToDelete.Add((int)item.LanguageId);
                         disclaimer.DisclaimerContents.Remove(item);
                         _contentDisclaimerRepository.Delete(item);
                     }
@@ -89,28 +92,44 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-
-            var disclaimerDocs = _context.GetAll(Constants.DisclaimersDiscriminator).Records as IEnumerable<DisclaimerCommandEvent>;
-            foreach (var content in disclaimer.DisclaimerContents)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventSourcing = new DisclaimerCommandEvent()
+                var disclaimerDocs = _context.GetAll(Constants.DisclaimersDiscriminator);
+                foreach (var content in disclaimer.DisclaimerContents)
                 {
-                    id = disclaimerDocs.ToList().Find(d => d.DisclaimerId == disclaimer.DisclaimerId && d.LanguageId == content.LanguageId).id,
-                    EventType = ServiceBusEventType.Update,
-                    DisclaimerId = disclaimer.DisclaimerId,
-                    Name = disclaimer.Name,
-                    CreatedBy = disclaimer.CreatedBy,
-                    CreatedDate = disclaimer.CreatedDate,
-                    UpdatedBy = disclaimer.UpdatedBy,
-                    UpdatedDate = disclaimer.UpdatedDate,
-                    DefaultCountryId = disclaimer.DefaultCountryId,
-                    ProviderName = content.ProviderName,
-                    ProviderTerms = content.ProviderTerms,
-                    LanguageId = content.LanguageId,
-                    DisclaimerContentId = content.DisclaimerContentId,
-                    Discriminator = Constants.DisclaimersDiscriminator
-                };
-                await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    var doc = disclaimerDocs.FirstOrDefault(d => d.GetPropertyValue<int>("DisclaimerId") == disclaimer.DisclaimerId
+                                    && d.GetPropertyValue<int?>("LanguageId") == content.LanguageId);
+                    var eventSourcing = new DisclaimerCommandEvent()
+                    {
+                        id = doc != null ? doc.GetPropertyValue<Guid>("id") : Guid.NewGuid(),
+                        EventType = doc != null ? ServiceBusEventType.Update : ServiceBusEventType.Create,
+                        DisclaimerId = disclaimer.DisclaimerId,
+                        Name = disclaimer.Name,
+                        CreatedBy = disclaimer.CreatedBy,
+                        CreatedDate = disclaimer.CreatedDate,
+                        UpdatedBy = disclaimer.UpdatedBy,
+                        UpdatedDate = disclaimer.UpdatedDate,
+                        DefaultCountryId = disclaimer.DefaultCountryId,
+                        ProviderName = content.ProviderName,
+                        ProviderTerms = content.ProviderTerms,
+                        LanguageId = content.LanguageId,
+                        DisclaimerContentId = content.DisclaimerContentId,
+                        Discriminator = Constants.DisclaimersDiscriminator
+                    };
+                    await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                }
+                foreach(int i in contentToDelete)
+                {
+                    var deleteEvt = new DisclaimerCommandEvent()
+                    {
+                        id = disclaimerDocs.FirstOrDefault(d => d.GetPropertyValue<int>("DisclaimerId") == disclaimer.DisclaimerId
+                              && d.GetPropertyValue<int>("LanguageId") == i).GetPropertyValue<Guid>("id"),
+                        EventType = ServiceBusEventType.Delete,
+                        Discriminator = Constants.DisclaimersDiscriminator
+                    };
+                    await _eventcontext.PublishThroughEventBusAsync(deleteEvt);
+                }
+                scope.Complete();
             }
             return response;
         }

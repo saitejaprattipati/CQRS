@@ -68,25 +68,29 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-            foreach(var content in _taxTag.TaxTagContents)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventSourcing = new TagGroupCommandEvent()
+                foreach (var content in _taxTag.TaxTagContents)
                 {
-                    EventType = ServiceBusEventType.Create,
-                    Discriminator = Constants.TaxTagsDiscriminator,
-                    TagId = _taxTag.TaxTagId,
-                    ParentTagId = _taxTag.ParentTagId,
-                    IsPublished = _taxTag.IsPublished,
-                    CreatedBy = _taxTag.CreatedBy,
-                    CreatedDate = _taxTag.CreatedDate,
-                    UpdatedBy = _taxTag.UpdatedBy,
-                    UpdatedDate = _taxTag.UpdatedDate,
-                    RelatedCountryIds = (from rc in _taxTag.TaxTagRelatedCountries where rc != null select rc.CountryId).ToList(),
-                    TagContentId = content.TaxTagContentId,
-                    LanguageId = content.LanguageId,
-                    DisplayName = content.DisplayName
-                };
-                await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    var eventSourcing = new TagGroupCommandEvent()
+                    {
+                        EventType = ServiceBusEventType.Create,
+                        Discriminator = Constants.TaxTagsDiscriminator,
+                        TagId = _taxTag.TaxTagId,
+                        ParentTagId = _taxTag.ParentTagId,
+                        IsPublished = _taxTag.IsPublished,
+                        CreatedBy = _taxTag.CreatedBy,
+                        CreatedDate = _taxTag.CreatedDate,
+                        UpdatedBy = _taxTag.UpdatedBy,
+                        UpdatedDate = _taxTag.UpdatedDate,
+                        RelatedCountryIds = (from rc in _taxTag.TaxTagRelatedCountries where rc != null select rc.CountryId).ToList(),
+                        TagContentId = content.TaxTagContentId,
+                        LanguageId = content.LanguageId,
+                        DisplayName = content.DisplayName
+                    };
+                    await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                }
+                scope.Complete();
             }
             return response;
         }

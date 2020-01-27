@@ -7,8 +7,8 @@ namespace Author.Command.Events
 {
    public class ArticleCommandEvent : IntegrationEvent
     {
-        [JsonProperty("ArticleID")]
-        public int ArticleID { get; set; }
+        [JsonProperty("ArticleId")]
+        public int ArticleId { get; set; }
 
         [JsonProperty("PublishedDate")]
         public DateTime PublishedDate { get; set; }

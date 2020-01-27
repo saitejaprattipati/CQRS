@@ -44,6 +44,7 @@ namespace Author.Command.Service
             List<int> objresourceGroupId = new List<int>();
             objresourceGroupId.Add(request.CountryGroupsId);
             var countryGroup = _CountryGroupsRepository.getCountryGroups(objresourceGroupId)[0];
+            var contentToDelete = new List<int>();
 
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -83,6 +84,7 @@ namespace Author.Command.Service
                 {
                     if (request.LanguageName.Where(s => s.LanguageId == countryGroupContent.LanguageId).Count() == 0)
                     {
+                        contentToDelete.Add((int)countryGroupContent.LanguageId);
                         countryGroup.CountryGroupContents.Remove(countryGroupContent);
                         _CountryGroupsRepository.Delete(countryGroupContent);
                     }
@@ -102,27 +104,43 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-
-            var countryGroupDocs = _context.GetAll(Constants.CountryGroupsDiscriminator).Records as IEnumerable<CountryGroupCommandEvent>;
-            foreach (var content in countryGroup.CountryGroupContents)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventSourcing = new CountryGroupCommandEvent()
+                var countryGroupDocs = _context.GetAll(Constants.CountryGroupsDiscriminator);
+                foreach (var content in countryGroup.CountryGroupContents)
                 {
-                    id = countryGroupDocs.ToList().Find(d => d.CountryGroupId == countryGroup.CountryGroupId && d.LanguageId == content.LanguageId).id,
-                    EventType = ServiceBusEventType.Update,
-                    CountryGroupId = countryGroup.CountryGroupId,
-                    IsPublished = countryGroup.IsPublished,
-                    CreatedBy = countryGroup.CreatedBy,
-                    CreatedDate = countryGroup.CreatedDate,
-                    UpdatedBy = countryGroup.UpdatedBy,
-                    UpdatedDate = countryGroup.UpdatedDate,
-                    GroupName = content.GroupName,
-                    CountryGroupContentId = content.CountryGroupContentId,
-                    LanguageId = content.LanguageId,
-                    AssociatedCountryIds = (from cg in countryGroup.CountryGroupAssociatedCountries where cg != null select cg.CountryId).ToList(),
-                    Discriminator = Constants.CountryGroupsDiscriminator
-                };
-                await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    var doc = countryGroupDocs.FirstOrDefault(d => d.GetPropertyValue<int>("CountryGroupId") == countryGroup.CountryGroupId
+                                                && d.GetPropertyValue<int?>("LanguageId") == content.LanguageId);
+                    var eventSourcing = new CountryGroupCommandEvent()
+                    {
+                        id = doc != null ? doc.GetPropertyValue<Guid>("id") : Guid.NewGuid(),
+                        EventType = doc != null ? ServiceBusEventType.Update : ServiceBusEventType.Create,
+                        CountryGroupId = countryGroup.CountryGroupId,
+                        IsPublished = countryGroup.IsPublished,
+                        CreatedBy = countryGroup.CreatedBy,
+                        CreatedDate = countryGroup.CreatedDate,
+                        UpdatedBy = countryGroup.UpdatedBy,
+                        UpdatedDate = countryGroup.UpdatedDate,
+                        GroupName = content.GroupName,
+                        CountryGroupContentId = content.CountryGroupContentId,
+                        LanguageId = content.LanguageId,
+                        AssociatedCountryIds = (from cg in countryGroup.CountryGroupAssociatedCountries where cg != null select cg.CountryId).ToList(),
+                        Discriminator = Constants.CountryGroupsDiscriminator
+                    };
+                    await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                }
+                foreach(int i in contentToDelete)
+                {
+                    var deleteEvt = new CountryGroupCommandEvent()
+                    {
+                        id = countryGroupDocs.FirstOrDefault(d => d.GetPropertyValue<int>("CountryGroupId") == countryGroup.CountryGroupId
+                              && d.GetPropertyValue<int>("LanguageId") == i).GetPropertyValue<Guid>("id"),
+                        EventType = ServiceBusEventType.Delete,
+                        Discriminator = Constants.CountryGroupsDiscriminator
+                    };
+                    await _Eventcontext.PublishThroughEventBusAsync(deleteEvt);
+                }
+                scope.Complete();
             }
             return response;
         }

@@ -62,27 +62,34 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-            foreach(var content in siteDisclaimer.ArticleContents)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventSourcing = new ArticleCommandEvent()
+                foreach (var content in siteDisclaimer.ArticleContents)
                 {
-                    EventType = ServiceBusEventType.Create,
-                    Discriminator = Constants.ArticlesDiscriminator,
-                    CreatedBy = siteDisclaimer.CreatedBy,
-                    CreatedDate = siteDisclaimer.CreatedDate,
-                    UpdatedBy = siteDisclaimer.UpdatedBy,
-                    UpdatedDate = siteDisclaimer.UpdatedDate,
-                    PublishedDate = siteDisclaimer.PublishedDate,
-                    IsPublished = siteDisclaimer.IsPublished,
-                    Author = siteDisclaimer.Author,
-                    Type = siteDisclaimer.Type,
-                    SubType = siteDisclaimer.SubType,
-                    LanguageId = content.LanguageId,
-                    Title = content.Title,
-                    TeaserText = content.TeaserText,
-                    Content = content.Content
-                };
-                await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    var eventSourcing = new ArticleCommandEvent()
+                    {
+                        EventType = ServiceBusEventType.Create,
+                        Discriminator = Constants.ArticlesDiscriminator,
+                        ArticleId = siteDisclaimer.ArticleId,
+                        CreatedBy = siteDisclaimer.CreatedBy ?? string.Empty,
+                        CreatedDate = siteDisclaimer.CreatedDate,
+                        UpdatedBy = siteDisclaimer.UpdatedBy ?? string.Empty,
+                        UpdatedDate = siteDisclaimer.UpdatedDate,
+                        PublishedDate = siteDisclaimer.PublishedDate,
+                        IsPublished = siteDisclaimer.IsPublished,
+                        Author = siteDisclaimer.Author ?? string.Empty,
+                        Type = siteDisclaimer.Type,
+                        SubType = siteDisclaimer.SubType,
+                        LanguageId = content.LanguageId,
+                        Title = content.Title,
+                        TeaserText = content.TeaserText,
+                        Content = content.Content,
+                        ArticleContentId = content.ArticleContentId,
+                        DisclaimerId = siteDisclaimer.DisclaimerId
+                    };
+                    await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                }
+                scope.Complete();
             }
 
             return response;

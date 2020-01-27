@@ -112,17 +112,17 @@ namespace Author.Command.Service
                     ImageType = _imagesPNG.ImageType,
                     Name = _imagesPNG.Name,
                     CountryId = _imagesPNG.CountryId,
-                    Keyword = _imagesPNG.Keyword,
-                    Source = _imagesPNG.Source,
-                    Description = _imagesPNG.Description,
-                    Copyright = _imagesPNG.Copyright,
+                    Keyword = _imagesPNG.Keyword ?? string.Empty,
+                    Source = _imagesPNG.Source ?? string.Empty,
+                    Description = _imagesPNG.Description ?? string.Empty,
+                    Copyright = _imagesPNG.Copyright ?? string.Empty,
                     FilePath = _imagesPNG.FilePath,
                     FileType = _imagesPNG.FileType,
                     CreatedBy = _imagesPNG.CreatedBy,
                     CreatedDate = _imagesPNG.CreatedDate,
                     UpdatedBy = _imagesPNG.UpdatedBy,
                     UpdatedDate = _imagesPNG.UpdatedDate,
-                    EmpGuid = _imagesPNG.EmpGuid,
+                    EmpGuid = _imagesPNG.EmpGuid ?? string.Empty,
                     IsEdited = false
                 };
                 await _Eventcontext.PublishThroughEventBusAsync(pngImageEvent);
@@ -135,17 +135,17 @@ namespace Author.Command.Service
                     ImageType = _imagesSVG.ImageType,
                     Name = _imagesSVG.Name,
                     CountryId = _imagesSVG.CountryId,
-                    Keyword = _imagesSVG.Keyword,
-                    Source = _imagesSVG.Source,
-                    Description = _imagesSVG.Description,
-                    Copyright = _imagesSVG.Copyright,
+                    Keyword = _imagesSVG.Keyword ?? string.Empty,
+                    Source = _imagesSVG.Source ?? string.Empty,
+                    Description = _imagesSVG.Description ?? string.Empty,
+                    Copyright = _imagesSVG.Copyright ?? string.Empty,
                     FilePath = _imagesSVG.FilePath,
                     FileType = _imagesSVG.FileType,
                     CreatedBy = _imagesSVG.CreatedBy,
                     CreatedDate = _imagesSVG.CreatedDate,
                     UpdatedBy = _imagesSVG.UpdatedBy,
                     UpdatedDate = _imagesSVG.UpdatedDate,
-                    EmpGuid = _imagesSVG.EmpGuid,
+                    EmpGuid = _imagesSVG.EmpGuid ?? string.Empty,
                     IsEdited = false
                 };
                 await _Eventcontext.PublishThroughEventBusAsync(svgImageEvent);
@@ -165,12 +165,13 @@ namespace Author.Command.Service
                         UpdatedDate = _Country.UpdatedDate,
                         CountryContentId = content.CountryContentId,
                         DisplayName = content.DisplayName,
-                        DsiplayNameShort = content.DisplayNameShort,
+                        DisplayNameShort = content.DisplayNameShort,
                         LanguageId = content.LanguageId,
                         Discriminator = Constants.CountriesDiscriminator
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }
+                scope.Complete();
             }
             return response;
         }
