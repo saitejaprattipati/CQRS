@@ -9,9 +9,11 @@ namespace Author.Core.SearchApi.Persistence
     {
         SearchIndexClient _indexClient;
         SearchServiceClient _serviceClient;
-        public SearchRepository(SearchServiceClient serviceClient , SearchIndexClient indexClient)
+        string _searchKey, _searchName;
+        public SearchRepository(SearchServiceClient serviceClient, string searchName, string searchKey)
         {
-            _indexClient = indexClient;
+            _searchKey = searchKey;
+            _searchName = searchName;
             _serviceClient = serviceClient;
         }
         public void CreateIndex(string indexName)
@@ -34,8 +36,9 @@ namespace Author.Core.SearchApi.Persistence
                 _serviceClient.Indexes.DeleteAsync(indexName);
             }
         }
-        public void UploadIndexData(List<publicindex> data)
+        public void UploadIndexData(List<publicindex> data, string searchIndex)
         {
+            _indexClient = new SearchIndexClient(_searchName, searchIndex, new SearchCredentials(_searchKey));
             var batch = IndexBatch.Upload(data);
 
             try

@@ -12,6 +12,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+using System.IO;
+using Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.QuickPulse;
+using Microsoft.ApplicationInsights.Extensibility;
+using Author.Core.SearchApi.Telemetry;
 
 namespace Author.Core.SearchApi
 {
@@ -28,11 +34,38 @@ namespace Author.Core.SearchApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            //services.AddSwaggerGen(c =>
+            //{
+            //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+            //});
+            services.AddSingleton<ITelemetryInitializer, AppinsightsTelemetry>();
+            services.AddApplicationInsightsTelemetry();
+            services.ConfigureTelemetryModule<QuickPulseTelemetryModule>((module, o) => module.AuthenticationApiKey = "66f5037c-21cc-4736-97ef-6d065ec25c12");
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "ToDo API",
+                    Description = "Search API",
+                    TermsOfService = new Uri("https://example.com/terms"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Shayne Boyer",
+                        Email = string.Empty,
+                        Url = new Uri("https://twitter.com/spboyer"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "Use under LICX",
+                        Url = new Uri("https://example.com/license"),
+                    }
+                });
+            });
             services.AddSingleton<ISearchRepository, SearchRepository>(sp=>{
-                var SSName = Configuration[""];
-                var SSQueryApiKey = Configuration[""];
-                var SSIndex = Configuration[""];                
-                return new SearchRepository(new SearchServiceClient(SSName, new SearchCredentials(SSQueryApiKey)),new SearchIndexClient(SSName, SSIndex, new SearchCredentials(SSQueryApiKey)));
+                var SSName = Configuration["SearchName"];
+                var SSQueryApiKey = Configuration["SearchKey"];             
+                return new SearchRepository(new SearchServiceClient(SSName, new SearchCredentials(SSQueryApiKey)), SSName, SSQueryApiKey);
             });
         }
 
@@ -42,14 +75,15 @@ namespace Author.Core.SearchApi
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-            }
-
-            app.UseHttpsRedirection();
-
+            }                     
             app.UseRouting();
-
             app.UseAuthorization();
-
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
+            app.UseStaticFiles();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

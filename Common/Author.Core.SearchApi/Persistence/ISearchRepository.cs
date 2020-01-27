@@ -11,6 +11,6 @@ namespace Author.Core.SearchApi.Persistence
     {
         public void CreateIndex(string indexName);
         public void DeleteIndex(string indexName);
-        public void UploadIndexData(List<publicindex> data);
+        public void UploadIndexData(List<publicindex> data, string searchIndex);
     }
 }

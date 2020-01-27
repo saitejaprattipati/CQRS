@@ -2,10 +2,13 @@ using Author.Query.New.API.Constants;
 using Author.Query.New.API.Extensions;
 using Author.Query.New.API.GraphQL;
 using Author.Query.New.API.Middleware;
+using Author.Query.New.API.Telemetry;
 using Boxed.AspNetCore;
 using GraphQL.Server;
 using GraphQL.Server.Ui.Playground;
 using GraphQL.Server.Ui.Voyager;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.QuickPulse;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -40,7 +43,8 @@ namespace Author.Query.New.API
         /// called by the ASP.NET runtime. See
         /// http://blogs.msdn.com/b/webdev/archive/2014/06/17/dependency-injection-in-asp-net-vnext.aspx
         /// </summary>
-        public virtual void ConfigureServices(IServiceCollection services) =>
+        public virtual void ConfigureServices(IServiceCollection services)
+        =>
             services
             //.Configure<IISServerOptions>(options => options.AllowSynchronousIO = true)
             .Configure<KestrelServerOptions>(options => { options.AllowSynchronousIO = true; })
@@ -60,8 +64,11 @@ namespace Author.Query.New.API
             .Services
             .AddCustomGraphQL(this.configuration, this.webHostEnvironment)
             .AddGraphQLResolvers()
+            .AddSingleton<ITelemetryInitializer, AppinsightsTelemetry>()
             .AddProjectRepositories()
-            .AddProjectSchemas();
+            .AddProjectSchemas()
+            .AddApplicationInsightsTelemetry()
+            .ConfigureTelemetryModule<QuickPulseTelemetryModule>((module, o) => module.AuthenticationApiKey = "66f5037c-21cc-4736-97ef-6d065ec25c12");
 
         /// <summary>
         /// Configures the application and HTTP request pipeline. Configure is called after ConfigureServices is
