@@ -5,9 +5,7 @@ namespace Author.Query.Persistence.Interfaces
 {
     public interface ICountryService
     {
-        Task<CountryResult> GetAllCountriesAsync(string locale);
-
-        Task<CountryResult> GetAllCountriesAsync(LanguageDTO language);
+        Task<CountryResult> GetAllCountriesAsync(LanguageDTO language,int pageNo,int pageSize);
 
         Task<CountryDTO> GetCountryAsync(LanguageDTO language, int countryId);
     }
