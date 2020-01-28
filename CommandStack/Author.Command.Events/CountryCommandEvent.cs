@@ -41,7 +41,7 @@ namespace Author.Command.Events
         [JsonProperty("DisplayName")]
         public string DisplayName { get; set; }
 
-        [JsonProperty("DsiplayNameShort")]
-        public string DsiplayNameShort { get; set; }
+        [JsonProperty("DisplayNameShort")]
+        public string DisplayNameShort { get; set; }
     }
 }

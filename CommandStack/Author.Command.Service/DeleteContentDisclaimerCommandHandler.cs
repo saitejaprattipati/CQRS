@@ -2,8 +2,11 @@
 using Author.Command.Events;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
+using Author.Core.Framework;
 using Author.Core.Framework.ExceptionHandling;
+using Author.Core.Services.Persistence.CosmosDB;
 using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -16,11 +19,13 @@ namespace Author.Command.Service
     {
         private readonly IIntegrationEventPublisherServiceService _eventcontext;
         private readonly ContentDisclaimerRepository _contentDisclaimerRepository;
+        private readonly CosmosDBContext _context;
 
         public DeleteContentDisclaimerCommandHandler(IIntegrationEventPublisherServiceService eventcontext)
         {
             _eventcontext = eventcontext;
             _contentDisclaimerRepository = new ContentDisclaimerRepository(new TaxatHand_StgContext());
+            _context = new CosmosDBContext();
         }
 
         public async Task<DeleteContentDisclaimerCommandResponse> Handle(DeleteContentDisclaimerCommand request, CancellationToken cancellationToken)
@@ -54,12 +59,23 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-            foreach(var content in disclaimers)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventSourcing = new DisclaimerCommandEvent()
+                var disclaimersDocs = _context.GetAll(Constants.DisclaimersDiscriminator);
+                foreach (var disclaimer in disclaimers)
                 {
-
-                };
+                    foreach (var doc in disclaimersDocs.Where(d => d.GetPropertyValue<int>("DisclaimerId") == disclaimer.DisclaimerId))
+                    {
+                        var eventSourcing = new DisclaimerCommandEvent()
+                        {
+                            id = doc.GetPropertyValue<Guid>("id"),
+                            EventType = ServiceBusEventType.Delete,
+                            Discriminator = Constants.DisclaimersDiscriminator
+                        };
+                        await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    }
+                }
+                scope.Complete();
             }
             return response;
         }

@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using System.Transactions;
 using Author.Core.Framework.ExceptionHandling;
 using Author.Core.Framework;
+using Author.Core.Services.Persistence.CosmosDB;
 
 namespace Author.Command.Service
 {
@@ -22,12 +23,15 @@ namespace Author.Command.Service
         private readonly IIntegrationEventPublisherServiceService _Eventcontext;
         private readonly TagGroupsRepository _taxTagsRepository;
         private readonly ILogger _logger;
+        private readonly CosmosDBContext _context;
+
 
         public UpdateTagGroupsCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<CreateTagGroupsCommandHandler> logger)
         {
             _taxTagsRepository = new TagGroupsRepository(new TaxatHand_StgContext());
             _Eventcontext = Eventcontext;
             _logger = logger;
+            _context = new CosmosDBContext();
         }
         public async Task<UpdateTagGroupsCommandResponse> Handle(UpdateTagsCommand request, CancellationToken cancellationToken)
         {
@@ -38,6 +42,7 @@ namespace Author.Command.Service
             List<int> objTagGroups = new List<int>();
             objTagGroups.Add(request.TagGroupsId);
             var taxGroup = _taxTagsRepository.GetTagGroups(objTagGroups)[0];
+            var contentToDelete = new List<int>();
 
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -83,6 +88,7 @@ namespace Author.Command.Service
                 {
                     if (request.LanguageName.Where(s => s.LanguageId == resourceContent.LanguageId).Count() == 0)
                     {
+                        contentToDelete.Add((int)resourceContent.LanguageId);
                         taxGroup.TaxTagContents.Remove(resourceContent);
                         _taxTagsRepository.Delete(resourceContent);
                     }
@@ -102,25 +108,44 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-            foreach (var content in taxGroup.TaxTagContents)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventSourcing = new TagGroupCommandEvent()
+                var taggroupDocs = _context.GetAll(Constants.TaxTagsDiscriminator);
+                foreach (var content in taxGroup.TaxTagContents)
                 {
-                    EventType = (int)ServiceBusEventType.Update,
-                    Discriminator = Constants.TaxTagsDiscriminator,
-                    TagId = taxGroup.TaxTagId,
-                    ParentTagId = taxGroup.ParentTagId,
-                    IsPublished = taxGroup.IsPublished,
-                    CreatedBy = taxGroup.CreatedBy,
-                    CreatedDate = taxGroup.CreatedDate,
-                    UpdatedBy = taxGroup.UpdatedBy,
-                    UpdatedDate = taxGroup.UpdatedDate,
-                    RelatedCountryIds = (from rc in taxGroup.TaxTagRelatedCountries where rc != null select rc.CountryId).ToList(),
-                    TagContentId = content.TaxTagContentId,
-                    LanguageId = content.LanguageId,
-                    DisplayName = content.DisplayName
-                };
-                await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    var doc = taggroupDocs.FirstOrDefault(d => d.GetPropertyValue<int>("TaxTagId") == taxGroup.TaxTagId
+                                && d.GetPropertyValue<int?>("LanguageId") == content.LanguageId);
+                    var eventSourcing = new TagGroupCommandEvent()
+                    {
+                        id = doc != null ? doc.GetPropertyValue<Guid>("id") : Guid.NewGuid(),
+                        EventType = doc != null ? ServiceBusEventType.Update : ServiceBusEventType.Create,
+                        Discriminator = Constants.TaxTagsDiscriminator,
+                        TagId = taxGroup.TaxTagId,
+                        ParentTagId = taxGroup.ParentTagId,
+                        IsPublished = taxGroup.IsPublished,
+                        CreatedBy = taxGroup.CreatedBy,
+                        CreatedDate = taxGroup.CreatedDate,
+                        UpdatedBy = taxGroup.UpdatedBy,
+                        UpdatedDate = taxGroup.UpdatedDate,
+                        RelatedCountryIds = (from rc in taxGroup.TaxTagRelatedCountries where rc != null select rc.CountryId).ToList(),
+                        TagContentId = content.TaxTagContentId,
+                        LanguageId = content.LanguageId,
+                        DisplayName = content.DisplayName
+                    };
+                    await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                }
+                foreach(int i in contentToDelete)
+                {
+                    var deleteEvt = new TagGroupCommandEvent()
+                    {
+                        id = taggroupDocs.FirstOrDefault(d => d.GetPropertyValue<int>("TagId") == taxGroup.TaxTagId
+                              && d.GetPropertyValue<int?>("LanguageId") == i).GetPropertyValue<Guid>("id"),
+                        EventType = ServiceBusEventType.Delete,
+                        Discriminator = Constants.TaxTagsDiscriminator
+                    };
+                    await _Eventcontext.PublishThroughEventBusAsync(deleteEvt);
+                }
+                scope.Complete();
             }
             return response;
         }

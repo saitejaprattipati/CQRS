@@ -12,7 +12,8 @@ namespace Author.Core.Framework
         public const string ResourceGroupsDiscriminator = "ResourceGroups";
         public const string SystemUsersDiscriminator = "SystemUsers";
         public const string TaxTagsDiscriminator = "TaxTags";
-        public const string Discriminator = "";
+        public const string ImagesDiscriminator = "Images";
+        public const string ArticlesDiscriminator = "Articles";
     }
 
     public enum SystemUserRole
@@ -87,10 +88,10 @@ namespace Author.Core.Framework
         Profile
     }
 
-    public enum ServiceBusEventType
+    public static class ServiceBusEventType
     {
-        Create = 1,
-        Update,
-        Delete
+        public const string Create = "Create";
+        public const string Update = "Update";
+        public const string Delete = "Delete";
     }
 }

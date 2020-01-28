@@ -59,24 +59,28 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-            foreach(var contnet in _resourceGroup.ResourceGroupContents)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventSourcing = new ResourceGroupCommandEvent()
+                foreach (var contnet in _resourceGroup.ResourceGroupContents)
                 {
-                    EventType = (int)ServiceBusEventType.Create,
-                    Discriminator = Constants.ResourceGroupsDiscriminator,
-                    ResourceGroupId = _resourceGroup.ResourceGroupId,
-                    IsPublished = _resourceGroup.IsPublished,
-                    CreatedBy = _resourceGroup.CreatedBy,
-                    CreatedDate = _resourceGroup.CreatedDate,
-                    UpdatedBy = _resourceGroup.UpdatedBy,
-                    UpdatedDate = _resourceGroup.UpdatedDate,
-                    Position = _resourceGroup.Position,
-                    ResourceGroupContentId = contnet.ResourceGroupContentId,
-                    LanguageId = contnet.LanguageId,
-                    GroupName = contnet.GroupName
-                };
-                await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    var eventSourcing = new ResourceGroupCommandEvent()
+                    {
+                        EventType = ServiceBusEventType.Create,
+                        Discriminator = Constants.ResourceGroupsDiscriminator,
+                        ResourceGroupId = _resourceGroup.ResourceGroupId,
+                        IsPublished = _resourceGroup.IsPublished,
+                        CreatedBy = _resourceGroup.CreatedBy,
+                        CreatedDate = _resourceGroup.CreatedDate,
+                        UpdatedBy = _resourceGroup.UpdatedBy,
+                        UpdatedDate = _resourceGroup.UpdatedDate,
+                        Position = _resourceGroup.Position,
+                        ResourceGroupContentId = contnet.ResourceGroupContentId,
+                        LanguageId = contnet.LanguageId,
+                        GroupName = contnet.GroupName
+                    };
+                    await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                }
+                scope.Complete();
             }
             return response;
         }

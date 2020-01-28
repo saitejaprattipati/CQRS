@@ -55,6 +55,11 @@ namespace Author.Command.Persistence
             _context.Entry(user).Property(x => x.CreatedDate).IsModified = false;
         }
 
+        public void Update(SystemUserAssociatedCountries sysuserassociatedcountries)
+        {
+            _context.Entry(sysuserassociatedcountries).State = EntityState.Modified;
+        }
+
         public async Task<bool> RemoveSystemUserAssociatedCountriesAsync(int systemuserId)
         {
             var existingSysUserCountries = await _context.SystemUserAssociatedCountries.Where(sy => sy.SystemUserId.Equals(systemuserId)).ToListAsync();
@@ -96,6 +101,8 @@ namespace Author.Command.Persistence
         void Update(SystemUsers user);
 
         SystemUserAssociatedCountries Add(SystemUserAssociatedCountries sysuserassociatedcountries);
+
+        void Update(SystemUserAssociatedCountries sysuserassociatedcountries);
 
         bool UserExists(string email, int systemUserId);
 
