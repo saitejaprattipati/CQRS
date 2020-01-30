@@ -19,6 +19,7 @@ namespace Author.Query.Persistence.Mapping
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => Helper.ReplaceChars(src.DisplayName)))
                 .ForMember(dest => dest.Path, opt => opt.MapFrom(src => Helper.ReplaceChars(src.DisplayName)));
             CreateMap<Images, ImageDTO>();
+            CreateMap<Disclaimers, DisclaimerDTO>();
             CreateMap<List<Images>, List<ImageDTO>>();
         }
     }

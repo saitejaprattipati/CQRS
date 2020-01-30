@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Author.Query.Domain.DBAggregate
+﻿namespace Author.Query.Domain.DBAggregate
 {
-   public class Disclaimers
+    public class Disclaimers
     {
         /// <summary>gets or sets the id </summary>
         ///// <value>It is of type integer </value>

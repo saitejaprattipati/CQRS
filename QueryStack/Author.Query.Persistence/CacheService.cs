@@ -80,8 +80,8 @@ namespace Author.Query.Persistence
             if (cacheData.IsNullOrEmpty)
             {
                 // Get data from database
-                var dbData = await _dbContext.Set<TEntity>().ProjectTo<TEntityDTO>(_mapper.ConfigurationProvider).ToListAsync();
-                var status = await AddAsync(dbData, cacheKey);
+                var dbData = await _dbContext.Set<TEntity>().ProjectTo<TEntityDTO>(_mapper.ConfigurationProvider).AsNoTracking().ToListAsync();
+                await AddAsync(dbData, cacheKey);
                 return dbData;
             }
             return JsonConvert.DeserializeObject<List<TEntityDTO>>(cacheData);
