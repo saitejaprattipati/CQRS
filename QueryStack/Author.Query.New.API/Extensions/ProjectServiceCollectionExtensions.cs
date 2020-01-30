@@ -4,6 +4,8 @@ using Author.Query.New.API.GraphQL.Resolvers;
 using Author.Query.Persistence;
 using Author.Query.Persistence.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using NetCore.AutoRegisterDi;
+using System.Reflection;
 
 namespace Author.Query.New.API.Extensions
 {
@@ -27,13 +29,20 @@ namespace Author.Query.New.API.Extensions
                 .AddScoped<IImageService, ImageService>()
                 .AddScoped(typeof(ICacheService<,>), typeof(CacheService<,>))
                 .AddScoped<ICountryService, CountryService>()
-                .AddScoped<ICountryGroupService, CountryGroupService>();
-                
+                .AddScoped<ICountryGroupService, CountryGroupService>()
+                .AddScoped<IDisclaimerService, DisclaimerService>();
+
+        //public static IServiceCollection AddProjectRepositories(this IServiceCollection services) =>
+        //    services.RegisterAssemblyPublicNonGenericClasses(Assembly.GetAssembly(typeof(CommonService)))
+        //    //services.RegisterAssemblyPublicNonGenericClasses(Assembly.GetExecutingAssembly())
+        //            .Where(c => c.Name.EndsWith("Persistence"))
+        //            .AsPublicImplementedInterfaces(ServiceLifetime.Scoped);
 
         public static IServiceCollection AddGraphQLResolvers(this IServiceCollection services) =>
-           services
-               .AddScoped<ICountriesResolver, CountriesResolver>()
-               .AddScoped<ICountryGroupsResolver, CountryGroupsResolver>();
+        services
+            .AddScoped<ICountriesResolver, CountriesResolver>()
+            .AddScoped<ICountryGroupsResolver, CountryGroupsResolver>()
+            .AddScoped<IDisclaimerResolver, DisclaimerResolver>();
 
         /// <summary>
         /// Add project GraphQL schema and web socket types.

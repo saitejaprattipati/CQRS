@@ -29,10 +29,9 @@ namespace Author.Query.Persistence
         {
             var localeLangId = language.LanguageId;
             var dftLanguageId = int.Parse(_appSettings.Value.DefaultLanguageId);
-            var countries = new CountryResult();
-
+            
             // By default pick the localLanguage value
-            countries = await GetAllCountriesDataAsync(localeLangId, pageNo, pageSize);
+            var countries = await GetAllCountriesDataAsync(localeLangId, pageNo, pageSize);
 
             // If localLanguage data is not available then pull the data based on default language
             if (countries.Countries.Count == 0)
