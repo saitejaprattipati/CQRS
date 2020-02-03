@@ -34,6 +34,7 @@ namespace Author.Query.Persistence
         public DbSet<TaxTags> TaxTags { get; set; }
         public DbSet<Articles> Articles { get; set; }
         public DbSet<Images> Images { get; set; }
+        public DbSet<SearchSource> SearchSource { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -11,7 +11,7 @@ namespace Author.Core.SearchApi.Domain
     {
         [IsFilterable, IsSearchable, IsSortable, IsFacetable]
         [System.ComponentModel.DataAnnotations.Key]
-        public string Image_Id { get; set; }
+        public string ImageURL { get; set; }
 
         [IsFilterable, IsSearchable, IsSortable, IsFacetable]
         [Analyzer(AnalyzerName.AsString.EnLucene)]
@@ -21,9 +21,9 @@ namespace Author.Core.SearchApi.Domain
         [Analyzer(AnalyzerName.AsString.EnLucene)]
         public string TeaserText { get; set; }
 
-        [IsFilterable, IsSearchable, IsSortable, IsFacetable]
+        [IsFilterable, IsSearchable, IsFacetable]
         [Analyzer(AnalyzerName.AsString.FrLucene)]
-        public string RelatedCountries { get; set; }
+        public List<string> RelatedCountries { get; set; }
 
         [IsFilterable, IsSearchable, IsSortable, IsFacetable]
         public string UpdatedDate { get; set; }

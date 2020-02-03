@@ -65,7 +65,7 @@ namespace Author.Core.SearchApi
             services.AddSingleton<ISearchRepository, SearchRepository>(sp=>{
                 var SSName = Configuration["SearchName"];
                 var SSQueryApiKey = Configuration["SearchKey"];             
-                return new SearchRepository(new SearchServiceClient(SSName, new SearchCredentials(SSQueryApiKey)), SSName, SSQueryApiKey);
+                return new SearchRepository(new SearchServiceClient(SSName, new SearchCredentials(SSQueryApiKey)), SSName, SSQueryApiKey, Configuration);
             });
         }
 

@@ -31,7 +31,7 @@ namespace Author.Core.SearchApi.Controllers
         /// <response code="200">Index Created</response>
         /// <response code="500">Internal server error message</response> 
         [HttpPost]
-        [Route("createindex")]
+        [Route("createindex/{indexName}")]
         [ProducesResponseType(typeof(string), 201)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> CreateIndex(string indexName)
@@ -78,6 +78,102 @@ namespace Author.Core.SearchApi.Controllers
             _searchRepo.UploadIndexData(data, searchIndex);
             await Task.CompletedTask;
             return Ok("Index Data Uploaded");
+        }
+        /// <summary>
+        /// This is Http POST action that inserts data into index for search service
+        /// </summary>
+        /// <param name="data">This is data. Represents data of the index</param>
+        /// <param name="indexName">This is the indexName the data to be inserted</param>
+        /// <returns cref="IActionResult">
+        ///     It Returns HTTP action results <see cref="OkObjectResult"/> with <see cref="Author.Core.SearchApi"/>.
+        /// </returns>     
+        /// <response code="200">Data inserted into Index</response>
+        /// <response code="500">Internal server error message</response> 
+        [HttpPost]
+        [Route("suggesteData/{highlights}/{fuzzy}/{term}/{searchIndex}")]
+        [ProducesResponseType(typeof(string), 201)]
+        [ProducesResponseType(typeof(string), 400)]
+        public IActionResult SuggesteData(bool highlights, bool fuzzy, string term, string searchIndex)
+        {
+            return Ok( _searchRepo.SuggestData(highlights, fuzzy, term, searchIndex));
+        }
+        /// <summary>
+        /// This is Http POST action that inserts data into index for search service
+        /// </summary>
+        /// <param name="data">This is data. Represents data of the index</param>
+        /// <param name="indexName">This is the indexName the data to be inserted</param>
+        /// <returns cref="IActionResult">
+        ///     It Returns HTTP action results <see cref="OkObjectResult"/> with <see cref="Author.Core.SearchApi"/>.
+        /// </returns>     
+        /// <response code="200">Data inserted into Index</response>
+        /// <response code="500">Internal server error message</response> 
+        [HttpPost]
+        [Route("autocompletedata/{fuzzy}/{term}/{searchIndex}")]
+        [ProducesResponseType(typeof(string), 201)]
+        [ProducesResponseType(typeof(string), 400)]
+        public IActionResult AutocompleteData(bool fuzzy, string term, string searchIndex)
+        {
+            return Ok(_searchRepo.AutoCompleteData(term, searchIndex, fuzzy));
+        }
+        /// <summary>
+        /// This is Http POST action that inserts data into index for search service
+        /// </summary>
+        /// <param name="data">This is data. Represents data of the index</param>
+        /// <param name="indexName">This is the indexName the data to be inserted</param>
+        /// <returns cref="IActionResult">
+        ///     It Returns HTTP action results <see cref="OkObjectResult"/> with <see cref="Author.Core.SearchApi"/>.
+        /// </returns>     
+        /// <response code="200">Data inserted into Index</response>
+        /// <response code="500">Internal server error message</response> 
+        [HttpPost]
+        [Route("Createdatasource/{collectionName}/{datasourceName}")]
+        [ProducesResponseType(typeof(string), 201)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> CreateDatasource(string collectionName, string datasourceName)
+        {
+            _searchRepo.CreateDatasource(collectionName, datasourceName);
+            await Task.CompletedTask;
+            return Ok("Datasource Created");
+        }
+        /// <summary>
+        /// This is Http POST action that inserts data into index for search service
+        /// </summary>
+        /// <param name="data">This is data. Represents data of the index</param>
+        /// <param name="indexName">This is the indexName the data to be inserted</param>
+        /// <returns cref="IActionResult">
+        ///     It Returns HTTP action results <see cref="OkObjectResult"/> with <see cref="Author.Core.SearchApi"/>.
+        /// </returns>     
+        /// <response code="200">Data inserted into Index</response>
+        /// <response code="500">Internal server error message</response> 
+        [HttpPost]
+        [Route("createindexer/{indexName}/{indexerName}/{datasourceName}")]
+        [ProducesResponseType(typeof(string), 201)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> CreateIndexer(string indexName, string indexerName, string datasourceName)
+        {
+          _searchRepo.CreateIndexer(indexName, indexerName, datasourceName);
+            await Task.CompletedTask;
+            return Ok("Indexer Created");
+        }
+        /// <summary>
+        /// This is Http POST action that inserts data into index for search service
+        /// </summary>
+        /// <param name="data">This is data. Represents data of the index</param>
+        /// <param name="indexName">This is the indexName the data to be inserted</param>
+        /// <returns cref="IActionResult">
+        ///     It Returns HTTP action results <see cref="OkObjectResult"/> with <see cref="Author.Core.SearchApi"/>.
+        /// </returns>     
+        /// <response code="200">Data inserted into Index</response>
+        /// <response code="500">Internal server error message</response> 
+        [HttpPost]
+        [Route("runindexer/{indexerName}")]
+        [ProducesResponseType(typeof(string), 201)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> RunIndexer(string indexerName)
+        {
+           _searchRepo.RunIndexer(indexerName);
+            await Task.CompletedTask;
+            return Ok("Indexer Run Successfully");
         }
     }
 }
