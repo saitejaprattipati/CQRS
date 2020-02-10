@@ -102,7 +102,7 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("postCodeEdited")]
-        public int? LanguageId { get; set; }
+        public int LanguageId { get; set; }
 
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>

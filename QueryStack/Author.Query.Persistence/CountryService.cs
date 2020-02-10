@@ -236,9 +236,13 @@ namespace Author.Query.Persistence
             int pageNo = 1, pageSize = 100;
             var images = await _cacheService.GetAllAsync("imagesCacheKey");
 
-            var countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(languageId))
-                                    .Select(c => new { c.CountryId, c.DisplayName, c.PNGImageId, c.SVGImageId, })
-                                    .Skip((pageNo - 1) * 100).Take(pageSize).AsNoTracking().ToListAsync();
+            //var countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(languageId))
+            //                        .Select(c => new { c.CountryId, c.DisplayName, c.PNGImageId, c.SVGImageId, })
+            //                        .Skip((pageNo - 1) * 100).Take(pageSize).AsNoTracking().ToListAsync();
+            var countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true))
+                                    .Select(c => new { c.CountryId, c.DisplayName, c.PNGImageId, c.SVGImageId,c. LanguageId })
+                                    .AsNoTracking().ToListAsync();
+            countries =  countries.Where(s=>s.LanguageId.Equals(languageId)).ToList();
 
             if (countries.Count == 0)
             {

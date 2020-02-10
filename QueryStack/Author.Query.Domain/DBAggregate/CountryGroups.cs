@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+
 
 namespace Author.Query.Domain.DBAggregate
 {
-   public class CountryGroups
+    public class CountryGroups
     {
         /// <summary>gets or sets the id </summary>
         ///// <value>It is of type integer </value>
@@ -13,12 +12,12 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the AddressId </summary>
         ///// <value>It is of type integer </value>
         //[JsonProperty("addressId")]
-        public int? CountryGroupId { get; set; }
+        public int CountryGroupId { get; set; }
 
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>
         //[JsonProperty("postCode")]
-        public bool? IsPublished { get; set; }
+        public bool IsPublished { get; set; }
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("postCodeEdited")]
@@ -53,9 +52,12 @@ namespace Author.Query.Domain.DBAggregate
         //[JsonProperty("addressContentId")]
         public string GroupName { get; set; }
 
-        /// <summary>gets or sets LanguageId </summary>
-        /// <value>It is of type integer </value>
-        //[JsonProperty("languageId")]
-        public int? CountryId { get; set; }
+        public ICollection<RelatedEntityId> AssociatedCountryIds { get; set; }
     }
+
+    public class RelatedEntityId
+    {
+        public int IdVal { get; set; }
+    }
+
 }
