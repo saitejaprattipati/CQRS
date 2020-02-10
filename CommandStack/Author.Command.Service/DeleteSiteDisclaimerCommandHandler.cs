@@ -1,8 +1,12 @@
 ﻿using Author.Command.Domain.Command;
+using Author.Command.Events;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
+using Author.Core.Framework;
 using Author.Core.Framework.ExceptionHandling;
+using Author.Core.Services.Persistence.CosmosDB;
 using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -15,11 +19,13 @@ namespace Author.Command.Service
     {
         private readonly IIntegrationEventPublisherServiceService _eventcontext;
         private readonly SiteDisclaimerRepository _siteDisclaimerRepository;
+        private readonly CosmosDBContext _context;
 
         public DeleteSiteDisclaimerCommandHandler(IIntegrationEventPublisherServiceService eventcontext)
         {
             _eventcontext = eventcontext;
             _siteDisclaimerRepository = new SiteDisclaimerRepository(new TaxatHand_StgContext());
+            _context = new CosmosDBContext();
         }
 
         public async Task<DeleteSiteDisclaimerCommandResponse> Handle(DeleteSiteDisclaimerCommand request, CancellationToken cancellationToken)
@@ -29,15 +35,15 @@ namespace Author.Command.Service
                 IsSuccessful = false
             };
 
-            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            var siteDisclaimerIds = request.SiteDisclaimerIds.Distinct().ToList();
+            var siteDisclaimers = await _siteDisclaimerRepository.GetSiteDisclaimerByIds(siteDisclaimerIds);
+            if (siteDisclaimers.Count != siteDisclaimerIds.Count)
             {
-                var siteDisclaimerIds = request.SiteDisclaimerIds.Distinct().ToList();
-                var siteDisclaimers = await _siteDisclaimerRepository.GetSiteDisclaimerByIds(siteDisclaimerIds);
-                if (siteDisclaimers.Count != siteDisclaimerIds.Count)
-                {
-                    throw new RulesException("Invalid", @"SiteDisclaimer not found");
-                }
+                throw new RulesException("Invalid", @"SiteDisclaimer not found");
+            }
 
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {                
                 foreach (var siteDisclaimer in siteDisclaimers)
                 {
                     foreach (var sitedisclaimerContent in siteDisclaimer.ArticleContents.ToList())
@@ -100,6 +106,25 @@ namespace Author.Command.Service
                 await _siteDisclaimerRepository.UnitOfWork.SaveEntitiesAsync();
 
                 response.IsSuccessful = true;
+                scope.Complete();
+            }
+
+            using(TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var disclaimerDocs = _context.GetAll(Constants.ArticlesDiscriminator);
+                foreach (var sitedisclaimer in siteDisclaimers)
+                {
+                    foreach (var doc in disclaimerDocs.Where(d => d.GetPropertyValue<int>("ArticleId") == sitedisclaimer.ArticleId))
+                    {
+                        var eventSource = new ArticleCommandEvent
+                        {
+                            id = doc.GetPropertyValue<Guid>("id"),
+                            EventType = ServiceBusEventType.Delete,
+                            Discriminator = Constants.ArticlesDiscriminator
+                        };
+                        await _eventcontext.PublishThroughEventBusAsync(eventSource);
+                    }
+                }
                 scope.Complete();
             }
             return response;

@@ -14,15 +14,17 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using System.Transactions;
 using Author.Core.Framework;
+using Author.Core.Services.Persistence.CosmosDB;
 
 namespace Author.Command.Service
 {
-   public class UpdateCountryCommandHandler : IRequestHandler<UpdateCountryCommand, UpdateCountryCommandResponse>
+    public class UpdateCountryCommandHandler : IRequestHandler<UpdateCountryCommand, UpdateCountryCommandResponse>
     {
         private readonly IIntegrationEventBlobService _Eventblobcontext;
         private readonly IIntegrationEventPublisherServiceService _Eventcontext;
         private readonly CountryRepository _CountryRepository;
         private readonly ILogger _logger;
+        private readonly CosmosDBContext _context;
 
         public UpdateCountryCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<UpdateCountryCommandHandler> logger, IIntegrationEventBlobService Eventblobcontext)
         {
@@ -30,6 +32,7 @@ namespace Author.Command.Service
             _Eventcontext = Eventcontext;
             _Eventblobcontext = Eventblobcontext;
             _logger = logger;
+            _context = new CosmosDBContext();
         }
         public async Task<UpdateCountryCommandResponse> Handle(UpdateCountryCommand request, CancellationToken cancellationToken)
         {
@@ -39,24 +42,30 @@ namespace Author.Command.Service
             };
 
             var country = new Countries();
+            Images pngImage = new Images();
+            Images svgImage = new Images();
+            var countryDocs = _context.GetAll(Constants.CountriesDiscriminator);
+            var imageDocs = _context.GetAll(Constants.ImagesDiscriminator);
+            var contentToDelete = new List<int>();
+
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 List<int> objCountryId = new List<int>();
-            objCountryId.Add(request.CountryId);
-            country = _CountryRepository.getCountry(objCountryId)[0];
-            List<Images> images = _CountryRepository.getImages(new List<int?> { country.PngimageId, country.SvgimageId });
+                objCountryId.Add(request.CountryId);
+                country = _CountryRepository.getCountry(objCountryId)[0];
+                List<Images> images = _CountryRepository.getImages(new List<int?> { country.PngimageId, country.SvgimageId });
 
-            if (request.ImagesData.JPGData == "" || request.ImagesData.JPGName == "" || request.ImagesData.SVGData == "" || request.ImagesData.SVGData == "")
-            { throw new ArgumentNullException(nameof(request)); }
-            ImageData imageData = new ImageData()
-            {
-                JPGData = request.ImagesData.JPGData,
-                JPGName = request.ImagesData.JPGName,
-                SVGData = request.ImagesData.SVGData,
-                SVGName = request.ImagesData.SVGName
-            };
-            List<string> urls = await _Eventblobcontext.PublishThroughBlobStorageAsync(imageData);
-                foreach(Images img in images)
+                if (request.ImagesData.JPGData == "" || request.ImagesData.JPGName == "" || request.ImagesData.SVGData == "" || request.ImagesData.SVGData == "")
+                { throw new ArgumentNullException(nameof(request)); }
+                ImageData imageData = new ImageData()
+                {
+                    JPGData = request.ImagesData.JPGData,
+                    JPGName = request.ImagesData.JPGName,
+                    SVGData = request.ImagesData.SVGData,
+                    SVGName = request.ImagesData.SVGName
+                };
+                List<string> urls = await _Eventblobcontext.PublishThroughBlobStorageAsync(imageData);
+                foreach (Images img in images)
                 {
                     if (img.FileType == "svg")
                     {
@@ -67,6 +76,7 @@ namespace Author.Command.Service
                         img.UpdatedBy = "";
                         img.UpdatedDate = DateTime.UtcNow;
                         _CountryRepository.Update(img);
+                        svgImage = img;
                     }
                     else
                     {
@@ -77,6 +87,7 @@ namespace Author.Command.Service
                         img.UpdatedBy = "";
                         img.UpdatedDate = DateTime.UtcNow;
                         _CountryRepository.Update(img);
+                        pngImage = img;
                     }
                 }
                 foreach (var content in request.LanguageNames)
@@ -103,6 +114,7 @@ namespace Author.Command.Service
                 {
                     if (request.LanguageNames.Where(s => s.LanguageID == resourceContent.LanguageId).Count() == 0)
                     {
+                        contentToDelete.Add((int)resourceContent.LanguageId);
                         country.CountryContents.Remove(resourceContent);
                         _CountryRepository.Delete(resourceContent);
                     }
@@ -114,26 +126,93 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-            foreach (var content in country.CountryContents)
+
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventSourcing = new CountryCommandEvent()
+                var pngImageEvent = new ImageCommandEvent()
                 {
-                    EventType = (int)ServiceBusEventType.Update,
-                    CountryId = country.CountryId,
-                    SVGImageId = country.SvgimageId,
-                    PNGImageId = country.PngimageId,
-                    IsPublished = country.IsPublished,
-                    CreatedBy = country.CreatedBy,
-                    CreatedDate = country.CreatedDate,
-                    UpdatedBy = country.UpdatedBy,
-                    UpdatedDate = country.UpdatedDate,
-                    CountryContentId = content.CountryContentId,
-                    DisplayName = content.DisplayName,
-                    DsiplayNameShort = content.DisplayNameShort,
-                    LanguageId = content.LanguageId,
-                    Discriminator = Constants.CountriesDiscriminator
+                    id = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == pngImage.ImageId).GetPropertyValue<Guid>("id"),
+                    EventType = ServiceBusEventType.Update,
+                    Discriminator = Constants.ImagesDiscriminator,
+                    ImageId = pngImage.ImageId,
+                    ImageType = pngImage.ImageType,
+                    Name = pngImage.Name,
+                    CountryId = pngImage.CountryId,
+                    Keyword = pngImage.Keyword ?? string.Empty,
+                    Source = pngImage.Source ?? string.Empty,
+                    Description = pngImage.Description ?? string.Empty,
+                    Copyright = pngImage.Copyright ?? string.Empty,
+                    FilePath = pngImage.FilePath,
+                    FileType = pngImage.FileType,
+                    CreatedBy = pngImage.CreatedBy,
+                    CreatedDate = pngImage.CreatedDate,
+                    UpdatedBy = pngImage.UpdatedBy,
+                    UpdatedDate = pngImage.UpdatedDate,
+                    EmpGuid = pngImage.EmpGuid ?? string.Empty,
+                    IsEdited = true
                 };
-                await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                await _Eventcontext.PublishThroughEventBusAsync(pngImageEvent);
+
+                var svgImageEvent = new ImageCommandEvent()
+                {
+                    id = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == svgImage.ImageId).GetPropertyValue<Guid>("id"),
+                    EventType = ServiceBusEventType.Update,
+                    Discriminator = Constants.ImagesDiscriminator,
+                    ImageId = svgImage.ImageId,
+                    ImageType = svgImage.ImageType,
+                    Name = svgImage.Name,
+                    CountryId = svgImage.CountryId,
+                    Keyword = svgImage.Keyword ?? string.Empty,
+                    Source = svgImage.Source ?? string.Empty,
+                    Description = svgImage.Description ??string.Empty,
+                    Copyright = svgImage.Copyright ?? string.Empty,
+                    FilePath = svgImage.FilePath,
+                    FileType = svgImage.FileType,
+                    CreatedBy = svgImage.CreatedBy,
+                    CreatedDate = svgImage.CreatedDate,
+                    UpdatedBy = svgImage.UpdatedBy,
+                    UpdatedDate = svgImage.UpdatedDate,
+                    EmpGuid = svgImage.EmpGuid ?? string.Empty,
+                    IsEdited = true
+                };
+                await _Eventcontext.PublishThroughEventBusAsync(svgImageEvent);
+
+                foreach (var item in country.CountryContents)
+                {
+                    var doc = countryDocs.FirstOrDefault(d => d.GetPropertyValue<int>("CountryId") == country.CountryId
+                             && d.GetPropertyValue<int?>("LanguageId") == item.LanguageId);
+                    var eventSourcing = new CountryCommandEvent()
+                    {
+                        id = doc != null ? doc.GetPropertyValue<Guid>("id") : Guid.NewGuid(),
+                        EventType = doc != null ? ServiceBusEventType.Update : ServiceBusEventType.Create,
+                        CountryId = country.CountryId,
+                        SVGImageId = country.SvgimageId,
+                        PNGImageId = country.PngimageId,
+                        IsPublished = country.IsPublished,
+                        CreatedBy = country.CreatedBy,
+                        CreatedDate = country.CreatedDate,
+                        UpdatedBy = country.UpdatedBy,
+                        UpdatedDate = country.UpdatedDate,
+                        CountryContentId = item.CountryContentId,
+                        DisplayName = item.DisplayName,
+                        DisplayNameShort = item.DisplayNameShort,
+                        LanguageId = item.LanguageId,
+                        Discriminator = Constants.CountriesDiscriminator
+                    };
+                    await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                }
+                foreach(int i in contentToDelete)
+                {
+                    var deleteEvt = new CountryCommandEvent()
+                    {
+                        id = countryDocs.FirstOrDefault(d => d.GetPropertyValue<int>("CountryId") == country.CountryId &&
+                                 d.GetPropertyValue<int>("LanguageId") == i).GetPropertyValue<Guid>("id"),
+                        EventType = ServiceBusEventType.Delete,
+                        Discriminator = Constants.CountriesDiscriminator
+                    };
+                    await _Eventcontext.PublishThroughEventBusAsync(deleteEvt);
+                }
+                scope.Complete();
             }
             return response;
         }

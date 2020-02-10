@@ -1,5 +1,4 @@
-﻿using Author.Core.Framework.Utilities;
-using Author.Query.New.API.GraphQL.Types;
+﻿using Author.Query.New.API.GraphQL.Types;
 using Author.Query.Persistence.DTO;
 using Author.Query.Persistence.Interfaces;
 using GraphQL.DataLoader;
@@ -9,16 +8,16 @@ using System;
 
 namespace Author.Query.New.API.GraphQL.Resolvers
 {
-    public class CountriesResolver : Resolver, ICountriesResolver
+    public class DisclaimerResolver : Resolver, IDisclaimerResolver
     {
-        private readonly ICountryService _countryService;
+        private readonly IDisclaimerService _disclaimerService;
         private readonly IHttpContextAccessor _accessor;
         private readonly IDataLoaderContextAccessor _dataLoaderContextAccessor;
 
-        public CountriesResolver(ICountryService countryService, IHttpContextAccessor accessor,
+        public DisclaimerResolver(IDisclaimerService disclaimerService, IHttpContextAccessor accessor,
                                 IDataLoaderContextAccessor dataLoaderContextAccessor)
         {
-            _countryService = countryService ?? throw new ArgumentNullException(nameof(countryService));
+            _disclaimerService = disclaimerService ?? throw new ArgumentNullException(nameof(disclaimerService));
             _accessor = accessor;
             _dataLoaderContextAccessor = dataLoaderContextAccessor;
         }
@@ -26,8 +25,8 @@ namespace Author.Query.New.API.GraphQL.Resolvers
         public void Resolve(GraphQLQuery graphQLQuery)
         {
             var language = _accessor.HttpContext.Items["language"] as LanguageDTO;
-            graphQLQuery.FieldAsync<ResponseGraphType<CountryResultType>>(
-                "countriesresponse",
+            graphQLQuery.FieldAsync<ResponseGraphType<DisclaimerResultType>>(
+                "disclaimersresponse",
                 arguments: new QueryArguments
                 (
                     new QueryArgument<IdGraphType> { Name = "pageNo", Description = "page number" },
@@ -36,35 +35,35 @@ namespace Author.Query.New.API.GraphQL.Resolvers
                 resolve: async context =>
                 {
                     var pageNo = context.GetArgument<int>("pageNo") == 0 ? 1 : context.GetArgument<int>("pageNo");
-                    var pageSize = context.GetArgument<int>("pageSize") == 0 ? 100: context.GetArgument<int>("pageSize");
+                    var pageSize = context.GetArgument<int>("pageSize") == 0 ? 100 : context.GetArgument<int>("pageSize");
                     if (language != null)
                     {
-                        var loader = _dataLoaderContextAccessor.Context.GetOrAddLoader("GetAllCountries",
-                                                () => _countryService.GetAllCountriesAsync(language, pageNo, pageSize));
+                        var loader = _dataLoaderContextAccessor.Context.GetOrAddLoader("GetAllDisclaimers",
+                                                () => _disclaimerService.GetAllDisclaimersAsync(language, pageNo, pageSize));
                         var list = await context.TryAsyncResolve(
                               async c => await loader.LoadAsync());
                         return Response(list);
                     }
                     return null;
                 }
-                , description: "All Countries data"
+                , description: "All Disclaimers data"
             );
 
-            graphQLQuery.FieldAsync<ResponseGraphType<CountryType>>(
-                "country",
+            graphQLQuery.FieldAsync<ResponseGraphType<DisclaimerType>>(
+                "disclaimer",
                 arguments: new QueryArguments(
-                    new QueryArgument<NonNullGraphType<IntGraphType>> { Name = "countryId", Description = "id of the country" }
+                    new QueryArgument<NonNullGraphType<IntGraphType>> { Name = "disclaimerId", Description = "id of the disclaimer" }
                 ),
                 resolve: async context =>
                 {
-                    var countryId = context.GetArgument<int>("countryId");
-                    if (language != null && countryId > 0)
+                    var disclaimerId = context.GetArgument<int>("disclaimerId");
+                    if (language != null && disclaimerId > 0)
                     {
-                        var loader = _dataLoaderContextAccessor.Context.GetOrAddLoader("GetCountry",
-                                                () => _countryService.GetCountryAsync(language, countryId));
-                        var countryDetails = await context.TryAsyncResolve(
+                        var loader = _dataLoaderContextAccessor.Context.GetOrAddLoader("GetDisclaimer",
+                                                () => _disclaimerService.GetDiscalimerAsync(language, disclaimerId));
+                        var disclaimerDetails = await context.TryAsyncResolve(
                               async c => await loader.LoadAsync());
-                        return Response(countryDetails);
+                        return Response(disclaimerDetails);
                     }
 
                     return null;

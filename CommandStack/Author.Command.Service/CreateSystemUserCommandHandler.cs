@@ -74,31 +74,35 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-            foreach (var content in user.SystemUserAssociatedCountries)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventSourcing = new SystemUserCommandEvent()
+                foreach (var content in user.SystemUserAssociatedCountries)
                 {
-                    EventType = (int)ServiceBusEventType.Create,
-                    Discriminator = Constants.SystemUsersDiscriminator,
-                    SystemUserId = user.SystemUserId,
-                    CreatedBy = user.CreatedBy,
-                    CreatedDate = user.CreatedDate,
-                    UpdatedBy = user.UpdatedBy,
-                    UpdatedDate = user.UpdatedDate,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    WorkPhoneNumber = user.WorkPhoneNumber,
-                    MobilePhoneNumber = user.MobilePhoneNumber,
-                    Level = user.Level,
-                    Role = user.Role,
-                    Location = user.Location,
-                    Email = user.Email,
-                    TimeZone = user.TimeZone,
-                    CountryId = content.CountryId,
-                    IsPrimary = content.IsPrimary,
-                    SystemUserAssociatedCountryId = content.SystemUserAssociatedCountryId
-                };
-                await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    var eventSourcing = new SystemUserCommandEvent()
+                    {
+                        EventType = ServiceBusEventType.Create,
+                        Discriminator = Constants.SystemUsersDiscriminator,
+                        SystemUserId = user.SystemUserId,
+                        CreatedBy = user.CreatedBy,
+                        CreatedDate = user.CreatedDate,
+                        UpdatedBy = user.UpdatedBy,
+                        UpdatedDate = user.UpdatedDate,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        WorkPhoneNumber = user.WorkPhoneNumber,
+                        MobilePhoneNumber = user.MobilePhoneNumber,
+                        Level = user.Level,
+                        Role = user.Role,
+                        Location = user.Location,
+                        Email = user.Email,
+                        TimeZone = user.TimeZone,
+                        CountryId = content.CountryId,
+                        IsPrimary = content.IsPrimary,
+                        SystemUserAssociatedCountryId = content.SystemUserAssociatedCountryId
+                    };
+                    await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                }
+                scope.Complete();
             }
             return response;
         }

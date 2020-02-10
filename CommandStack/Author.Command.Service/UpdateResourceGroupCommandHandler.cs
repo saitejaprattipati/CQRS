@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
 using Author.Core.Framework;
+using Author.Core.Services.Persistence.CosmosDB;
 
 namespace Author.Command.Service
 {
@@ -20,12 +21,14 @@ namespace Author.Command.Service
         private readonly IIntegrationEventPublisherServiceService _eventcontext;
         private readonly ResourceGroupRepository _ResourceGroupRepository;
         private readonly IMapper _mapper;
+        private readonly CosmosDBContext _context;
 
         public UpdateResourceGroupCommandHandler(IIntegrationEventPublisherServiceService eventcontext, IMapper mapper)
         {
             _ResourceGroupRepository = new ResourceGroupRepository(new TaxatHand_StgContext());
             _eventcontext = eventcontext;
             _mapper = mapper;
+            _context = new CosmosDBContext();
         }
         public async Task<UpdateResourceGroupCommandResponse> Handle(UpdateResourceGroupCommand request, CancellationToken cancellationToken)
         {
@@ -36,6 +39,7 @@ namespace Author.Command.Service
             List<int> objresourceGroupId = new List<int>();
             objresourceGroupId.Add(request.ResourceGroupId);
             var resourceGroup = _ResourceGroupRepository.getResourceGroups(objresourceGroupId)[0];
+            var contentToDelete = new List<int>();
 
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -63,6 +67,7 @@ namespace Author.Command.Service
                 {
                     if (request.LanguageName.Where(s => s.LanguageId == resourceContent.LanguageId).Count() == 0)
                     {
+                        contentToDelete.Add((int)resourceContent.LanguageId);
                         resourceGroup.ResourceGroupContents.Remove(resourceContent);
                         _ResourceGroupRepository.Delete(resourceContent);
                     }
@@ -74,24 +79,43 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-            foreach (var contnet in resourceGroup.ResourceGroupContents)
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var eventSourcing = new ResourceGroupCommandEvent()
+                var resourcegroupDocs = _context.GetAll(Constants.ResourceGroupsDiscriminator);
+                foreach (var contnet in resourceGroup.ResourceGroupContents)
                 {
-                    EventType = (int)ServiceBusEventType.Update,
-                    Discriminator = Constants.ResourceGroupsDiscriminator,
-                    ResourceGroupId = resourceGroup.ResourceGroupId,
-                    IsPublished = resourceGroup.IsPublished,
-                    CreatedBy = resourceGroup.CreatedBy,
-                    CreatedDate = resourceGroup.CreatedDate,
-                    UpdatedBy = resourceGroup.UpdatedBy,
-                    UpdatedDate = resourceGroup.UpdatedDate,
-                    Position = resourceGroup.Position,
-                    ResourceGroupContentId = contnet.ResourceGroupContentId,
-                    LanguageId = contnet.LanguageId,
-                    GroupName = contnet.GroupName
-                };
-                await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    var doc = resourcegroupDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ResourceGroupId") == resourceGroup.ResourceGroupId
+                                                  && d.GetPropertyValue<int?>("LanguageId") == contnet.LanguageId);
+                    var eventSourcing = new ResourceGroupCommandEvent()
+                    {
+                        id = doc != null ? doc.GetPropertyValue<Guid>("id") : Guid.NewGuid(),
+                        EventType = doc != null ? ServiceBusEventType.Update : ServiceBusEventType.Create,
+                        Discriminator = Constants.ResourceGroupsDiscriminator,
+                        ResourceGroupId = resourceGroup.ResourceGroupId,
+                        IsPublished = resourceGroup.IsPublished,
+                        CreatedBy = resourceGroup.CreatedBy,
+                        CreatedDate = resourceGroup.CreatedDate,
+                        UpdatedBy = resourceGroup.UpdatedBy,
+                        UpdatedDate = resourceGroup.UpdatedDate,
+                        Position = resourceGroup.Position,
+                        ResourceGroupContentId = contnet.ResourceGroupContentId,
+                        LanguageId = contnet.LanguageId,
+                        GroupName = contnet.GroupName
+                    };
+                    await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                }
+                foreach(int i in contentToDelete)
+                {
+                    var deleteEvt = new ResourceGroupCommandEvent()
+                    {
+                        id = resourcegroupDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ResourceGroupId") == resourceGroup.ResourceGroupId
+                                     && d.GetPropertyValue<int?>("LanguageId") == i).GetPropertyValue<Guid>("id"),
+                        EventType = ServiceBusEventType.Delete,
+                        Discriminator = Constants.ResourceGroupsDiscriminator
+                    };
+                    await _eventcontext.PublishThroughEventBusAsync(deleteEvt);
+                }
+                scope.Complete();
             }
             return response;
         }

@@ -1,5 +1,4 @@
 ﻿using Author.Query.Persistence.DTO;
-using Author.Query.Persistence.Interfaces;
 using GraphQL.DataLoader;
 using GraphQL.Types;
 
@@ -7,7 +6,7 @@ namespace Author.Query.New.API.GraphQL.Types
 {
     public class CountryType : ObjectGraphType<CountryDTO>, IGraphQLType
     {
-        public CountryType(IImageService imageService, IDataLoaderContextAccessor dataLoaderContextAccessor)
+        public CountryType(IDataLoaderContextAccessor dataLoaderContextAccessor)
         {
             Name = "Country";
             Field(x => x.PNGImagePath, nullable: true);

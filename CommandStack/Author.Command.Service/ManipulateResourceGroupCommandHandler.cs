@@ -13,6 +13,8 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using Author.Core.Framework.ExceptionHandling;
 using System.Transactions;
+using Author.Core.Framework;
+using Author.Core.Services.Persistence.CosmosDB;
 
 namespace Author.Command.Service
 {
@@ -21,11 +23,14 @@ namespace Author.Command.Service
         private readonly IIntegrationEventPublisherServiceService _Eventcontext;
         private readonly ResourceGroupRepository _ResourceGroupRepository;
         private readonly ILogger _logger;
+        private readonly CosmosDBContext _context;
+
         public ManipulateResourceGroupCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<ManipulateResourceGroupCommandHandler> logger)
         {
             _ResourceGroupRepository = new ResourceGroupRepository(new TaxatHand_StgContext());
             _Eventcontext = Eventcontext;
             _logger = logger;
+            _context = new CosmosDBContext();
         }
 
         public async Task<ManipulateResourceGroupCommandResponse> Handle(ManipulateResourceGroupCommand request, CancellationToken cancellationToken)
@@ -34,12 +39,13 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
+
+            List<ResourceGroups> resourceGroups = _ResourceGroupRepository.getResourceGroups(request.ResourceGroupIds);
+            if (request.ResourceGroupIds.Count != resourceGroups.Count)
+                throw new RulesException("Invalid", @"ResourceGroup not found");
+
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                List<ResourceGroups> resourceGroups = _ResourceGroupRepository.getResourceGroups(request.ResourceGroupIds);
-                if (request.ResourceGroupIds.Count != resourceGroups.Count)
-                    throw new RulesException("Invalid", @"ResourceGroup not found");
-
                 if (request.Operation == "Publish")
                 {
                     foreach (var resourcegroup in resourceGroups)
@@ -73,6 +79,55 @@ namespace Author.Command.Service
                 await _ResourceGroupRepository.UnitOfWork
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
+                scope.Complete();
+            }
+
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var resourcegrpDocs = _context.GetAll(Constants.ResourceGroupsDiscriminator);
+
+                if (request.Operation == "Publish" || request.Operation == "UnPublish")
+                {
+                    foreach (var resourcegrp in resourceGroups)
+                    {
+                        foreach (var doc in resourcegrpDocs.Where(d => d.GetPropertyValue<int>("ResourceGroupId") == resourcegrp.ResourceGroupId))
+                        {
+                            var eventsource = new ResourceGroupCommandEvent()
+                            {
+                                id = doc.GetPropertyValue<Guid>("id"),
+                                EventType = ServiceBusEventType.Update,
+                                Discriminator = Constants.ResourceGroupsDiscriminator,
+                                ResourceGroupId = resourcegrp.ResourceGroupId,
+                                IsPublished = resourcegrp.IsPublished,
+                                LanguageId = doc.GetPropertyValue<int?>("LanguageId"),
+                                GroupName = doc.GetPropertyValue<string>("GroupName"),
+                                Position = doc.GetPropertyValue<int>("Position"),
+                                ResourceGroupContentId = doc.GetPropertyValue<int>("ResourceGroupContentId"),
+                                CreatedBy = doc.GetPropertyValue<string>("CreatedBy"),
+                                CreatedDate = doc.GetPropertyValue<DateTime>("CreatedDate"),
+                                UpdatedBy = doc.GetPropertyValue<string>("UpdatedBy"),
+                                UpdatedDate = doc.GetPropertyValue<DateTime>("UpdatedDate")
+                            };
+                            await _Eventcontext.PublishThroughEventBusAsync(eventsource);
+                        }
+                    }
+                }
+                else if (request.Operation == "Delete")
+                {
+                    foreach (var resourcegrp in resourceGroups)
+                    {
+                        foreach (var doc in resourcegrpDocs.Where(d => d.GetPropertyValue<int>("ResourceGroupId") == resourcegrp.ResourceGroupId))
+                        {
+                            var resourceEvent = new ResourceGroupCommandEvent()
+                            {
+                                id = doc.GetPropertyValue<Guid>("id"),
+                                EventType = ServiceBusEventType.Delete,
+                                Discriminator = Constants.ResourceGroupsDiscriminator
+                            };
+                            await _Eventcontext.PublishThroughEventBusAsync(resourceEvent);
+                        }
+                    }
+                }
                 scope.Complete();
             }
             return response;

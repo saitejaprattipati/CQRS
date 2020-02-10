@@ -37,7 +37,7 @@ namespace Author.Query.Persistence.DTO
         public string Name { get; set; } = "";
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         public string Path { get; set; } = "";
-        public bool CompleteResponse { get; set; }
+        public bool CompleteResponse { get; set; } = true;
 
     }
 }

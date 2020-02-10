@@ -101,11 +101,60 @@ namespace Author.Command.Service
                 response.IsSuccessful = true;
                 scope.Complete();
             }
-            foreach (var content in _Country.CountryContents)
+
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var pngImageEvent = new ImageCommandEvent()
+                {
+                    EventType = ServiceBusEventType.Create,
+                    Discriminator = Constants.ImagesDiscriminator,
+                    ImageId = _imagesPNG.ImageId,
+                    ImageType = _imagesPNG.ImageType,
+                    Name = _imagesPNG.Name,
+                    CountryId = _imagesPNG.CountryId,
+                    Keyword = _imagesPNG.Keyword ?? string.Empty,
+                    Source = _imagesPNG.Source ?? string.Empty,
+                    Description = _imagesPNG.Description ?? string.Empty,
+                    Copyright = _imagesPNG.Copyright ?? string.Empty,
+                    FilePath = _imagesPNG.FilePath,
+                    FileType = _imagesPNG.FileType,
+                    CreatedBy = _imagesPNG.CreatedBy,
+                    CreatedDate = _imagesPNG.CreatedDate,
+                    UpdatedBy = _imagesPNG.UpdatedBy,
+                    UpdatedDate = _imagesPNG.UpdatedDate,
+                    EmpGuid = _imagesPNG.EmpGuid ?? string.Empty,
+                    IsEdited = false
+                };
+                await _Eventcontext.PublishThroughEventBusAsync(pngImageEvent);
+
+                var svgImageEvent = new ImageCommandEvent()
+                {
+                    EventType = ServiceBusEventType.Create,
+                    Discriminator = Constants.ImagesDiscriminator,
+                    ImageId = _imagesSVG.ImageId,
+                    ImageType = _imagesSVG.ImageType,
+                    Name = _imagesSVG.Name,
+                    CountryId = _imagesSVG.CountryId,
+                    Keyword = _imagesSVG.Keyword ?? string.Empty,
+                    Source = _imagesSVG.Source ?? string.Empty,
+                    Description = _imagesSVG.Description ?? string.Empty,
+                    Copyright = _imagesSVG.Copyright ?? string.Empty,
+                    FilePath = _imagesSVG.FilePath,
+                    FileType = _imagesSVG.FileType,
+                    CreatedBy = _imagesSVG.CreatedBy,
+                    CreatedDate = _imagesSVG.CreatedDate,
+                    UpdatedBy = _imagesSVG.UpdatedBy,
+                    UpdatedDate = _imagesSVG.UpdatedDate,
+                    EmpGuid = _imagesSVG.EmpGuid ?? string.Empty,
+                    IsEdited = false
+                };
+                await _Eventcontext.PublishThroughEventBusAsync(svgImageEvent);
+
+                foreach (var content in _Country.CountryContents)
                 {
                     var eventSourcing = new CountryCommandEvent()
                     {
-                        EventType = (int)ServiceBusEventType.Create,
+                        EventType = ServiceBusEventType.Create,
                         CountryId = _Country.CountryId,
                         SVGImageId = _Country.SvgimageId,
                         PNGImageId = _Country.PngimageId,
@@ -116,13 +165,14 @@ namespace Author.Command.Service
                         UpdatedDate = _Country.UpdatedDate,
                         CountryContentId = content.CountryContentId,
                         DisplayName = content.DisplayName,
-                        DsiplayNameShort = content.DisplayNameShort,
+                        DisplayNameShort = content.DisplayNameShort,
                         LanguageId = content.LanguageId,
                         Discriminator = Constants.CountriesDiscriminator
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }
-            
+                scope.Complete();
+            }
             return response;
         }
     }
