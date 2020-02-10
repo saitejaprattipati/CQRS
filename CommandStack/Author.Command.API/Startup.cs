@@ -24,6 +24,9 @@ using NSwag.AspNetCore;
 using NetCore.AutoRegisterDi;
 using AutoMapper;
 using Author.Command.Service.Mapping;
+using Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.QuickPulse;
+using Microsoft.ApplicationInsights.Extensibility;
+using Author.Command.API.Telemetry;
 
 namespace Author.Command.API
 {
@@ -42,7 +45,8 @@ namespace Author.Command.API
             services.Configure<AuthorConfigurationSettings>(Configuration);
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
             services.AddCors();
-         ///   services.AddCorrelationId();
+            services.AddSingleton<ITelemetryInitializer, AppinsightsTelemetry>();
+            ///   services.AddCorrelationId();
             services.AddMediatR(typeof(CreateArticleCommandHandler).GetTypeInfo().Assembly);
             services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
             //  services.AddTransient<CreateArticleCommandHandler>();
@@ -92,6 +96,8 @@ namespace Author.Command.API
 
             //  services.AddDbContext<TaxatHand_StgContext>(options => options.UseSqlServer(connection));
             AddEventing(services);
+            services.AddApplicationInsightsTelemetry();
+            services.ConfigureTelemetryModule<QuickPulseTelemetryModule>((module, o) => module.AuthenticationApiKey = "66f5037c-21cc-4736-97ef-6d065ec25c12");
         }
 
         private void AddEventing(IServiceCollection services)

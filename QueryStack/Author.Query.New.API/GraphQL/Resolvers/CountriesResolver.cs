@@ -36,7 +36,7 @@ namespace Author.Query.New.API.GraphQL.Resolvers
                 resolve: async context =>
                 {
                     var pageNo = context.GetArgument<int>("pageNo") == 0 ? 1 : context.GetArgument<int>("pageNo");
-                    var pageSize = context.GetArgument<int>("pageSize") == 0 ? 100: context.GetArgument<int>("pageSize");
+                    var pageSize = context.GetArgument<int>("pageSize") == 0 ? 10000: context.GetArgument<int>("pageSize");
                     if (language != null)
                     {
                         var loader = _dataLoaderContextAccessor.Context.GetOrAddLoader("GetAllCountries",

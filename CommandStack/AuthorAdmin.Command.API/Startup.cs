@@ -36,6 +36,9 @@ using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Linq;
+using Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.QuickPulse;
+using Microsoft.ApplicationInsights.Extensibility;
+using AuthorAdmin.Command.API.Telemetry;
 
 namespace AuthorAdmin.Command.API
 {
@@ -58,9 +61,10 @@ namespace AuthorAdmin.Command.API
             services.Configure<AuthorConfigurationSettings>(Configuration);
             ConfigureCSRFValidationByEnvironment(services);
             services.AddCors((options => { options.AddPolicy("FrontEnd", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials()); }));
-
+            services.AddSingleton<ITelemetryInitializer, AppinsightsTelemetry>();
             //  services.AddMediatR(CreateUserCommandHandler);
-
+            services.AddApplicationInsightsTelemetry();
+            services.ConfigureTelemetryModule<QuickPulseTelemetryModule>((module, o) => module.AuthenticationApiKey = "66f5037c-21cc-4736-97ef-6d065ec25c12");
 
             services.AddMediatR(typeof(CreateArticleCommandHandler).GetTypeInfo().Assembly);
             services.AddTransient<IIntegrationEventPublisherServiceService, IntegrationEventPublisherService>();
@@ -134,6 +138,8 @@ namespace AuthorAdmin.Command.API
 
             //  services.AddDbContext<TaxatHand_StgContext>(options => options.UseSqlServer(connection));
             AddEventing(services);
+            services.AddApplicationInsightsTelemetry();
+            services.AddApplicationInsightsTelemetry();
         }
 
         private void ConfigureCSRFValidationByEnvironment(IServiceCollection services)
