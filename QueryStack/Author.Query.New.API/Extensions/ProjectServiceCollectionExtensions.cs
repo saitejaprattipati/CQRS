@@ -30,7 +30,8 @@ namespace Author.Query.New.API.Extensions
                 .AddScoped(typeof(ICacheService<,>), typeof(CacheService<,>))
                 .AddScoped<ICountryService, CountryService>()
                 .AddScoped<ICountryGroupService, CountryGroupService>()
-                .AddScoped<IDisclaimerService, DisclaimerService>();
+                .AddScoped<IDisclaimerService, DisclaimerService>()
+                .AddScoped<ITaxTagsService, TaxTagsService>();
 
         //public static IServiceCollection AddProjectRepositories(this IServiceCollection services) =>
         //    services.RegisterAssemblyPublicNonGenericClasses(Assembly.GetAssembly(typeof(CommonService)))
@@ -42,7 +43,8 @@ namespace Author.Query.New.API.Extensions
         services
             .AddScoped<ICountriesResolver, CountriesResolver>()
             .AddScoped<ICountryGroupsResolver, CountryGroupsResolver>()
-            .AddScoped<IDisclaimerResolver, DisclaimerResolver>();
+            .AddScoped<IDisclaimerResolver, DisclaimerResolver>()
+            .AddScoped<ITaxTagGroupsResolver, TaxTagGroupsResolver>();
 
         /// <summary>
         /// Add project GraphQL schema and web socket types.

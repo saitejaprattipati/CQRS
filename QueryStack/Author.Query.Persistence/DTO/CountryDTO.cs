@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Author.Query.Persistence.DTO
 {
-    public class CountryResult 
+    public class CountryResult
     {
         public CountryResult()
         {

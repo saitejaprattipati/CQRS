@@ -136,6 +136,15 @@ namespace Author.Query.Persistence
                 a.Property<int>("id");
                 a.Property(o => o.IdVal);
             });
+
+            // For TaxTags
+            modelBuilder.Entity<TaxTags>().OwnsMany(p => p.RelatedCountryIds, a =>
+            {
+                a.WithOwner().HasForeignKey("TaxTagid");
+                a.Property<int>("id");
+                a.Property(o => o.IdVal);
+            });
+
             OneCollectionPerDbSet(modelBuilder);
         }
 
