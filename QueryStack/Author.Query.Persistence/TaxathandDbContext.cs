@@ -5,6 +5,7 @@ using System.Reflection;
 using Author.Query.Domain;
 using System.ComponentModel.DataAnnotations.Schema;
 using Author.Query.Domain.DBAggregate;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Author.Query.Persistence
 {
@@ -17,7 +18,7 @@ namespace Author.Query.Persistence
 
         protected TaxathandDbContext()
         {
-            //Database.EnsureCreated();
+           // Database.EnsureCreated();
         }
 
         public DbSet<Address> Address { get; set; }
@@ -34,11 +35,101 @@ namespace Author.Query.Persistence
         public DbSet<TaxTags> TaxTags { get; set; }
         public DbSet<Articles> Articles { get; set; }
         public DbSet<Images> Images { get; set; }
+        public DbSet<SearchSource> SearchSource { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // For CountryGroups
+            var converter = new NumberToStringConverter<int>();
+            //Assign articles partition
+            modelBuilder.Entity<Articles>()
+                  .Property(e => e.LanguageId)
+                  .HasConversion(converter);
+            modelBuilder.Entity<Articles>()
+                  .HasPartitionKey(o => o.LanguageId);
+
+            //Assign countrygroups partition
+            modelBuilder.Entity<CountryGroups>()
+                  .Property(e => e.LanguageId)
+                  .HasConversion(converter);
+            modelBuilder.Entity<CountryGroups>()
+                  .HasPartitionKey(o => o.LanguageId);
+
+            //Assign country partition
+            modelBuilder.Entity<Countries>()
+                  .Property(e => e.LanguageId)
+                  .HasConversion(converter);
+            modelBuilder.Entity<Countries>()
+                  .HasPartitionKey(o => o.LanguageId);
+
+            //Assign address partition
+            modelBuilder.Entity<Address>()
+                  .HasPartitionKey(o => o.Country);
+
+            //Assign languages partition
+            modelBuilder.Entity<Languages>()
+                  .HasPartitionKey(o => o.Name);
+
+            //Assign contacts partition
+            modelBuilder.Entity<Contacts>()
+                  .Property(e => e.CountryId)
+                  .HasConversion(converter);
+            modelBuilder.Entity<Contacts>()
+                  .HasPartitionKey(o => o.CountryId);
+
+            //Assign disclaimers partition
+            modelBuilder.Entity<Disclaimers>()
+                  .Property(e => e.LanguageId)
+                  .HasConversion(converter);
+            modelBuilder.Entity<Disclaimers>()
+                  .HasPartitionKey(o => o.LanguageId);
+
+            //Assign provinces partition
+            modelBuilder.Entity<Provinces>()
+                  .Property(e => e.CountryId)
+                  .HasConversion(converter);
+            modelBuilder.Entity<Provinces>()
+                  .HasPartitionKey(o => o.CountryId);
+
+            //Assign resourcegroups partition
+            modelBuilder.Entity<ResourceGroups>()
+                  .Property(e => e.LanguageId)
+                  .HasConversion(converter);
+            modelBuilder.Entity<ResourceGroups>()
+                  .HasPartitionKey(o => o.LanguageId);
+
+            //Assign systemusers partition
+            modelBuilder.Entity<SystemUsers>()
+                  .Property(e => e.CountryId)
+                  .HasConversion(converter);
+            modelBuilder.Entity<SystemUsers>()
+                  .HasPartitionKey(o => o.CountryId);
+
+            //Assign websiteusers partition
+            modelBuilder.Entity<WebsiteUsers>()
+                  .HasPartitionKey(o => o.IndustryName);
+
+            //Assign taxtags partition
+            modelBuilder.Entity<TaxTags>()
+                  .Property(e => e.CountryId)
+                  .HasConversion(converter);
+            modelBuilder.Entity<TaxTags>()
+                  .HasPartitionKey(o => o.CountryId);
+
+            //Assign images partition
+            modelBuilder.Entity<Images>()
+                  .Property(e => e.CountryId)
+                  .HasConversion(converter);
+            modelBuilder.Entity<Images>()
+                  .HasPartitionKey(o => o.CountryId);
+
+            //Assign useractivities partition
+            modelBuilder.Entity<UserActivities>()
+                  .Property(e => e.UserActivitiesId)
+                  .HasConversion(converter);
+            modelBuilder.Entity<UserActivities>()
+                  .HasPartitionKey(o => o.UserActivitiesId);
+
             modelBuilder.Entity<CountryGroups>().OwnsMany(p => p.AssociatedCountryIds, a =>
             {
                 a.WithOwner().HasForeignKey("CountryGroupsid");

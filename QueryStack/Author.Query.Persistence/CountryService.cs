@@ -29,7 +29,7 @@ namespace Author.Query.Persistence
         {
             var localeLangId = language.LanguageId;
             var dftLanguageId = int.Parse(_appSettings.Value.DefaultLanguageId);
-            
+
             // By default pick the localLanguage value
             var countries = await GetAllCountriesDataAsync(localeLangId, pageNo, pageSize);
 
@@ -92,10 +92,14 @@ namespace Author.Query.Persistence
             var countryList = new CountryResult();
             var images = await _cacheService.GetAllAsync("imagesCacheKey");
 
-            var countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(languageId))
-                                    .Select(c => new { c.CountryId, c.DisplayName, c.PNGImageId, c.SVGImageId })
-                                    .OrderByDescending(c => c.CountryId)
-                                    .Skip((pageNo - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
+            //var countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true) && cc.LanguageId.Equals(languageId))
+            //                        .Select(c => new { c.CountryId, c.DisplayName, c.PNGImageId, c.SVGImageId, })
+            //                        .Skip((pageNo - 1) * 100).Take(pageSize).AsNoTracking().ToListAsync();
+            var countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true))
+                                    .Select(c => new { c.CountryId, c.DisplayName, c.PNGImageId, c.SVGImageId, c.LanguageId })
+                                    .OrderByDescending(s=>s.CountryId)
+                                    .Skip((pageNo - 1) * 100).Take(pageSize).AsNoTracking().ToListAsync();
+            countries = countries.Where(s => s.LanguageId.Equals(languageId)).ToList();
 
             if (countries.Count == 0)
             {
