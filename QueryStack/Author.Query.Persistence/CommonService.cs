@@ -3,7 +3,6 @@ using Author.Query.Domain.DBAggregate;
 using Author.Query.Persistence.DTO;
 using Author.Query.Persistence.Interfaces;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
