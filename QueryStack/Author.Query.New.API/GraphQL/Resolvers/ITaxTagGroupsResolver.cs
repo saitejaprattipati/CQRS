@@ -1,6 +1,7 @@
 ﻿namespace Author.Query.New.API.GraphQL.Resolvers
 {
-    public interface ICountryGroupsResolver : IResolver
+    public interface ITaxTagGroupsResolver:IResolver
     {
+
     }
 }
