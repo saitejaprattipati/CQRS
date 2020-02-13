@@ -6,15 +6,16 @@ EXPOSE 80
 
 WORKDIR /src
 COPY ["CommandStack/Author.Command.API/Author.Command.API.csproj", "CommandStack/Author.Command.API/"]
-COPY ["CommandStack/Author.Command.Domain/Author.Command.Domain.csproj", "CommandStack/Author.Command.Domain/"]
-COPY ["CommandStack/Author.Command.Events/Author.Command.Events.csproj", "CommandStack/Author.Command.Events/"]
-COPY ["CommandStack/Author.Command.Persistence/Author.Command.Persistence.csproj", "CommandStack/Author.Command.Persistence/"]
-COPY ["CommandStack/Author.Command.Service/Author.Command.Service.csproj", "CommandStack/Author.Command.Service/"]
-COPY ["Common/Author.Core.Framework/Author.Core.Framework.csproj", "Common/Author.Core.Framework/"]
-COPY ["Common/Author.Core.Services.BlobStorage/Author.Core.Services.BlobStorage.csproj", "Common/Author.Core.Services.BlobStorage/"]
-COPY ["Common/Author.Core.Services.EventBus.Azure/Author.Core.Services.EventBus.Azure.csproj", "Common/Author.Core.Services.EventBus.Azure/"]
 COPY ["Common/Author.Core.Services.EventBus.RabbitMQ/Author.Core.Services.EventBus.RabbitMQ.csproj", "Common/Author.Core.Services.EventBus.RabbitMQ/"]
 COPY ["Common/Author.Core.Services.EventBus/Author.Core.Services.EventBus.csproj", "Common/Author.Core.Services.EventBus/"]
+COPY ["CommandStack/Author.Command.Service/Author.Command.Service.csproj", "CommandStack/Author.Command.Service/"]
+COPY ["CommandStack/Author.Command.Persistence/Author.Command.Persistence.csproj", "CommandStack/Author.Command.Persistence/"]
+COPY ["CommandStack/Author.Command.Domain/Author.Command.Domain.csproj", "CommandStack/Author.Command.Domain/"]
+COPY ["Common/Author.Core.Framework/Author.Core.Framework.csproj", "Common/Author.Core.Framework/"]
+COPY ["CommandStack/Author.Command.Events/Author.Command.Events.csproj", "CommandStack/Author.Command.Events/"]
+COPY ["Common/Author.Core.Services.Persistence.CosmosDB/Author.Core.Services.Persistence.CosmosDB.csproj", "Common/Author.Core.Services.Persistence.CosmosDB/"]
+COPY ["Common/Author.Core.Services.BlobStorage/Author.Core.Services.BlobStorage.csproj", "Common/Author.Core.Services.BlobStorage/"]
+COPY ["Common/Author.Core.Services.EventBus.Azure/Author.Core.Services.EventBus.Azure.csproj", "Common/Author.Core.Services.EventBus.Azure/"]
 
 RUN dotnet restore "CommandStack/Author.Command.API/Author.Command.API.csproj"
 COPY . .

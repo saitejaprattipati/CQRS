@@ -6,6 +6,7 @@
     <UserSecretsId>cbe85649-9c82-4df0-85f3-0f4755a1a268</UserSecretsId>
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
     <ApplicationInsightsResourceId>/subscriptions/24b11871-bf50-42a3-9545-684eb027e133/resourcegroups/App0295_POC_RG/providers/microsoft.insights/components/taxathandAppInsights</ApplicationInsightsResourceId>
+    <DockerfileContext>..\..</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
