@@ -41,13 +41,11 @@ namespace Author.Command.API.Controllers
                         return BadRequest(response.FailureReason);
                     }
                 }
-
             }
             catch (Exception ex)
             {
                 //  _logger.LogError();
             }
-
             return BadRequest();
         }
     }

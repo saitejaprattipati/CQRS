@@ -1,4 +1,5 @@
-﻿using Author.Core.Services.EventBus;
+﻿using Author.Command.Domain.Models;
+using Author.Core.Services.EventBus;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace Author.Command.Events
         public int? ImageId { get; set; }
 
         [JsonProperty("State")]
-        public int? State { get; set; }
+        public string State { get; set; }
 
         [JsonProperty("Type")]
         public int Type { get; set; }
@@ -56,7 +57,7 @@ namespace Author.Command.Events
         public DateTime? NotificationSentDate { get; set; }
 
         [JsonProperty("ProvinceId")]
-        public int ProvinceId { get; set; }
+        public int? ProvinceId { get; set; }
 
         [JsonProperty("ArticleContentId")]
         public int? ArticleContentId { get; set; }
@@ -72,17 +73,21 @@ namespace Author.Command.Events
 
         [JsonProperty("Content")]
         public string Content { get; set; }
+        [JsonProperty("RelatedResources")]
+        public List<RelatedEntityId> RelatedResources { get; set; }
 
         [JsonProperty("RelatedContacts")]
-        public List<int> RelatedContacts { get; set; }
+        public List<RelatedEntityId> RelatedContacts { get; set; }
 
         [JsonProperty("RelatedCountries")]
-        public List<int> RelatedCountries { get; set; }
+        public List<RelatedEntityId> RelatedCountries { get; set; }
 
         [JsonProperty("RelatedCountryGroups")]
-        public List<int> RelatedCountryGroups { get; set; }
+        public List<RelatedEntityId> RelatedCountryGroups { get; set; }
 
         [JsonProperty("RelatedTaxTags")]
-        public List<int> RelatedTaxTags { get; set; }
+        public List<RelatedEntityId> RelatedTaxTags { get; set; }
+        [JsonProperty("RelatedArticles")]
+        public List<RelatedEntityId> RelatedArticles { get; set; }
     }
 }
