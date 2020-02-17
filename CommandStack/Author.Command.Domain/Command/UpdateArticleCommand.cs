@@ -7,8 +7,11 @@ using Author.Command.Domain.Models;
 
 namespace Author.Command.Domain.Command
 {
-    public class CreateArticleCommand : IRequest<CreateArticleCommandResponse>
+   public class UpdateArticleCommand : IRequest<UpdateArticleCommandResponse>
     {
+        [JsonProperty("articleID")]
+        public int ArticleID { get; set; }
+
         [JsonProperty("articleName")]
         public string ArticleName { get; set; }
 
@@ -27,9 +30,6 @@ namespace Author.Command.Domain.Command
         [JsonProperty("isPublished")]
         public bool IsPublished { get; set; }
 
-        [JsonProperty("type")]
-        public int Type { get; set; }
-
         [JsonProperty("subType")]
         public int? SubType { get; set; }
 
@@ -42,13 +42,8 @@ namespace Author.Command.Domain.Command
         [JsonProperty("notificationSentDate")]
         public DateTime? NotificationSentDate { get; set; }
 
-        [JsonProperty("createdDate")]
-        public DateTime? CreatedDate { get; set; }
-
         [JsonProperty("updatedDate")]
         public DateTime? UpdatedDate { get; set; }
-        [JsonProperty("createdBy")]
-        public string CreatedBy { get; set; }
 
         [JsonProperty("updatedBy")]
         public string UpdatedBy { get; set; }
@@ -86,9 +81,9 @@ namespace Author.Command.Domain.Command
         [JsonProperty("relatedContacts")]
         public List<int> RelatedContacts { get; set; }
     }
-    public class CreateArticleCommandResponse : CommandResponse
+    public class UpdateArticleCommandResponse : CommandResponse
     {
         [JsonProperty("UpdatedStatus")]
         public string UpdatedStatus { get; set; }
-    }   
+    }
 }

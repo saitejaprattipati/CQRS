@@ -28,14 +28,61 @@ namespace Author.Command.Persistence
             List<Articles> objArticles = _context.Articles.ToList();
             return objArticles;
         }
+        public List<Articles> getArticlesListById(List<int> ArticleIds)
+        {
+            List<Articles> objArticles = _context.Articles.Where(a => ArticleIds.Contains(a.ArticleId)).ToList();//   _context.Articles.ToList();
+            return objArticles;
+        }
+        public Articles getArticleCompleteDataById(int ArticleId)
+        {
+            List<Articles> objArticles = _context.Articles.ToList();
+
+
+
+            Articles _article = _context.Articles
+                    .Include(a => a.ArticleContents)
+                    .Include(a => a.ArticleRelatedCountries)//.Select(rc => rc.CountryContent))
+                    .Include(a => a.ArticleRelatedCountryGroups)//.Select(rcg => rcg.CountryGroupContent))
+                    .Include(a => a.ArticleRelatedTaxTags)//.Select(rc => rc.TaxTagContent.Select(tl => tl.Language)))
+                    .Include(a => a.ArticleRelatedContacts)//.Select(rc => rc.ContactContent))
+                    .Include(a => a.RelatedArticlesArticle)//.Select(ra => ra.ArticleContent))
+                    .Include(a => a.RelatedResourcesArticle)//.Select(ra => ra.ArticleContent))
+                   // .Include(a => a.Disclaimer.DisclaimerContent)
+                    .FirstOrDefault(a => a.ArticleId == ArticleId);
+            return _article;
+        }
+        public Articles getArticleDataById(int ArticleId)
+        {
+            List<Articles> objArticles = _context.Articles.ToList();
+
+
+
+            Articles _article = _context.Articles.FirstOrDefault(a => a.ArticleId == ArticleId);
+            return _article;
+        }
         public List<TaxTags> getTaxTags()
         {
             List<TaxTags> objTaxTags = _context.TaxTags.ToList();
             return objTaxTags;
         }
+        public TaxTags getTaxTagsById(int TaxTagsId)
+        {
+            TaxTags objTaxTags = _context.TaxTags.Where(s=>s.TaxTagId== TaxTagsId).FirstOrDefault();
+            return objTaxTags;
+        }
         public List<Countries> getCountries()
         {
             List<Countries> objCountries = _context.Countries.ToList();
+            return objCountries;
+        }
+        public CountryGroups getCountryGroupById(int CountryGroupId)
+        {
+            CountryGroups objCountryGroup = _context.CountryGroups.Where(s=>s.CountryGroupId == CountryGroupId).FirstOrDefault();
+            return objCountryGroup;
+        }
+        public Countries getCountryById(int CountryId)
+        {
+            Countries objCountries = _context.Countries.Where(s=>s.CountryId==CountryId).FirstOrDefault();
             return objCountries;
         }
         public List<CountryGroups> getCountryGroups()
@@ -48,66 +95,75 @@ namespace Author.Command.Persistence
             List<Contacts> objContacts = _context.Contacts.ToList();
             return objContacts;
         }
+        public Contacts getContactsById(int ContactId)
+        {
+            Contacts objContact = _context.Contacts.Where(s=>s.ContactId== ContactId).FirstOrDefault();
+            return objContact;
+        }
         public Articles Add(Articles Article)
         {
             return _context.Articles.Add(Article).Entity;
         }
-        public int SendNotificationsForArticle(CreateArticleCommand article)
+        public int SendNotificationsForArticle<T>(T article)
         {
-            var publishing = article.EventType == "Publish";
+           // var publishing = article.EventType == "Publish";
 
-            if (publishing && article.NotificationSentDate == null && article.SendNotification && false)
-            {
-                var users = ((from uct in (from user in _context.WebsiteUsers
-                                           from subscribedCountry in user.UserSubscribedCountries
-                                           from subscribedTag in subscribedCountry.UserSubscribedCountryTags.Select(s => s.TaxTag)
-                                           select new UserArticleRelation
-                                           {
-                                               Article = null,
-                                               Country = subscribedCountry.Country,
-                                               TaxTag = subscribedTag,
-                                               WebsiteUser = user
-                                           })
-                              from act in (from carticle in _context.Articles
-                                           from articleTag in carticle.ArticleRelatedTaxTags.Select(at => at.TaxTag)
-                                               //from articleCountry in article.ArticleRelatedCountries
-                                           let articleCountryGroup = carticle.ArticleRelatedCountryGroups.Select(s => s.CountryGroup).SelectMany(s => s.CountryGroupAssociatedCountries)
-                                           let countries = carticle.ArticleRelatedCountries.Select(arc => arc.Country).Concat(articleCountryGroup.Select(g => g.Country))
+            //if (publishing && article.NotificationSentDate == null && article.SendNotification && false)
+            //{
+            //    var users = ((from uct in (from user in _context.WebsiteUsers
+            //                               from subscribedCountry in user.UserSubscribedCountries
+            //                               from subscribedTag in subscribedCountry.UserSubscribedCountryTags.Select(s => s.TaxTag)
+            //                               select new UserArticleRelation
+            //                               {
+            //                                   Article = null,
+            //                                   Country = subscribedCountry.Country,
+            //                                   TaxTag = subscribedTag,
+            //                                   WebsiteUser = user
+            //                               })
+            //                  from act in (from carticle in _context.Articles
+            //                               from articleTag in carticle.ArticleRelatedTaxTags.Select(at => at.TaxTag)
+            //                                   //from articleCountry in article.ArticleRelatedCountries
+            //                               let articleCountryGroup = carticle.ArticleRelatedCountryGroups.Select(s => s.CountryGroup).SelectMany(s => s.CountryGroupAssociatedCountries)
+            //                               let countries = carticle.ArticleRelatedCountries.Select(arc => arc.Country).Concat(articleCountryGroup.Select(g => g.Country))
 
-                                           from country in countries
-                                           where
-                                               /*article.Type == ArticleType.Article
-                                               && */article.IsPublished
-                                               && carticle.PublishedDate <= DateTime.UtcNow
-                                           select new UserArticleRelation
-                                           {
-                                               Article = carticle,
-                                               Country = country,
-                                               TaxTag = articleTag,
-                                               WebsiteUser = null
-                                           })
-                              where
-                                   uct.Country.CountryId == act.Country.CountryId
-                                   && uct.TaxTag.TaxTagId == act.TaxTag.TaxTagId
-                              select new UserArticleRelation
-                              {
-                                  Article = act.Article,
-                                  Country = act.Country,
-                                  TaxTag = act.TaxTag,
-                                  WebsiteUser = uct.WebsiteUser
-                              })
-                .Where(r => r.Article.Type == int.Parse(ArticleType.Article.ToString())
-                            && r.Article.ArticleId == int.Parse(article.ArticleID))
-                .Select(r => r.WebsiteUser)
-                .Distinct()
-                .Include(r => r.UserDevices)).ToList();
-                return users.Count();
-            }
+            //                               from country in countries
+            //                               where
+            //                                   /*article.Type == ArticleType.Article
+            //                                   && */article.IsPublished
+            //                                   && carticle.PublishedDate <= DateTime.UtcNow
+            //                               select new UserArticleRelation
+            //                               {
+            //                                   Article = carticle,
+            //                                   Country = country,
+            //                                   TaxTag = articleTag,
+            //                                   WebsiteUser = null
+            //                               })
+            //                  where
+            //                       uct.Country.CountryId == act.Country.CountryId
+            //                       && uct.TaxTag.TaxTagId == act.TaxTag.TaxTagId
+            //                  select new UserArticleRelation
+            //                  {
+            //                      Article = act.Article,
+            //                      Country = act.Country,
+            //                      TaxTag = act.TaxTag,
+            //                      WebsiteUser = uct.WebsiteUser
+            //                  })
+            //    .Where(r => r.Article.Type == int.Parse(ArticleType.Article.ToString())
+            //                && r.Article.ArticleId == int.Parse(article.ArticleID))
+            //    .Select(r => r.WebsiteUser)
+            //    .Distinct()
+            //    .Include(r => r.UserDevices)).ToList();
+            //    return users.Count();
+            //}
             return 0;
         }
-        public void Update(Articles order)
+        public void Update<T>(T order)
         {
             _context.Entry(order).State = EntityState.Modified;
+        }
+        public void Delete<T>(T order)
+        {
+            _context.Entry(order).State = EntityState.Deleted;
         }
         public async Task<Articles> GetAsync(int orderId)
         {
@@ -119,7 +175,7 @@ namespace Author.Command.Persistence
     public interface IArticleRepository : IRepository<Articles>
     {
         Articles Add(Articles order);
-        void Update(Articles order);
+        void Update<T>(T order);
         Task<Articles> GetAsync(int orderId);
     }
 }

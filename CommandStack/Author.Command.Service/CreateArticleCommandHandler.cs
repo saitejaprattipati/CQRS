@@ -170,7 +170,7 @@ namespace Author.Command.Service
                         };
                     }
                     //Push logic needs to be implemented
-                    int userCount = _ArticleRepository.SendNotificationsForArticle(request);
+                    int userCount = _ArticleRepository.SendNotificationsForArticle<CreateArticleCommand>(request);
                     if (userCount > 0) { _article.NotificationSentDate = DateTime.Now; }
                     _ArticleRepository.Add(_article);
                     await _ArticleRepository.UnitOfWork
