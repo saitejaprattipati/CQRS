@@ -45,6 +45,7 @@ namespace Author.Command.Service
                 List<CountryGroups> countryGroups = _ArticleRepository.getCountryGroups();
                 List<Contacts> contacts = _ArticleRepository.getContacts();
                 Articles _article = _ArticleRepository.getArticleCompleteDataById(request.ArticleID);
+                var contentToDelete = new List<int>();
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     _article.UpdatedBy = request.UpdatedBy;
@@ -94,6 +95,7 @@ namespace Author.Command.Service
                     {
                         _ArticleRepository.Delete<ArticleContents>(removed);
                         _article.ArticleContents.Remove(removed);
+                        contentToDelete.Add((int)removed.LanguageId);
                     });
 
                     // Update Related Countries 
@@ -265,11 +267,22 @@ namespace Author.Command.Service
                             RelatedCountries = _article.ArticleRelatedCountries.Select(s => new RelatedEntityId { IdVal = s.CountryId }).ToList(),
                             RelatedCountryGroups = _article.ArticleRelatedCountryGroups.Select(s => new RelatedEntityId { IdVal = s.CountryGroupId }).ToList(),
                             RelatedTaxTags = _article.ArticleRelatedTaxTags.Select(s => new RelatedEntityId { IdVal = s.TaxTagId }).ToList(),
-                            RelatedArticles = _article.RelatedArticlesArticle.Select(s => new RelatedEntityId { IdVal = s.ArticleId }).ToList(),
+                            RelatedArticles = _article.RelatedArticlesArticle.Select(s => new RelatedEntityId { IdVal = s.RelatedArticleId }).ToList(),
                             RelatedResources = _article.RelatedResourcesArticle.Select(s => new RelatedEntityId { IdVal = s.RelatedArticleId }).ToList(),
                             Discriminator = Constants.ArticlesDiscriminator
                         };
                         await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
+                    }
+                    foreach (int i in contentToDelete)
+                    {
+                        var deleteEvt = new ArticleCommandEvent()
+                        {
+                            id = articleDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ArticleId") == _article.ArticleId
+                                  && d.GetPropertyValue<int>("LanguageId") == i).GetPropertyValue<Guid>("id"),
+                            EventType = ServiceBusEventType.Delete,
+                            Discriminator = Constants.ArticlesDiscriminator
+                        };
+                        await _Eventcontext.PublishThroughEventBusAsync(deleteEvt);
                     }
                     scope.Complete();
                 }
