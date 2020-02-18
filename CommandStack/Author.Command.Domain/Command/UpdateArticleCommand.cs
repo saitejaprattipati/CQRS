@@ -7,8 +7,12 @@ using Author.Command.Domain.Models;
 
 namespace Author.Command.Domain.Command
 {
-    public class CreateArticleCommand : IRequest<CreateArticleCommandResponse>
+   public class UpdateArticleCommand : IRequest<UpdateArticleCommandResponse>
     {
+        [JsonRequired]
+        [JsonProperty("articleID")]
+        public int ArticleID { get; set; }
+
         [JsonRequired]
         [JsonProperty("articleName")]
         public string ArticleName { get; set; }
@@ -34,12 +38,8 @@ namespace Author.Command.Domain.Command
         public bool IsPublished { get; set; }
 
         [JsonRequired]
-        [JsonProperty("type")]
-        public int Type { get; set; }
-
-        [JsonRequired]
         [JsonProperty("subType")]
-        public int? SubType { get; set; }
+        public int SubType { get; set; }
 
         [JsonRequired]
         [JsonProperty("sendNotification")]
@@ -50,17 +50,7 @@ namespace Author.Command.Domain.Command
         public string EventType { get; set; }
 
         [JsonProperty("notificationSentDate")]
-        public DateTime? NotificationSentDate { get; set; }
-
-        [JsonProperty("createdDate")]
-        public DateTime? CreatedDate { get; set; }
-
-        [JsonProperty("updatedDate")]
-        public DateTime? UpdatedDate { get; set; }
-
-        [JsonRequired]
-        [JsonProperty("createdBy")]
-        public string CreatedBy { get; set; }
+        public DateTime NotificationSentDate { get; set; }
 
         [JsonRequired]
         [JsonProperty("updatedBy")]
@@ -96,7 +86,7 @@ namespace Author.Command.Domain.Command
         [JsonRequired]
         [JsonProperty("relatedCountryGroups")]
         public List<int> RelatedCountryGroups { get; set; }
-
+        
         [JsonRequired]
         [JsonProperty("relatedArticles")]
         public List<int> RelatedArticles { get; set; }
@@ -109,9 +99,9 @@ namespace Author.Command.Domain.Command
         [JsonProperty("relatedContacts")]
         public List<int> RelatedContacts { get; set; }
     }
-    public class CreateArticleCommandResponse : CommandResponse
+    public class UpdateArticleCommandResponse : CommandResponse
     {
         [JsonProperty("UpdatedStatus")]
         public string UpdatedStatus { get; set; }
-    }   
+    }
 }

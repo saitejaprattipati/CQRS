@@ -170,7 +170,7 @@ namespace Author.Command.Service
                         };
                     }
                     //Push logic needs to be implemented
-                    int userCount = _ArticleRepository.SendNotificationsForArticle(request);
+                    int userCount = _ArticleRepository.SendNotificationsForArticle<CreateArticleCommand>(request);
                     if (userCount > 0) { _article.NotificationSentDate = DateTime.Now; }
                     _ArticleRepository.Add(_article);
                     await _ArticleRepository.UnitOfWork
@@ -212,7 +212,7 @@ namespace Author.Command.Service
                             RelatedCountries = _article.ArticleRelatedCountries.Select(s => new RelatedEntityId { IdVal = s.CountryId }).ToList(),
                             RelatedCountryGroups = _article.ArticleRelatedCountryGroups.Select(s => new RelatedEntityId { IdVal = s.CountryGroupId }).ToList(),
                             RelatedTaxTags = _article.ArticleRelatedTaxTags.Select(s => new RelatedEntityId { IdVal = s.TaxTagId }).ToList(),
-                            RelatedArticles = _article.RelatedArticlesArticle.Select(s => new RelatedEntityId { IdVal = s.ArticleId }).ToList(),
+                            RelatedArticles = _article.RelatedArticlesArticle.Select(s => new RelatedEntityId { IdVal = s.RelatedArticleId }).ToList(),
                             RelatedResources = _article.RelatedResourcesArticle.Select(s => new RelatedEntityId { IdVal = s.RelatedArticleId }).ToList(),
                             Discriminator = Constants.ArticlesDiscriminator
                         };
