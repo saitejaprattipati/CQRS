@@ -20,24 +20,29 @@ namespace Author.Query.Persistence
             _appSettings = appSettings;
         }
 
-        public async Task<TaxTagGroupsResult> GetTaxTagGroupsAsync(LanguageDTO language, int pageNo, int pageSize)
+        public async Task<TaxTagGroupsResult> GetTaxTagGroupsAsync(LanguageDTO language)
         {
             var localeLangId = language.LanguageId;
             var dftLanguageId = int.Parse(_appSettings.Value.DefaultLanguageId);
 
             // By default pick the localLanguage value
-            var taxTagGroups = await GetAllTaxTagGroupsAsync(localeLangId, pageNo, pageSize);
+            var taxTagGroups = await GetAllTaxTagGroupsAsync(localeLangId);
 
             // If localLanguage data is not available then pull the data based on default language
+            if (taxTagGroups == null)
+            {
+                return null;
+            }
+
             if (taxTagGroups.TaxTagGroups.Count == 0)
             {
-                taxTagGroups = await GetAllTaxTagGroupsAsync(dftLanguageId, pageNo, pageSize);
+                taxTagGroups = await GetAllTaxTagGroupsAsync(dftLanguageId);
             }
 
             return taxTagGroups;
         }
 
-        private async Task<TaxTagGroupsResult> GetAllTaxTagGroupsAsync(int languageId, int pageNo, int pageSize)
+        private async Task<TaxTagGroupsResult> GetAllTaxTagGroupsAsync(int languageId)
         {
             var taxTagGroupsResult = new TaxTagGroupsResult();
 
@@ -52,6 +57,21 @@ namespace Author.Query.Persistence
                                                       .OrderByDescending(tg => tg.TaxTagId)
                                                       .AsNoTracking().ToListAsync();
 
+
+            ////// Get all countries 
+            ////var countries = await _dbContext.Countries.Where(cc => cc.IsPublished.Equals(true))
+            ////                        .Select(c => new { c.CountryId, c.DisplayName, c.DisplayNameShort, c.LanguageId })
+            ////                        .AsNoTracking().ToListAsync();
+
+            ////countries = countries.Where(c => c.LanguageId.Equals(languageId)).ToList();
+
+            ////// Get all published taxTags            
+            ////var taxTags = await _dbContext.TaxTags.Where(tg => tg.IsPublished.Equals(true))
+            ////                                          .Select(tg => new { tg.TaxTagId, tg.ParentTagId, tg.DisplayName, tg.RelatedCountryIds,tg.LanguageId })
+            ////                                          .OrderByDescending(tg => tg.TaxTagId)
+            ////                                          .AsNoTracking().ToListAsync();
+
+            ////taxTags = taxTags.Where(tg => tg.LanguageId.Equals(languageId)).ToList();
 
             if (taxTags.Count == 0 || taxTags == null)
             {

@@ -111,10 +111,10 @@ namespace Author.Query.Persistence
 
             //Assign taxtags partition
             modelBuilder.Entity<TaxTags>()
-                  .Property(e => e.CountryId)
+                  .Property(e => e.LanguageId)
                   .HasConversion(converter);
             modelBuilder.Entity<TaxTags>()
-                  .HasPartitionKey(o => o.CountryId);
+                  .HasPartitionKey(o => o.LanguageId);
 
             //Assign images partition
             modelBuilder.Entity<Images>()

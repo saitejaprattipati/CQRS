@@ -10,5 +10,7 @@ namespace Author.Query.Persistence.Interfaces
         LanguageDTO GetLanguageFromLocale(string locale);
 
         Task<LanguageDTO> GetLanguageFromLocaleAsync(string locale);
+
+        LanguageDetailsDTO GetLanguageDetails();
     }
 }
