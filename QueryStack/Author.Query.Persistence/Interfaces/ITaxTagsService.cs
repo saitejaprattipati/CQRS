@@ -5,7 +5,7 @@ namespace Author.Query.Persistence.Interfaces
 {
     public interface ITaxTagsService
     {
-        Task<TaxTagGroupsResult> GetTaxTagGroupsAsync(LanguageDTO language, int pageNo, int pageSize);
+        Task<TaxTagGroupsResult> GetTaxTagGroupsAsync(LanguageDTO language);
 
         Task<TaxTagGroupDTO> GetTaxTagGroupAsync(LanguageDTO language, int taxTagId);
     }

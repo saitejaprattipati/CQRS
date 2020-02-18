@@ -27,26 +27,19 @@ namespace Author.Query.New.API.GraphQL.Resolvers
             var language = _accessor.HttpContext.Items["language"] as LanguageDTO;
             graphQLQuery.FieldAsync<ResponseGraphType<TaxTagGroupResultType>>(
                 "taxtaggroupsresponse",
-                arguments: new QueryArguments
-                (
-                    new QueryArgument<IdGraphType> { Name = "pageNo", Description = "page number" },
-                    new QueryArgument<IdGraphType> { Name = "pageSize", Description = "page size" }
-                ),
                 resolve: async context =>
                 {
-                    var pageNo = context.GetArgument<int>("pageNo") == 0 ? 1 : context.GetArgument<int>("pageNo");
-                    var pageSize = context.GetArgument<int>("pageSize") == 0 ? 100 : context.GetArgument<int>("pageSize");
                     if (language != null)
                     {
                         var loader = _dataLoaderContextAccessor.Context.GetOrAddLoader("GetTaxTagGroups",
-                                                () => _taxTagsService.GetTaxTagGroupsAsync(language, pageNo, pageSize));
+                                                () => _taxTagsService.GetTaxTagGroupsAsync(language));
                         var list = await context.TryAsyncResolve(
                               async c => await loader.LoadAsync());
                         return Response(list);
                     }
                     return null;
                 }
-                , description: "All TaxTagGraoups data"
+                , description: "All TaxTagGroups data"
             );
 
             graphQLQuery.FieldAsync<ResponseGraphType<TaxTagGroupType>>(

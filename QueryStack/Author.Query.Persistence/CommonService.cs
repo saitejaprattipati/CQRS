@@ -3,6 +3,7 @@ using Author.Query.Domain.DBAggregate;
 using Author.Query.Persistence.DTO;
 using Author.Query.Persistence.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -18,13 +19,16 @@ namespace Author.Query.Persistence
         private readonly IOptions<AppSettings> _appSettings;
         private readonly IMapper _mapper;
         private readonly ICacheService<Languages, LanguageDTO> _cacheService;
+        private readonly IHttpContextAccessor _accessor;
+
         public CommonService(TaxathandDbContext dbContext, IOptions<AppSettings> appSettings, IMapper mapper,
-            ICacheService<Languages, LanguageDTO> cacheService)
+            ICacheService<Languages, LanguageDTO> cacheService,IHttpContextAccessor accessor)
         {
-            _dbContext = dbContext ??  throw new ArgumentNullException(nameof(dbContext));
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _appSettings = appSettings;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
+            _accessor = accessor;
         }
 
 
@@ -34,11 +38,11 @@ namespace Author.Query.Persistence
             return GetLanguagesByFilter(GetFilterValues(locale, true).ToArray());
         }
 
-        public async Task<LanguageDTO> GetLanguageFromLocaleAsync(string locale) => 
+        public async Task<LanguageDTO> GetLanguageFromLocaleAsync(string locale) =>
             await GetLanguagesByFilterAsync(GetFilterValues(locale, true).ToArray());
 
         //private Languages GetLanguagesByFilter(string[] filters)
-        private async  Task<LanguageDTO> GetLanguagesByFilterAsync(string[] filters)
+        private async Task<LanguageDTO> GetLanguagesByFilterAsync(string[] filters)
         {
             try
             {
@@ -102,7 +106,7 @@ namespace Author.Query.Persistence
 
                 return null;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return null;
             }
@@ -171,6 +175,15 @@ namespace Author.Query.Persistence
             //return includeDefault ? pattern.Concat(new[] { ConfigurationManager.AppSettings["DefaultLocale"] }) : pattern;
 
             return includeDefault ? pattern.Concat(new[] { _appSettings.Value.DefaultLocale }) : pattern;
+        }
+
+        public LanguageDetailsDTO GetLanguageDetails()
+        {
+            var language = _accessor.HttpContext.Items["language"] as LanguageDTO;
+
+            var dftLanguageId = int.Parse(_appSettings.Value.DefaultLanguageId);
+
+            return new LanguageDetailsDTO { LocaleLangId = language.LanguageId , DefaultLanguageId = dftLanguageId};
         }
     }
 }
