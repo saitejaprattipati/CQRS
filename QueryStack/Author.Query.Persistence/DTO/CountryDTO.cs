@@ -38,6 +38,6 @@ namespace Author.Query.Persistence.DTO
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         public string Path { get; set; } = "";
         public bool CompleteResponse { get; set; } = true;
-
+        public int? LanguageId { get; set; }
     }
 }
