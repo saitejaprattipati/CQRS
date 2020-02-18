@@ -5,8 +5,8 @@ namespace Author.Query.Persistence.Interfaces
 {
     public interface IDisclaimerService
     {
-        Task<DisclaimerResult> GetAllDisclaimersAsync(LanguageDTO language, int pageNo, int pageSize);
+        Task<DisclaimerResult> GetAllDisclaimersAsync();
 
-        Task<DisclaimerDTO> GetDiscalimerAsync(LanguageDTO language, int disclaimerId);
+        Task<DisclaimerDTO> GetDiscalimerAsync(int disclaimerId);
     }
 }
