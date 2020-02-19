@@ -123,7 +123,8 @@ namespace Author.Command.Service
                     UpdatedBy = _imagesPNG.UpdatedBy,
                     UpdatedDate = _imagesPNG.UpdatedDate,
                     EmpGuid = _imagesPNG.EmpGuid ?? string.Empty,
-                    IsEdited = false
+                    IsEdited = false,
+                    PartitionKey = ""
                 };
                 await _Eventcontext.PublishThroughEventBusAsync(pngImageEvent);
 
@@ -146,7 +147,8 @@ namespace Author.Command.Service
                     UpdatedBy = _imagesSVG.UpdatedBy,
                     UpdatedDate = _imagesSVG.UpdatedDate,
                     EmpGuid = _imagesSVG.EmpGuid ?? string.Empty,
-                    IsEdited = false
+                    IsEdited = false,
+                    PartitionKey = ""
                 };
                 await _Eventcontext.PublishThroughEventBusAsync(svgImageEvent);
 
@@ -167,7 +169,8 @@ namespace Author.Command.Service
                         DisplayName = content.DisplayName,
                         DisplayNameShort = content.DisplayNameShort,
                         LanguageId = content.LanguageId,
-                        Discriminator = Constants.CountriesDiscriminator
+                        Discriminator = Constants.CountriesDiscriminator,
+                        PartitionKey = ""
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }

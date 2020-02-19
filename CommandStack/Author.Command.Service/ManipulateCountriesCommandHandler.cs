@@ -115,7 +115,8 @@ namespace Author.Command.Service
                                 CountryContentId = doc.GetPropertyValue<int>("CountryContentId"),
                                 DisplayName = doc.GetPropertyValue<string>("DisplayName"),
                                 DisplayNameShort = doc.GetPropertyValue<string>("DisplayNameShort"),
-                                LanguageId = doc.GetPropertyValue<int?>("LanguageId")
+                                LanguageId = doc.GetPropertyValue<int?>("LanguageId"),
+                                PartitionKey = ""
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(eventsource);
                         }
@@ -129,14 +130,16 @@ namespace Author.Command.Service
                         {
                             id = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == item.PngimageId).GetPropertyValue<Guid>("id"),
                             EventType = ServiceBusEventType.Delete,
-                            Discriminator = Constants.ImagesDiscriminator
+                            Discriminator = Constants.ImagesDiscriminator,
+                            PartitionKey = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == item.SvgimageId).GetPropertyValue<int>("CountryId").ToString()
                         };
                         await _Eventcontext.PublishThroughEventBusAsync(pngimgevent);
                         var svgimgevent = new ImageCommandEvent()
                         {
                             id = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == item.SvgimageId).GetPropertyValue<Guid>("id"),
                             EventType = ServiceBusEventType.Delete,
-                            Discriminator = Constants.ImagesDiscriminator
+                            Discriminator = Constants.ImagesDiscriminator,
+                            PartitionKey = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == item.SvgimageId).GetPropertyValue<int>("CountryId").ToString()
                         };
                         await _Eventcontext.PublishThroughEventBusAsync(svgimgevent);
 
@@ -146,7 +149,8 @@ namespace Author.Command.Service
                             {
                                 id = doc.GetPropertyValue<Guid>("id"),
                                 EventType = ServiceBusEventType.Delete,
-                                Discriminator = Constants.CountriesDiscriminator
+                                Discriminator = Constants.CountriesDiscriminator,
+                                PartitionKey = doc.GetPropertyValue<int>("LanguageId").ToString()
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(countryevent);
                         }

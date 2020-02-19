@@ -119,7 +119,8 @@ namespace Author.Command.Service
                                 LanguageId = doc.GetPropertyValue<int?>("LanguageId"),
                                 ParentTagId = doc.GetPropertyValue<int?>("ParentTagId"),
                                 RelatedCountryIds = doc.GetPropertyValue<List<int>>("RelatedCountryIds"),
-                                TagContentId = doc.GetPropertyValue<int>("TaxTagContentId")
+                                TagContentId = doc.GetPropertyValue<int>("TaxTagContentId"),
+                                PartitionKey = doc.GetPropertyValue<int>("LanguageId").ToString()
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(eventSource);
                         }
@@ -135,7 +136,8 @@ namespace Author.Command.Service
                             {
                                 id = doc.GetPropertyValue<Guid>("id"),
                                 EventType = ServiceBusEventType.Delete,
-                                Discriminator = Constants.TaxTagsDiscriminator
+                                Discriminator = Constants.TaxTagsDiscriminator,
+                                PartitionKey = ""
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(eventSrc);
                         }

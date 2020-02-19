@@ -86,7 +86,8 @@ namespace Author.Command.Service
                         RelatedCountryIds = (from rc in _taxTag.TaxTagRelatedCountries where rc != null select rc.CountryId).ToList(),
                         TagContentId = content.TaxTagContentId,
                         LanguageId = content.LanguageId,
-                        DisplayName = content.DisplayName
+                        DisplayName = content.DisplayName,
+                        PartitionKey = ""
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }

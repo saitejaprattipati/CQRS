@@ -120,7 +120,8 @@ namespace Author.Command.Service
                         {
                             id = doc.GetPropertyValue<Guid>("id"),
                             EventType = ServiceBusEventType.Delete,
-                            Discriminator = Constants.ArticlesDiscriminator
+                            Discriminator = Constants.ArticlesDiscriminator,
+                            PartitionKey = doc.GetPropertyValue<int>("LanguageId").ToString()
                         };
                         await _eventcontext.PublishThroughEventBusAsync(eventSource);
                     }

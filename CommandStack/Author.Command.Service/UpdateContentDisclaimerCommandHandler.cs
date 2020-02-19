@@ -114,7 +114,8 @@ namespace Author.Command.Service
                         ProviderTerms = content.ProviderTerms,
                         LanguageId = content.LanguageId,
                         DisclaimerContentId = content.DisclaimerContentId,
-                        Discriminator = Constants.DisclaimersDiscriminator
+                        Discriminator = Constants.DisclaimersDiscriminator,
+                        PartitionKey = ""
                     };
                     await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }
@@ -125,7 +126,8 @@ namespace Author.Command.Service
                         id = disclaimerDocs.FirstOrDefault(d => d.GetPropertyValue<int>("DisclaimerId") == disclaimer.DisclaimerId
                               && d.GetPropertyValue<int>("LanguageId") == i).GetPropertyValue<Guid>("id"),
                         EventType = ServiceBusEventType.Delete,
-                        Discriminator = Constants.DisclaimersDiscriminator
+                        Discriminator = Constants.DisclaimersDiscriminator,
+                        PartitionKey = ""
                     };
                     await _eventcontext.PublishThroughEventBusAsync(deleteEvt);
                 }

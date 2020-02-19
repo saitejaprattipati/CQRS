@@ -85,7 +85,8 @@ namespace Author.Command.Service
                         TeaserText = content.TeaserText,
                         Content = content.Content,
                         ArticleContentId = content.ArticleContentId,
-                        DisclaimerId = siteDisclaimer.DisclaimerId
+                        DisclaimerId = siteDisclaimer.DisclaimerId,
+                        PartitionKey = ""
                     };
                     await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }

@@ -41,5 +41,8 @@ namespace Author.Command.Events
         [JsonProperty("ProviderTerms")]
         public string ProviderTerms { get; set; }
 
+        [JsonProperty("PartitionKey")]
+        public string PartitionKey { get; set; }
+
     }
 }

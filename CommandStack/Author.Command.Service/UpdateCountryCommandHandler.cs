@@ -149,7 +149,8 @@ namespace Author.Command.Service
                     UpdatedBy = pngImage.UpdatedBy,
                     UpdatedDate = pngImage.UpdatedDate,
                     EmpGuid = pngImage.EmpGuid ?? string.Empty,
-                    IsEdited = true
+                    IsEdited = true,
+                    PartitionKey = ""
                 };
                 await _Eventcontext.PublishThroughEventBusAsync(pngImageEvent);
 
@@ -173,7 +174,8 @@ namespace Author.Command.Service
                     UpdatedBy = svgImage.UpdatedBy,
                     UpdatedDate = svgImage.UpdatedDate,
                     EmpGuid = svgImage.EmpGuid ?? string.Empty,
-                    IsEdited = true
+                    IsEdited = true,
+                    PartitionKey = ""
                 };
                 await _Eventcontext.PublishThroughEventBusAsync(svgImageEvent);
 
@@ -197,7 +199,8 @@ namespace Author.Command.Service
                         DisplayName = item.DisplayName,
                         DisplayNameShort = item.DisplayNameShort,
                         LanguageId = item.LanguageId,
-                        Discriminator = Constants.CountriesDiscriminator
+                        Discriminator = Constants.CountriesDiscriminator,
+                        PartitionKey = ""
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }
@@ -208,7 +211,8 @@ namespace Author.Command.Service
                         id = countryDocs.FirstOrDefault(d => d.GetPropertyValue<int>("CountryId") == country.CountryId &&
                                  d.GetPropertyValue<int>("LanguageId") == i).GetPropertyValue<Guid>("id"),
                         EventType = ServiceBusEventType.Delete,
-                        Discriminator = Constants.CountriesDiscriminator
+                        Discriminator = Constants.CountriesDiscriminator,
+                        PartitionKey = ""
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(deleteEvt);
                 }

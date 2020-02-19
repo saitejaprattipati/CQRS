@@ -44,7 +44,7 @@ namespace Author.Command.Service
                 List<Countries> countries = _ArticleRepository.getCountries();
                 List<CountryGroups> countryGroups = _ArticleRepository.getCountryGroups();
                 List<Contacts> contacts = _ArticleRepository.getContacts();
-                Articles _article = _ArticleRepository.getArticleCompleteDataById(request.ArticleID);
+                Articles _article = _ArticleRepository.getArticleCompleteDataById(new List<int> { request.ArticleID } )[0];
                 var contentToDelete = new List<int>();
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
@@ -269,7 +269,8 @@ namespace Author.Command.Service
                             RelatedTaxTags = _article.ArticleRelatedTaxTags.Select(s => new RelatedEntityId { IdVal = s.TaxTagId }).ToList(),
                             RelatedArticles = _article.RelatedArticlesArticle.Select(s => new RelatedEntityId { IdVal = s.RelatedArticleId }).ToList(),
                             RelatedResources = _article.RelatedResourcesArticle.Select(s => new RelatedEntityId { IdVal = s.RelatedArticleId }).ToList(),
-                            Discriminator = Constants.ArticlesDiscriminator
+                            Discriminator = Constants.ArticlesDiscriminator,
+                            PartitionKey = ""
                         };
                         await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                     }
@@ -280,7 +281,8 @@ namespace Author.Command.Service
                             id = articleDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ArticleId") == _article.ArticleId
                                   && d.GetPropertyValue<int>("LanguageId") == i).GetPropertyValue<Guid>("id"),
                             EventType = ServiceBusEventType.Delete,
-                            Discriminator = Constants.ArticlesDiscriminator
+                            Discriminator = Constants.ArticlesDiscriminator,
+                            PartitionKey = i.ToString()
                         };
                         await _Eventcontext.PublishThroughEventBusAsync(deleteEvt);
                     }

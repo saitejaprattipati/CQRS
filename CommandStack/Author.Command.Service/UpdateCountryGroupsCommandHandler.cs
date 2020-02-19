@@ -125,7 +125,8 @@ namespace Author.Command.Service
                         CountryGroupContentId = content.CountryGroupContentId,
                         LanguageId = content.LanguageId,
                         AssociatedCountryIds = (from cg in countryGroup.CountryGroupAssociatedCountries where cg != null select cg.CountryId).ToList(),
-                        Discriminator = Constants.CountryGroupsDiscriminator
+                        Discriminator = Constants.CountryGroupsDiscriminator,
+                        PartitionKey = ""
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }
@@ -136,7 +137,8 @@ namespace Author.Command.Service
                         id = countryGroupDocs.FirstOrDefault(d => d.GetPropertyValue<int>("CountryGroupId") == countryGroup.CountryGroupId
                               && d.GetPropertyValue<int>("LanguageId") == i).GetPropertyValue<Guid>("id"),
                         EventType = ServiceBusEventType.Delete,
-                        Discriminator = Constants.CountryGroupsDiscriminator
+                        Discriminator = Constants.CountryGroupsDiscriminator,
+                        PartitionKey = ""
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(deleteEvt);
                 }

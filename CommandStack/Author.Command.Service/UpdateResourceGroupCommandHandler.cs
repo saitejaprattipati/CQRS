@@ -100,7 +100,8 @@ namespace Author.Command.Service
                         Position = resourceGroup.Position,
                         ResourceGroupContentId = contnet.ResourceGroupContentId,
                         LanguageId = contnet.LanguageId,
-                        GroupName = contnet.GroupName
+                        GroupName = contnet.GroupName,
+                        PartitionKey = ""
                     };
                     await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }
@@ -111,7 +112,8 @@ namespace Author.Command.Service
                         id = resourcegroupDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ResourceGroupId") == resourceGroup.ResourceGroupId
                                      && d.GetPropertyValue<int?>("LanguageId") == i).GetPropertyValue<Guid>("id"),
                         EventType = ServiceBusEventType.Delete,
-                        Discriminator = Constants.ResourceGroupsDiscriminator
+                        Discriminator = Constants.ResourceGroupsDiscriminator,
+                        PartitionKey = ""
                     };
                     await _eventcontext.PublishThroughEventBusAsync(deleteEvt);
                 }

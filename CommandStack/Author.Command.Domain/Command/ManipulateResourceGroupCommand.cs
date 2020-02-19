@@ -16,7 +16,7 @@ namespace Author.Command.Domain.Command
     }
     public class ManipulateResourceGroupCommandResponse : CommandResponse
     {
-        [JsonProperty("UpdatedStatus")]
+        [JsonProperty("updatedStatus")]
         public string UpdatedStatus { get; set; }
     }
 }
