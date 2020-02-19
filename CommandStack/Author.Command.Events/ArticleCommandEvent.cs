@@ -73,6 +73,7 @@ namespace Author.Command.Events
 
         [JsonProperty("Content")]
         public string Content { get; set; }
+
         [JsonProperty("RelatedResources")]
         public List<RelatedEntityId> RelatedResources { get; set; }
 
@@ -87,7 +88,11 @@ namespace Author.Command.Events
 
         [JsonProperty("RelatedTaxTags")]
         public List<RelatedEntityId> RelatedTaxTags { get; set; }
+
         [JsonProperty("RelatedArticles")]
         public List<RelatedEntityId> RelatedArticles { get; set; }
+
+        [JsonProperty("PartitionKey")]
+        public string PartitionKey { get; set; }
     }
 }

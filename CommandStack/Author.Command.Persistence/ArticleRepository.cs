@@ -33,13 +33,13 @@ namespace Author.Command.Persistence
             List<Articles> objArticles = _context.Articles.Where(a => ArticleIds.Contains(a.ArticleId)).ToList();//   _context.Articles.ToList();
             return objArticles;
         }
-        public Articles getArticleCompleteDataById(int ArticleId)
+        public List<Articles> getArticleCompleteDataById(List<int> ArticleIds)
         {
-            List<Articles> objArticles = _context.Articles.ToList();
+            List<Articles> objArticles=new List<Articles>();// = _context.Articles.ToList();
 
-
-
-            Articles _article = _context.Articles
+            foreach(var article in ArticleIds)
+            {
+                objArticles.Add(_context.Articles
                     .Include(a => a.ArticleContents)
                     .Include(a => a.ArticleRelatedCountries)//.Select(rc => rc.CountryContent))
                     .Include(a => a.ArticleRelatedCountryGroups)//.Select(rcg => rcg.CountryGroupContent))
@@ -47,9 +47,12 @@ namespace Author.Command.Persistence
                     .Include(a => a.ArticleRelatedContacts)//.Select(rc => rc.ContactContent))
                     .Include(a => a.RelatedArticlesArticle)//.Select(ra => ra.ArticleContent))
                     .Include(a => a.RelatedResourcesArticle)//.Select(ra => ra.ArticleContent))
-                   // .Include(a => a.Disclaimer.DisclaimerContent)
-                    .FirstOrDefault(a => a.ArticleId == ArticleId);
-            return _article;
+                    .Include(a => a.UserReadArticles)
+                    .Include(a => a.UserSavedArticles)
+                    // .Include(a => a.Disclaimer.DisclaimerContent)
+                    .FirstOrDefault(a => a.ArticleId == article));
+            }
+            return objArticles;
         }
         public Articles getArticleDataById(int ArticleId)
         {
@@ -64,6 +67,10 @@ namespace Author.Command.Persistence
         {
             List<TaxTags> objTaxTags = _context.TaxTags.ToList();
             return objTaxTags;
+        }
+        public void DeleteArticle(Articles article)
+        {
+            _context.Articles.Remove(article);
         }
         public TaxTags getTaxTagsById(int TaxTagsId)
         {

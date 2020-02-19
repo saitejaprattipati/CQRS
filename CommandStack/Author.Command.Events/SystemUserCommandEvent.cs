@@ -59,5 +59,8 @@ namespace Author.Command.Events
         [JsonProperty("SystemUserAssociatedCountryId")]
         public int SystemUserAssociatedCountryId { get; set; }
 
+        [JsonProperty("PartitionKey")]
+        public string PartitionKey { get; set; }
+
     }
 }

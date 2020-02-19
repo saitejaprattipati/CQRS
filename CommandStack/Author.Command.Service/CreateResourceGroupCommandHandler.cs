@@ -76,7 +76,8 @@ namespace Author.Command.Service
                         Position = _resourceGroup.Position,
                         ResourceGroupContentId = contnet.ResourceGroupContentId,
                         LanguageId = contnet.LanguageId,
-                        GroupName = contnet.GroupName
+                        GroupName = contnet.GroupName,
+                        PartitionKey = ""
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }

@@ -65,7 +65,8 @@ namespace Author.Command.Service
                         ProviderTerms = content.ProviderTerms ?? string.Empty,
                         LanguageId = content.LanguageId,
                         DisclaimerContentId = content.DisclaimerContentId,
-                        Discriminator = Constants.DisclaimersDiscriminator
+                        Discriminator = Constants.DisclaimersDiscriminator,
+                        PartitionKey = ""
                     };
                     await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }

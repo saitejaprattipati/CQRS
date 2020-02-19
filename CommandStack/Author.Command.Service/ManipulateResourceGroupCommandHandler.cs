@@ -106,7 +106,8 @@ namespace Author.Command.Service
                                 CreatedBy = doc.GetPropertyValue<string>("CreatedBy"),
                                 CreatedDate = doc.GetPropertyValue<DateTime>("CreatedDate"),
                                 UpdatedBy = doc.GetPropertyValue<string>("UpdatedBy"),
-                                UpdatedDate = doc.GetPropertyValue<DateTime>("UpdatedDate")
+                                UpdatedDate = doc.GetPropertyValue<DateTime>("UpdatedDate"),
+                                PartitionKey = ""
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(eventsource);
                         }
@@ -122,7 +123,8 @@ namespace Author.Command.Service
                             {
                                 id = doc.GetPropertyValue<Guid>("id"),
                                 EventType = ServiceBusEventType.Delete,
-                                Discriminator = Constants.ResourceGroupsDiscriminator
+                                Discriminator = Constants.ResourceGroupsDiscriminator,
+                                PartitionKey = doc.GetPropertyValue<int>("LanguageId").ToString()
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(resourceEvent);
                         }

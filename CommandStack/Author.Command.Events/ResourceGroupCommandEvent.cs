@@ -37,5 +37,8 @@ namespace Author.Command.Events
 
         [JsonProperty("GroupName")]
         public string GroupName { get; set; }
+
+        [JsonProperty("PartitionKey")]
+        public string PartitionKey { get; set; }
     }
 }

@@ -55,5 +55,8 @@ namespace Author.Command.Events
 
         [JsonProperty("EmpGUID")]
         public string EmpGuid { get; set; }
+
+        [JsonProperty("PartitionKey")]
+        public string PartitionKey { get; set; }
     }
 }

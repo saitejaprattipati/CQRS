@@ -70,7 +70,8 @@ namespace Author.Command.Service
                             id = userDocs.FirstOrDefault(d => d.GetPropertyValue<int>("SystemUserId") == user.SystemUserId).GetPropertyValue<Guid>("id"),
                             EventType = ServiceBusEventType.Delete,
                             Discriminator = Constants.SystemUsersDiscriminator,
-                            SystemUserId = user.SystemUserId
+                            SystemUserId = user.SystemUserId,
+                            PartitionKey = userDocs.FirstOrDefault(d => d.GetPropertyValue<int>("SystemUserId") == user.SystemUserId).GetPropertyValue<int>("CountryId").ToString()
                         };
                         await _eventcontext.PublishThroughEventBusAsync(eventsourcing);
                     //}

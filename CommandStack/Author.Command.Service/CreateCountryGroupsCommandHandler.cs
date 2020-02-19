@@ -84,7 +84,8 @@ namespace Author.Command.Service
                         CountryGroupContentId = content.CountryGroupContentId,
                         LanguageId = content.LanguageId,
                         AssociatedCountryIds = (from cg in _countryGroup.CountryGroupAssociatedCountries where cg != null select cg.CountryId).ToList(),
-                        Discriminator = Constants.CountryGroupsDiscriminator
+                        Discriminator = Constants.CountryGroupsDiscriminator,
+                        PartitionKey = ""
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }

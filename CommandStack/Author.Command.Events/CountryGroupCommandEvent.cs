@@ -37,5 +37,8 @@ namespace Author.Command.Events
 
         [JsonProperty("AssociatedCountryIds")]
         public List<int> AssociatedCountryIds { get; set; }
+
+        [JsonProperty("PartitionKey")]
+        public string PartitionKey { get; set; }
     }
 }

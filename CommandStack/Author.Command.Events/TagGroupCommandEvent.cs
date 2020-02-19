@@ -40,5 +40,8 @@ namespace Author.Command.Events
 
         [JsonProperty("DisplayName")]
         public string DisplayName { get; set; }
+
+        [JsonProperty("PartitionKey")]
+        public string PartitionKey { get; set; }
     }
 }
