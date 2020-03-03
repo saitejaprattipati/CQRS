@@ -13,12 +13,12 @@ namespace Author.Query.Persistence
     {
         public TaxathandDbContext(DbContextOptions<TaxathandDbContext> options) : base(options)
         {
-            //Database.EnsureCreated();
+            Database.EnsureCreated();
         }
 
         protected TaxathandDbContext()
         {
-           // Database.EnsureCreated();
+            Database.EnsureCreated();
         }
 
         public DbSet<Address> Address { get; set; }
