@@ -32,11 +32,11 @@ namespace Author.Command.Events
         [JsonProperty("ResourcePosition")]
         public int? ResourcePosition { get; set; }
 
-        [JsonProperty("DisclaimerId")]
-        public int? DisclaimerId { get; set; }
+        [JsonProperty("Disclaimer")]
+        public DisclamersSchema Disclaimer { get; set; }
 
-        [JsonProperty("ResourceGroupId")]
-        public int? ResourceGroupId { get; set; }
+        [JsonProperty("ResourceGroup")]
+        public ResourceGroupsSchema ResourceGroup { get; set; }
 
         [JsonProperty("IsPublished")]
         public bool IsPublished { get; set; }
@@ -56,8 +56,8 @@ namespace Author.Command.Events
         [JsonProperty("NotificationSentDate")]
         public DateTime? NotificationSentDate { get; set; }
 
-        [JsonProperty("ProvinceId")]
-        public int? ProvinceId { get; set; }
+        [JsonProperty("Provisions")]
+        public ProvisionsSchema Provisions { get; set; }
 
         [JsonProperty("ArticleContentId")]
         public int? ArticleContentId { get; set; }
@@ -75,7 +75,7 @@ namespace Author.Command.Events
         public string Content { get; set; }
 
         [JsonProperty("RelatedResources")]
-        public List<RelatedEntityId> RelatedResources { get; set; }
+        public List<RelatedArticlesSchema> RelatedResources { get; set; }
 
         [JsonProperty("RelatedContacts")]
         public List<RelatedEntityId> RelatedContacts { get; set; }
@@ -87,10 +87,10 @@ namespace Author.Command.Events
         public List<RelatedEntityId> RelatedCountryGroups { get; set; }
 
         [JsonProperty("RelatedTaxTags")]
-        public List<RelatedEntityId> RelatedTaxTags { get; set; }
+        public List<RelatedTaxTagsSchema> RelatedTaxTags { get; set; }
 
         [JsonProperty("RelatedArticles")]
-        public List<RelatedEntityId> RelatedArticles { get; set; }
+        public List<RelatedArticlesSchema> RelatedArticles { get; set; }
 
         [JsonProperty("PartitionKey")]
         public string PartitionKey { get; set; }

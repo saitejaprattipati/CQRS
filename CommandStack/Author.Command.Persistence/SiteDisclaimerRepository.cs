@@ -31,7 +31,11 @@ namespace Author.Command.Persistence
                                                   .Where(a => a.ArticleId.Equals(siteDisclaimerId))
                                                   .FirstOrDefaultAsync(a => a.Type == Convert.ToInt32(ArticleType.Page));
         }
-
+        public Disclaimers getDisclaimerById(int DisclaimerId)
+        {
+            Disclaimers objContact = _context.Disclaimers.Include(s => s.DisclaimerContents).Where(d => d.DisclaimerId == DisclaimerId).FirstOrDefault();
+            return objContact;
+        }
         public async Task<List<Articles>> GetSiteDisclaimerByIds(List<int> siteDisclaimerIds)
         {
             var pageType = Convert.ToInt32(ArticleType.Page);
