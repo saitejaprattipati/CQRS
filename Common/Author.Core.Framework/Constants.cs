@@ -4,6 +4,9 @@ namespace Author.Core.Framework
 {
     public class Constants
     {
+        public const string CONTENT_TYPE_ARTICLE = "TAX_CONTENT_TYPE_ARTICLE";
+        public const string CONTENT_TYPE_RESOURCE = "TAX_CONTENT_TYPE_RESOURCE";
+
         //Validation
         public const string GeneralStringRegularExpression = @"^([\w\W]*)$"; //This is to pass VeraCode checks
         public const string DisclaimersDiscriminator = "Disclaimers";
@@ -14,6 +17,7 @@ namespace Author.Core.Framework
         public const string TaxTagsDiscriminator = "TaxTags";
         public const string ImagesDiscriminator = "Images";
         public const string ArticlesDiscriminator = "Articles";
+        public const string TAX_COOKIE_BROWSER_NAME = "taxcookie";
     }
 
     public enum SystemUserRole

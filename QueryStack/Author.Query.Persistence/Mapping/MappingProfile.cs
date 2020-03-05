@@ -22,6 +22,9 @@ namespace Author.Query.Persistence.Mapping
             CreateMap<Disclaimers, DisclaimerDTO>();
             CreateMap<List<Images>, List<ImageDTO>>();
             CreateMap<ResourceGroups,ResourceGroupDTO>();
+            CreateMap<Articles, ArticleDTO>();
+            CreateMap<Contacts, ContactDTO>();
+            CreateMap<Address, AddressDTO>();
         }
     }
 }

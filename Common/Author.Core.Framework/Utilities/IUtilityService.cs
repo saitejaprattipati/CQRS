@@ -7,5 +7,9 @@ namespace Author.Core.Framework.Utilities
         bool IsTrusted();
 
         string GetLocale(IHeaderDictionary headersDictionary);
+
+        string GetCookieId(HttpRequest request);
+
+        string FormatArticleContent(string content);
     }
 }

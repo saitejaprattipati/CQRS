@@ -4,6 +4,7 @@ using Author.Query.Persistence.DTO;
 using Author.Query.Persistence.Interfaces;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,7 +20,7 @@ namespace Author.Query.Persistence
         private readonly ICommonService _commonService;
 
         public CountryService(TaxathandDbContext dbContext, IOptions<AppSettings> appSettings,
-            ICacheService<Images, ImageDTO> imageCacheService, ICacheService<Countries, CountryDTO> countryCacheService, 
+            ICacheService<Images, ImageDTO> imageCacheService, ICacheService<Countries, CountryDTO> countryCacheService,
             ICommonService commonService)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
@@ -43,6 +44,45 @@ namespace Author.Query.Persistence
             }
 
             return countries;
+        }
+
+        public async Task<CountryResult> GetCountriesByIdsAsync(List<int> countryIds, int defaultLanguageId, List<int> localeLanguageIdList,List<ImageDTO> imagesFromCache)
+        {
+            var countryList = new CountryResult();
+
+            if (imagesFromCache == null || imagesFromCache.Count == 0)
+            {
+                imagesFromCache = await _imageCacheService.GetAllAsync("imagesCacheKey");
+            }
+
+            // Fetch the data from Cache
+            var countriesFromCache = await _countryCacheService.GetAllAsync("countriesCacheKey");
+            var countries = countriesFromCache.Where(co => localeLanguageIdList.Contains(co.LanguageId) 
+                                                     && countryIds.Contains(co.Uuid)).ToList();
+
+            if (countries == null || countries.Count == 0)
+            {
+                countries = countriesFromCache.Where(c => c.LanguageId.Equals(defaultLanguageId)
+                                                     && countryIds.Contains(c.Uuid)).ToList();
+                if (countries.Count == 0)
+                {
+                    return null;
+                }
+            }
+
+            countryList.Countries.AddRange(countries.Select(co => new CountryDTO
+            {
+                Uuid = co.Uuid,
+                PNGImagePath = imagesFromCache.FirstOrDefault(im => im.ImageId.Equals(co.PNGImageId)).FilePath,
+                SVGImagePath = imagesFromCache.FirstOrDefault(im => im.ImageId.Equals(co.SVGImageId)).FilePath,
+                DisplayName = co.DisplayName,
+                DisplayNameShort = co.DisplayName,
+                Name = Helper.ReplaceChars(co.DisplayName),
+                Path = Helper.ReplaceChars(co.DisplayName),
+                CompleteResponse = true
+            }));
+
+            return countryList;
         }
 
         public async Task<CountryDTO> GetCountryAsync(int countryId)
