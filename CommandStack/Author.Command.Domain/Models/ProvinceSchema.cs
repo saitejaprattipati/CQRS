@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Author.Command.Domain.Models
 {
-    public class ProvisionsSchema
+    public class ProvinceSchema
     {
         [JsonProperty("ProvinceId")]
         public int ProvinceId { get; set; }
