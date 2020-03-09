@@ -87,8 +87,8 @@ namespace Author.Command.Service
                     }
                     if (request.RelatedArticles != null)
                     {
-                      //  var rArticleList = request.RelatedArticles;
-                      //  var relatedArticles = rarticles.Where(a => rArticleList.Any(ra => ra == a.ArticleId)).ToList();
+                        //  var rArticleList = request.RelatedArticles;
+                        //  var relatedArticles = rarticles.Where(a => rArticleList.Any(ra => ra == a.ArticleId)).ToList();
                         foreach (Articles article in rarticles)
                         {
                             _article.RelatedArticlesArticle.Add(new RelatedArticles()
@@ -102,8 +102,8 @@ namespace Author.Command.Service
                     }
                     if (request.RelatedResources != null)
                     {
-                       // var rResourceList = request.RelatedResources.ToList();                       
-                     //   var relatedResources = articles.Where(a => rResourceList.Contains(a.ArticleId)).ToList();
+                        // var rResourceList = request.RelatedResources.ToList();                       
+                        //   var relatedResources = articles.Where(a => rResourceList.Contains(a.ArticleId)).ToList();
                         foreach (Articles article in rresources)
                         {
                             _article.RelatedResourcesArticle.Add(new RelatedResources()
@@ -115,7 +115,7 @@ namespace Author.Command.Service
                     }
                     if (request.RelatedTaxTags != null)
                     {
-                      //  var rTagList = request.RelatedTaxTags.ToList();                        
+                        //  var rTagList = request.RelatedTaxTags.ToList();                        
                         //var relatedTags = taxTags.Where(t => rTagList.Contains(t.TaxTagId)).ToList();
                         foreach (TaxTags tags in rtaxTags)
                         {
@@ -128,8 +128,8 @@ namespace Author.Command.Service
                     }
                     if (request.RelatedCountries != null)
                     {
-                       // var rCountries = request.RelatedCountries.ToList();
-                       // var relatedCountries = countries.Where(c => rCountries.Contains(c.CountryId)).ToList();
+                        // var rCountries = request.RelatedCountries.ToList();
+                        // var relatedCountries = countries.Where(c => rCountries.Contains(c.CountryId)).ToList();
                         foreach (Countries country in rcountries)
                         {
                             _article.ArticleRelatedCountries.Add(new ArticleRelatedCountries()
@@ -141,8 +141,8 @@ namespace Author.Command.Service
                     }
                     if (request.RelatedCountryGroups != null)
                     {
-                      //  var rCountryGroups = request.RelatedCountryGroups.ToList();
-                       // var relatedCountryGroups = countryGroups.Where(c => rCountryGroups.Contains(c.CountryGroupId)).ToList();
+                        //  var rCountryGroups = request.RelatedCountryGroups.ToList();
+                        // var relatedCountryGroups = countryGroups.Where(c => rCountryGroups.Contains(c.CountryGroupId)).ToList();
                         foreach (CountryGroups cGroup in rcountryGroups)
                         {
                             _article.ArticleRelatedCountryGroups.Add(new ArticleRelatedCountryGroups()
@@ -185,38 +185,39 @@ namespace Author.Command.Service
                     {
                         var DisclaimerLanguageId = DisclaimersDetails.DisclaimerContents.Where(d => d.LanguageId == content.LanguageId).Count() > 0 ? content.LanguageId : 37;
                         var ResourceGroupLanguageId = ResourceGroupsDetails.ResourceGroupContents.Where(d => d.LanguageId == content.LanguageId).Count() > 0 ? content.LanguageId : 37;
-                        var ProvisionsLanguageId = ProvincesDetails.ProvinceContents.Where(d => d.LanguageId == content.LanguageId).Count() > 0 ? content.LanguageId : 37;                     
+                        var ProvisionsLanguageId = ProvincesDetails.ProvinceContents.Where(d => d.LanguageId == content.LanguageId).Count() > 0 ? content.LanguageId : 37;
                         var eventSourcing = new ArticleCommandEvent()
-                        {
+                        {                           
                             EventType = ServiceBusEventType.Create,
                             ArticleId = _article.ArticleId,
-                            PublishedDate = _article.PublishedDate,
-                            Author = _article.Author,
-                            ImageId = _article.ImageId,
-                            State = _article.State,
-                            Type = _article.Type,
-                            SubType = _article.SubType,
-                            ResourcePosition = _article.ResourcePosition,
-                              Disclaimer = new DisclamersSchema { DisclaimerId=int.Parse(_article.DisclaimerId.ToString()), ProviderName= DisclaimersDetails.DisclaimerContents.Where(d=>d.LanguageId== DisclaimerLanguageId).Select(ds=>ds.ProviderName).FirstOrDefault(), ProviderTerms = DisclaimersDetails.DisclaimerContents.Where(d => d.LanguageId == DisclaimerLanguageId).Select(ds => ds.ProviderTerms).FirstOrDefault() },
-                             ResourceGroup = new ResourceGroupsSchema {ResourceGroupId  = int.Parse(_article.ResourceGroupId.ToString()), GroupName = ResourceGroupsDetails.ResourceGroupContents.Where(d => d.LanguageId == ResourceGroupLanguageId).Select(ds => ds.GroupName).FirstOrDefault(), Position = ResourceGroupsDetails.Position },
-                            IsPublished = _article.IsPublished,
-                            CreatedDate = _article.CreatedDate,
-                            CreatedBy = _article.CreatedBy,
-                            UpdatedDate = _article.UpdatedDate,
-                            UpdatedBy = _article.UpdatedBy,
-                            NotificationSentDate = _article.NotificationSentDate,
-                            Provisions = new ProvisionsSchema { ProvinceId = int.Parse(_article.ProvinceId.ToString()), DisplayName = ProvincesDetails.ProvinceContents.Where(d => d.LanguageId == ProvisionsLanguageId).Select(ds => ds.DisplayName).FirstOrDefault() },
-                            ArticleContentId = content.ArticleContentId,
-                            LanguageId = content.LanguageId,
-                            Title = content.Title,
-                            TeaserText = content.TeaserText,
-                            Content = content.Content,
+                            PublishedDate = _article.PublishedDate ==null?"": _article.PublishedDate.ToString(),
+                            Author = _article.Author == null ? "" : _article.Author,
+                            ImageId = _article.ImageId == null ? -1 : _article.ImageId,
+                            State = _article.State == null ? "" : _article.State,
+                            Type = _article.Type == null ? -1 : _article.Type,
+                            SubType = _article.SubType == null ? -1 : _article.SubType,
+                            ResourcePosition = _article.ResourcePosition == null ? -1 : _article.ResourcePosition,
+                            Disclaimer = new DisclamersSchema { DisclaimerId = int.Parse(_article.DisclaimerId.ToString()), ProviderName = DisclaimersDetails.DisclaimerContents.Where(d => d.LanguageId == DisclaimerLanguageId).Select(ds => ds.ProviderName == null ? "" : ds.ProviderName).FirstOrDefault(), ProviderTerms = DisclaimersDetails.DisclaimerContents.Where(d => d.LanguageId == DisclaimerLanguageId).Select(ds => ds.ProviderTerms == null ? "" : ds.ProviderTerms).FirstOrDefault() },
+                            ResourceGroup = new ResourceGroupsSchema { ResourceGroupId = int.Parse(_article.ResourceGroupId.ToString()), GroupName = ResourceGroupsDetails.ResourceGroupContents.Where(d => d.LanguageId == ResourceGroupLanguageId).Select(ds => ds.GroupName == null ? "" : ds.GroupName).FirstOrDefault(), Position = ResourceGroupsDetails.Position == null ? -1 : ResourceGroupsDetails.Position },
+                            IsPublished = _article.IsPublished == null ? false : _article.IsPublished,
+                            CreatedDate = _article.CreatedDate == null ? "" : _article.CreatedDate.ToString(),
+                            CreatedBy = _article.CreatedBy == null ? "" : _article.CreatedBy,
+                            UpdatedDate = _article.UpdatedDate == null ? "" : _article.UpdatedDate.ToString(),
+                            UpdatedBy = _article.UpdatedBy == null ? "" : _article.UpdatedBy,
+                            NotificationSentDate = _article.NotificationSentDate == null ? "" : _article.NotificationSentDate.ToString(),
+                            Provinces = new ProvinceSchema { ProvinceId = int.Parse(_article.ProvinceId.ToString()), DisplayName = ProvincesDetails.ProvinceContents.Where(d => d.LanguageId == ProvisionsLanguageId).Select(ds => ds.DisplayName == null ? "" : ds.DisplayName).FirstOrDefault() },
+                            ArticleContentId = content.ArticleContentId == null ? -1 : content.ArticleContentId,
+                            LanguageId = content.LanguageId == null ? -1 : content.LanguageId,
+                            Title = content.Title == null ? "" : content.Title,
+                            TitleInEnglishDefault = _article.ArticleContents.Where(l => l.LanguageId == 37 && l.ArticleId == content.ArticleId).Select(s => { if (s.Title == null) return ""; else return s.Title; }).FirstOrDefault(),
+                            TeaserText = content.TeaserText == null ? "" : content.TeaserText,
+                            Content = content.Content == null ? "" : content.Content,
                             RelatedContacts = _article.ArticleRelatedContacts.Select(s => new RelatedEntityId { IdVal = s.ContactId }).ToList(),
                             RelatedCountries = _article.ArticleRelatedCountries.Select(s => new RelatedEntityId { IdVal = s.CountryId }).ToList(),
                             RelatedCountryGroups = _article.ArticleRelatedCountryGroups.Select(s => new RelatedEntityId { IdVal = s.CountryGroupId }).ToList(),
-                            RelatedTaxTags = _article.ArticleRelatedTaxTags.Select(s => { var RelatedtaxTagLanguageId = taxTagsDetails.Where(td => td.TaxTagId == s.TaxTagId).FirstOrDefault().TaxTagContents.Where(ttc => ttc.LanguageId == content.LanguageId).Count() > 0 ? content.LanguageId : 37; return new RelatedTaxTagsSchema { TaxTagId = s.TaxTagId, DisplayName = taxTagsDetails.Where(td => td.TaxTagId == s.TaxTagId).FirstOrDefault().TaxTagContents.Where(ttc => ttc.LanguageId == RelatedtaxTagLanguageId).Select(ttcs => ttcs.DisplayName).FirstOrDefault() }; }).ToList(),
-                            RelatedArticles = _article.RelatedArticlesArticle.Select(s => { var RelatedArticleLanguageId = articlesDetails.Where(ra => ra.ArticleId.Equals(s.RelatedArticleId)).FirstOrDefault().ArticleContents.Where(ttc => ttc.LanguageId == content.LanguageId).Count() > 0 ? content.LanguageId : 37; return new RelatedArticlesSchema { ArticleId = s.RelatedArticleId, PublishedDate = articlesDetails.Where(ra => ra.ArticleId.Equals(s.RelatedArticleId)).Select(v => v.PublishedDate).FirstOrDefault().ToString(), Title = articlesDetails.Where(ra => ra.ArticleId.Equals(s.RelatedArticleId)).FirstOrDefault().ArticleContents.Where(ttc => ttc.LanguageId == RelatedArticleLanguageId).Select(v => v.Title).FirstOrDefault().ToString(), CountryId = articlesDetails.Where(ad => ad.ArticleId.Equals(s.RelatedArticleId)).FirstOrDefault().ArticleRelatedCountries.Select(arc => new RelatedEntityId { IdVal = arc.CountryId }).ToList() }; }).ToList(),
-                            RelatedResources = _article.RelatedResourcesArticle.Select(s => { var RelatedResourceLanguageId = articlesDetails.Where(ra => ra.ArticleId.Equals(s.RelatedArticleId)).FirstOrDefault().ArticleContents.Where(ttc => ttc.LanguageId == content.LanguageId).Count() > 0 ? content.LanguageId : 37; return new RelatedArticlesSchema { ArticleId = s.RelatedArticleId, PublishedDate = articlesDetails.Where(ra => ra.ArticleId.Equals(s.RelatedArticleId)).Select(v => v.PublishedDate).FirstOrDefault().ToString(), Title = articlesDetails.Where(ra => ra.ArticleId.Equals(s.RelatedArticleId)).FirstOrDefault().ArticleContents.Where(ttc => ttc.LanguageId == RelatedResourceLanguageId).Select(v => v.Title).FirstOrDefault().ToString(), CountryId = articlesDetails.Where(ad => ad.ArticleId.Equals(s.RelatedArticleId)).FirstOrDefault().ArticleRelatedCountries.Select(arc => new RelatedEntityId { IdVal = arc.CountryId }).ToList() }; }).ToList(),
+                            RelatedTaxTags = _article.ArticleRelatedTaxTags.Select(s => { var RelatedtaxTagLanguageId = taxTagsDetails.Where(td => td.TaxTagId == s.TaxTagId).FirstOrDefault().TaxTagContents.Where(ttc => ttc.LanguageId == content.LanguageId).Count() > 0 ? content.LanguageId : 37; return new RelatedTaxTagsSchema { TaxTagId = s.TaxTagId, DisplayName = taxTagsDetails.Where(td => td.TaxTagId == s.TaxTagId).FirstOrDefault().TaxTagContents.Where(ttc => ttc.LanguageId == RelatedtaxTagLanguageId).Select(ttcs => ttcs.DisplayName == null ? "" : ttcs.DisplayName).FirstOrDefault() }; }).ToList(),
+                            RelatedArticles = _article.RelatedArticlesArticle.Select(s => { var RelatedArticleLanguageId = articlesDetails.Where(ra => ra.ArticleId.Equals(s.RelatedArticleId)).FirstOrDefault().ArticleContents.Where(ttc => ttc.LanguageId == content.LanguageId).Count() > 0 ? content.LanguageId : 37; return new RelatedArticlesSchema { ArticleId = s.RelatedArticleId, PublishedDate = articlesDetails.Where(ra => ra.ArticleId.Equals(s.RelatedArticleId)).Select(v => v.PublishedDate == null ? "" : v.PublishedDate.ToString()).FirstOrDefault(), Title = articlesDetails.Where(ra => ra.ArticleId.Equals(s.RelatedArticleId)).FirstOrDefault().ArticleContents.Where(ttc => ttc.LanguageId == RelatedArticleLanguageId).Select(v => v.Title == null ? "" : v.Title).FirstOrDefault().ToString(), CountryId = articlesDetails.Where(ad => ad.ArticleId.Equals(s.RelatedArticleId)).FirstOrDefault().ArticleRelatedCountries.Select(arc => new RelatedEntityId { IdVal = arc.CountryId }).ToList() }; }).ToList(),
+                            RelatedResources = _article.RelatedResourcesArticle.Select(s => { var RelatedResourceLanguageId = articlesDetails.Where(ra => ra.ArticleId.Equals(s.RelatedArticleId)).FirstOrDefault().ArticleContents.Where(ttc => ttc.LanguageId == content.LanguageId).Count() > 0 ? content.LanguageId : 37; return new RelatedArticlesSchema { ArticleId = s.RelatedArticleId, PublishedDate = articlesDetails.Where(ra => ra.ArticleId.Equals(s.RelatedArticleId)).Select(v => v.PublishedDate == null ? "" : v.PublishedDate.ToString()).FirstOrDefault(), Title = articlesDetails.Where(ra => ra.ArticleId.Equals(s.RelatedArticleId)).FirstOrDefault().ArticleContents.Where(ttc => ttc.LanguageId == RelatedResourceLanguageId).Select(v => v.Title == null ? "" : v.Title).FirstOrDefault().ToString(), CountryId = articlesDetails.Where(ad => ad.ArticleId.Equals(s.RelatedArticleId)).FirstOrDefault().ArticleRelatedCountries.Select(arc => new RelatedEntityId { IdVal = arc.CountryId }).ToList() }; }).ToList(),
                             Discriminator = Constants.ArticlesDiscriminator,
                             PartitionKey = ""
                         };

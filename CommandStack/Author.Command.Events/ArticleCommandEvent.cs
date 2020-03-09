@@ -12,7 +12,7 @@ namespace Author.Command.Events
         public int ArticleId { get; set; }
 
         [JsonProperty("PublishedDate")]
-        public DateTime PublishedDate { get; set; }
+        public string PublishedDate { get; set; }
 
         [JsonProperty("Author")]
         public string Author { get; set; }
@@ -42,22 +42,22 @@ namespace Author.Command.Events
         public bool IsPublished { get; set; }
 
         [JsonProperty("CreatedDate")]
-        public DateTime CreatedDate { get; set; }
+        public string CreatedDate { get; set; }
 
         [JsonProperty("CreatedBy")]
         public string CreatedBy { get; set; }
 
         [JsonProperty("UpdatedDate")]
-        public DateTime UpdatedDate { get; set; }
+        public string UpdatedDate { get; set; }
 
         [JsonProperty("UpdatedBy")]
         public string UpdatedBy { get; set; }
 
         [JsonProperty("NotificationSentDate")]
-        public DateTime? NotificationSentDate { get; set; }
+        public string NotificationSentDate { get; set; }
 
-        [JsonProperty("Provisions")]
-        public ProvisionsSchema Provisions { get; set; }
+        [JsonProperty("Provinces")]
+        public ProvinceSchema Provinces { get; set; }
 
         [JsonProperty("ArticleContentId")]
         public int? ArticleContentId { get; set; }
@@ -67,6 +67,10 @@ namespace Author.Command.Events
 
         [JsonProperty("Title")]
         public string Title { get; set; }
+
+        [JsonProperty("TitleInEnglishDefault")]
+        public string TitleInEnglishDefault { get; set; }
+        
 
         [JsonProperty("TeaserText")]
         public  string  TeaserText { get; set; }
