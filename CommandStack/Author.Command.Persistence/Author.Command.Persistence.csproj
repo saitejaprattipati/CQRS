@@ -9,6 +9,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\Author.Core.Services.Rediscache\Author.Core.Services.Rediscache.csproj" />
     <ProjectReference Include="..\Author.Command.Domain\Author.Command.Domain.csproj" />
   </ItemGroup>
 </Project>
