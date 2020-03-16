@@ -24,13 +24,15 @@ namespace Author.Command.Service
         private readonly CountryRepository _CountryRepository;
         private readonly ILogger _logger;
         private readonly CosmosDBContext _context;
+        private readonly ICacheService<Countries, Countries> _cacheService;
 
-        public ManipulateCountriesCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<ManipulateCountriesCommandHandler> logger)
+        public ManipulateCountriesCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<ManipulateCountriesCommandHandler> logger, ICacheService<Countries, Countries> cacheService)
         {
             _CountryRepository = new CountryRepository(new TaxatHand_StgContext());
             _Eventcontext = Eventcontext;
             _logger = logger;
             _context = new CosmosDBContext();
+            _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
         }
 
         public async Task<ManipulateCountriesCommandResponse> Handle(ManipulateCountriesCommand request, CancellationToken cancellationToken)
@@ -83,6 +85,8 @@ namespace Author.Command.Service
                 }
                 else
                     throw new RulesException("Operation", @"The Operation " + request.Operation + " is not valied");
+                await _cacheService.ClearCacheAsync("countriesCacheKey");
+                await _cacheService.ClearCacheAsync("imagesCacheKey");
                 await _CountryRepository.UnitOfWork
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;

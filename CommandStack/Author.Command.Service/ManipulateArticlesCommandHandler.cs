@@ -190,6 +190,61 @@ namespace Author.Command.Service
                 {
                     foreach (var item in articles)
                     {
+                        foreach (var content in item.ArticleContents)
+                        {
+                            foreach (var article in articleDocs.Where(ad => ad.GetPropertyValue<int>("LanguageId") == content.LanguageId))
+                            {
+                                foreach (var relatedArticles in article.GetPropertyValue<List<RelatedArticlesSchema>>("RelatedArticles"))
+                                {
+                                    if (relatedArticles.ArticleId == item.ArticleId)
+                                    {
+                                        List<RelatedArticlesSchema> relatedArticleSchema = new List<RelatedArticlesSchema>();
+                                        relatedArticleSchema = article.GetPropertyValue<List<RelatedArticlesSchema>>("RelatedArticles");
+
+                                        var index = relatedArticleSchema.IndexOf(relatedArticleSchema.Where(i => i.ArticleId == item.ArticleId).First());
+                                        if (index != -1)
+                                            relatedArticleSchema.Remove(relatedArticleSchema.Where(i => i.ArticleId == item.ArticleId).First());
+                                        var eventSourcingRelated = new ArticleCommandEvent()
+                                        {
+                                            id = article != null ? article.GetPropertyValue<Guid>("id") : Guid.NewGuid(),
+                                            EventType = ServiceBusEventType.Update,
+                                            ArticleId = article.GetPropertyValue<int>("ArticleId"),
+                                            PublishedDate = article.GetPropertyValue<string>("PublishedDate"),
+                                            Author = article.GetPropertyValue<string>("author"),
+                                            ImageId = article.GetPropertyValue<int>("ImageId"),
+                                            State = article.GetPropertyValue<string>("State"),
+                                            Type = article.GetPropertyValue<int>("Type"),
+                                            SubType = article.GetPropertyValue<int>("SubType"),
+                                            ResourcePosition = article.GetPropertyValue<int>("ResourcePosition"),
+                                            Disclaimer = article.GetPropertyValue<DisclamersSchema>("Disclaimer"),
+                                            ResourceGroup = article.GetPropertyValue<ResourceGroupsSchema>("ResourceGroup"),
+                                            IsPublished = article.GetPropertyValue<bool>("IsPublished"),
+                                            CreatedDate = article.GetPropertyValue<string>("CreatedDate"),
+                                            CreatedBy = article.GetPropertyValue<string>("CreatedBy"),
+                                            UpdatedDate = article.GetPropertyValue<string>("UpdatedDate"),
+                                            UpdatedBy = article.GetPropertyValue<string>("UpdatedBy"),
+                                            NotificationSentDate = article.GetPropertyValue<string>("NotificationSentDate"),
+                                            Provinces = article.GetPropertyValue<ProvinceSchema>("Provisions"),
+                                            ArticleContentId = article.GetPropertyValue<int>("ArticleContentId"),
+                                            LanguageId = article.GetPropertyValue<int>("LanguageId"),
+                                            Title = article.GetPropertyValue<string>("Title"),
+                                            TitleInEnglishDefault = article.GetPropertyValue<string>("TitleInEnglishDefault"),
+                                            TeaserText = article.GetPropertyValue<string>("TeaserText"),
+                                            Content = article.GetPropertyValue<string>("Content"),
+                                            RelatedContacts = article.GetPropertyValue<List<RelatedEntityId>>("RelatedContacts"),
+                                            RelatedCountries = article.GetPropertyValue<List<RelatedEntityId>>("RelatedCountries"),
+                                            RelatedCountryGroups = article.GetPropertyValue<List<RelatedEntityId>>("RelatedCountryGroups"),
+                                            RelatedTaxTags = article.GetPropertyValue<List<RelatedTaxTagsSchema>>("RelatedTaxTags"),
+                                            RelatedArticles = relatedArticleSchema,
+                                            RelatedResources = article.GetPropertyValue<List<RelatedArticlesSchema>>("RelatedResources"),
+                                            Discriminator = article.GetPropertyValue<string>("Discriminator"),
+                                            PartitionKey = ""
+                                        };
+                                        await _Eventcontext.PublishThroughEventBusAsync(eventSourcingRelated);
+                                    }
+                                }
+                            }
+                        }
                         foreach (var doc in articleDocs.Where(d => d.GetPropertyValue<int>("ArticleId") == item.ArticleId))
                         {
                             var articleevent = new ArticleCommandEvent()
