@@ -15,6 +15,7 @@ using Author.Core.Framework.ExceptionHandling;
 using System.Transactions;
 using Author.Core.Services.Persistence.CosmosDB;
 using Author.Core.Framework;
+using Author.Command.Domain.Models;
 
 namespace Author.Command.Service
 {
@@ -72,7 +73,7 @@ namespace Author.Command.Service
                         {
                             taxgroup.TaxTagContents.Remove(tagGroupContents);
                             _tagGroupRepository.Delete<TaxTagContents>(tagGroupContents);
-                        }                       
+                        }
                         if (request.TagType == "Tag")
                         {
                             if (taxgroup.ParentTagId == null) throw new RulesException("Invalid", @"Tag not Valid");
@@ -84,7 +85,7 @@ namespace Author.Command.Service
                         }
                         _tagGroupRepository.DeletetagGroup(taxgroup);
                     }
-                    
+
                 }
                 else
                     throw new RulesException("Operation", @"The Operation " + request.Operation + " is not valied");
@@ -94,15 +95,15 @@ namespace Author.Command.Service
                 scope.Complete();
             }
 
-            using(TransactionScope scope=new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var taxtagDocs = _context.GetAll(Constants.TaxTagsDiscriminator);
 
                 if (request.Operation == "Publish" || request.Operation == "UnPublish")
                 {
-                    foreach(var tagGrp in tagGroups)
+                    foreach (var tagGrp in tagGroups)
                     {
-                        foreach(var doc in taxtagDocs.Where(d => d.GetPropertyValue<int>("TaxTagId") == tagGrp.TaxTagId))
+                        foreach (var doc in taxtagDocs.Where(d => d.GetPropertyValue<int>("TaxTagId") == tagGrp.TaxTagId))
                         {
                             var eventSource = new TagGroupCommandEvent
                             {
@@ -130,6 +131,62 @@ namespace Author.Command.Service
                 {
                     foreach (var tagGrp in tagGroups)
                     {
+                        foreach (var content in tagGrp.TaxTagContents)
+                        {
+                            var articleDocs = _context.GetAll(Constants.ArticlesDiscriminator);
+                            foreach (var article in articleDocs.Where(ad => ad.GetPropertyValue<int>("LanguageId") == content.LanguageId))
+                            {
+                                foreach (var relatedTaxTags in article.GetPropertyValue<List<RelatedTaxTagsSchema>>("RelatedTaxTags"))
+                                {
+                                    if (relatedTaxTags.TaxTagId == content.TaxTagId)
+                                    {
+                                        List<RelatedTaxTagsSchema> relatedTaxTagsSchema = new List<RelatedTaxTagsSchema>();
+                                        relatedTaxTagsSchema = article.GetPropertyValue<List<RelatedTaxTagsSchema>>("RelatedTaxTags");
+
+                                        var index = relatedTaxTagsSchema.IndexOf(relatedTaxTagsSchema.Where(i => i.TaxTagId == content.TaxTagId).First());
+                                        if (index != -1)
+                                            relatedTaxTagsSchema.Remove(relatedTaxTagsSchema.Where(i => i.TaxTagId == tagGrp.TaxTagId).First());
+                                        var eventSourcingRelated = new ArticleCommandEvent()
+                                        {
+                                            id = article != null ? article.GetPropertyValue<Guid>("id") : Guid.NewGuid(),
+                                            EventType = ServiceBusEventType.Update,
+                                            ArticleId = article.GetPropertyValue<int>("ArticleId"),
+                                            PublishedDate = article.GetPropertyValue<string>("PublishedDate"),
+                                            Author = article.GetPropertyValue<string>("author"),
+                                            ImageId = article.GetPropertyValue<int>("ImageId"),
+                                            State = article.GetPropertyValue<string>("State"),
+                                            Type = article.GetPropertyValue<int>("Type"),
+                                            SubType = article.GetPropertyValue<int>("SubType"),
+                                            ResourcePosition = article.GetPropertyValue<int>("ResourcePosition"),
+                                            Disclaimer = article.GetPropertyValue<DisclamersSchema>("Disclaimer"),
+                                            ResourceGroup = article.GetPropertyValue<ResourceGroupsSchema>("ResourceGroup"),
+                                            IsPublished = article.GetPropertyValue<bool>("IsPublished"),
+                                            CreatedDate = article.GetPropertyValue<string>("CreatedDate"),
+                                            CreatedBy = article.GetPropertyValue<string>("CreatedBy"),
+                                            UpdatedDate = article.GetPropertyValue<string>("UpdatedDate"),
+                                            UpdatedBy = article.GetPropertyValue<string>("UpdatedBy"),
+                                            NotificationSentDate = article.GetPropertyValue<string>("NotificationSentDate"),
+                                            Provinces = article.GetPropertyValue<ProvinceSchema>("Provisions"),
+                                            ArticleContentId = article.GetPropertyValue<int>("ArticleContentId"),
+                                            LanguageId = article.GetPropertyValue<int>("LanguageId"),
+                                            Title = article.GetPropertyValue<string>("Title"),
+                                            TitleInEnglishDefault = article.GetPropertyValue<string>("TitleInEnglishDefault"),
+                                            TeaserText = article.GetPropertyValue<string>("TeaserText"),
+                                            Content = article.GetPropertyValue<string>("Content"),
+                                            RelatedContacts = article.GetPropertyValue<List<RelatedEntityId>>("RelatedContacts"),
+                                            RelatedCountries = article.GetPropertyValue<List<RelatedEntityId>>("RelatedCountries"),
+                                            RelatedCountryGroups = article.GetPropertyValue<List<RelatedEntityId>>("RelatedCountryGroups"),
+                                            RelatedTaxTags = relatedTaxTagsSchema,
+                                            RelatedArticles = article.GetPropertyValue<List<RelatedArticlesSchema>>("RelatedArticles"),
+                                            RelatedResources = article.GetPropertyValue<List<RelatedArticlesSchema>>("RelatedResources"),
+                                            Discriminator = article.GetPropertyValue<string>("Discriminator"),
+                                            PartitionKey = ""
+                                        };
+                                        await _Eventcontext.PublishThroughEventBusAsync(eventSourcingRelated);
+                                    }
+                                }
+                            }
+                        }
                         foreach (var doc in taxtagDocs.Where(d => d.GetPropertyValue<int>("TaxTagId") == tagGrp.TaxTagId))
                         {
                             var eventSrc = new TagGroupCommandEvent

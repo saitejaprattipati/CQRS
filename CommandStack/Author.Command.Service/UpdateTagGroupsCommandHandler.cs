@@ -15,10 +15,11 @@ using System.Transactions;
 using Author.Core.Framework.ExceptionHandling;
 using Author.Core.Framework;
 using Author.Core.Services.Persistence.CosmosDB;
+using Author.Command.Domain.Models;
 
 namespace Author.Command.Service
 {
-   public class UpdateTagGroupsCommandHandler : IRequestHandler<UpdateTagsCommand, UpdateTagGroupsCommandResponse>
+    public class UpdateTagGroupsCommandHandler : IRequestHandler<UpdateTagsCommand, UpdateTagGroupsCommandResponse>
     {
         private readonly IIntegrationEventPublisherServiceService _Eventcontext;
         private readonly TagGroupsRepository _taxTagsRepository;
@@ -43,22 +44,23 @@ namespace Author.Command.Service
             objTagGroups.Add(request.TagGroupsId);
             var taxGroup = _taxTagsRepository.GetTagGroups(objTagGroups)[0];
             var contentToDelete = new List<int>();
-
+            var articleDocs = _context.GetAll(Constants.ArticlesDiscriminator);
+            var taxTagDocs = _context.GetAll(Constants.TaxTagsDiscriminator);
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 //List<Languages> languages = _taxTagsRepository.GetAllLanguages();
                 if (request.TagType == "Tag")
                 {
-                    if(taxGroup.ParentTagId==null) throw new RulesException("Invalid", @"Tag not Valid");
+                    if (taxGroup.ParentTagId == null) throw new RulesException("Invalid", @"Tag not Valid");
                     taxGroup.ParentTagId = request.TagGroup;
                     foreach (var country in request.RelatedCountyIds)
                     {
                         var taxCountries = taxGroup.TaxTagRelatedCountries.Where(s => s.CountryId == country).FirstOrDefault();
-                        if(taxCountries == null)
-                        { 
-                        TaxTagRelatedCountries objRelatedCountries = new TaxTagRelatedCountries();
-                        objRelatedCountries.CountryId = country;
-                        taxGroup.TaxTagRelatedCountries.Add(objRelatedCountries);
+                        if (taxCountries == null)
+                        {
+                            TaxTagRelatedCountries objRelatedCountries = new TaxTagRelatedCountries();
+                            objRelatedCountries.CountryId = country;
+                            taxGroup.TaxTagRelatedCountries.Add(objRelatedCountries);
                         }
                         else
                         {
@@ -95,7 +97,7 @@ namespace Author.Command.Service
                 }
                 foreach (var resourceCountries in taxGroup.TaxTagRelatedCountries.ToList())
                 {
-                    if (request.RelatedCountyIds.Where(s =>s == resourceCountries.CountryId).Count() == 0)
+                    if (request.RelatedCountyIds.Where(s => s == resourceCountries.CountryId).Count() == 0)
                     {
                         taxGroup.TaxTagRelatedCountries.Remove(resourceCountries);
                         _taxTagsRepository.Delete(resourceCountries);
@@ -113,6 +115,58 @@ namespace Author.Command.Service
                 var taggroupDocs = _context.GetAll(Constants.TaxTagsDiscriminator);
                 foreach (var content in taxGroup.TaxTagContents)
                 {
+                    foreach (var article in articleDocs.Where(ad => ad.GetPropertyValue<int>("LanguageId") == content.LanguageId))
+                    {
+                        foreach (var relatedTaxTags in article.GetPropertyValue<List<RelatedTaxTagsSchema>>("RelatedTaxTags"))
+                        {
+                            if (relatedTaxTags.TaxTagId == content.TaxTagId)
+                            {
+                                List<RelatedTaxTagsSchema> relatedTaxTagsSchema = new List<RelatedTaxTagsSchema>();
+                                relatedTaxTagsSchema = article.GetPropertyValue<List<RelatedTaxTagsSchema>>("RelatedTaxTags");
+
+                                var index = relatedTaxTagsSchema.IndexOf(relatedTaxTagsSchema.Where(i => i.TaxTagId == content.TaxTagId).First());
+                                if (index != -1)
+                                    relatedTaxTagsSchema[index] = new RelatedTaxTagsSchema { TaxTagId = int.Parse(content.TaxTagId.ToString()), DisplayName = content.DisplayName };
+                                var eventSourcingRelated = new ArticleCommandEvent()
+                                {
+                                    id = article != null ? article.GetPropertyValue<Guid>("id") : Guid.NewGuid(),
+                                    EventType = ServiceBusEventType.Update,
+                                    ArticleId = article.GetPropertyValue<int>("ArticleId"),
+                                    PublishedDate = article.GetPropertyValue<string>("PublishedDate"),
+                                    Author = article.GetPropertyValue<string>("author"),
+                                    ImageId = article.GetPropertyValue<int>("ImageId"),
+                                    State = article.GetPropertyValue<string>("State"),
+                                    Type = article.GetPropertyValue<int>("Type"),
+                                    SubType = article.GetPropertyValue<int>("SubType"),
+                                    ResourcePosition = article.GetPropertyValue<int>("ResourcePosition"),
+                                    Disclaimer = article.GetPropertyValue<DisclamersSchema>("Disclaimer"),
+                                    ResourceGroup = article.GetPropertyValue<ResourceGroupsSchema>("ResourceGroup"),
+                                    IsPublished = article.GetPropertyValue<bool>("IsPublished"),
+                                    CreatedDate = article.GetPropertyValue<string>("CreatedDate"),
+                                    CreatedBy = article.GetPropertyValue<string>("CreatedBy"),
+                                    UpdatedDate = article.GetPropertyValue<string>("UpdatedDate"),
+                                    UpdatedBy = article.GetPropertyValue<string>("UpdatedBy"),
+                                    NotificationSentDate = article.GetPropertyValue<string>("NotificationSentDate"),
+                                    Provinces = article.GetPropertyValue<ProvinceSchema>("Provisions"),
+                                    ArticleContentId = article.GetPropertyValue<int>("ArticleContentId"),
+                                    LanguageId = article.GetPropertyValue<int>("LanguageId"),
+                                    Title = article.GetPropertyValue<string>("Title"),
+                                    TitleInEnglishDefault = article.GetPropertyValue<string>("TitleInEnglishDefault"),
+                                    TeaserText = article.GetPropertyValue<string>("TeaserText"),
+                                    Content = article.GetPropertyValue<string>("Content"),
+                                    RelatedContacts = article.GetPropertyValue<List<RelatedEntityId>>("RelatedContacts"),
+                                    RelatedCountries = article.GetPropertyValue<List<RelatedEntityId>>("RelatedCountries"),
+                                    RelatedCountryGroups = article.GetPropertyValue<List<RelatedEntityId>>("RelatedCountryGroups"),
+                                    RelatedTaxTags = relatedTaxTagsSchema,
+                                    RelatedArticles = article.GetPropertyValue<List<RelatedArticlesSchema>>("RelatedArticles"),
+                                    RelatedResources = article.GetPropertyValue<List<RelatedArticlesSchema>>("RelatedResources"),
+                                    Discriminator = article.GetPropertyValue<string>("Discriminator"),
+                                    PartitionKey = ""
+                                };
+                                await _Eventcontext.PublishThroughEventBusAsync(eventSourcingRelated);
+                            }
+                        }
+                    }
                     var doc = taggroupDocs.FirstOrDefault(d => d.GetPropertyValue<int>("TaxTagId") == taxGroup.TaxTagId
                                 && d.GetPropertyValue<int?>("LanguageId") == content.LanguageId);
                     var eventSourcing = new TagGroupCommandEvent()
@@ -135,8 +189,61 @@ namespace Author.Command.Service
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }
-                foreach(int i in contentToDelete)
+                foreach (int i in contentToDelete)
                 {
+                    foreach (var article in articleDocs.Where(ad => ad.GetPropertyValue<int>("LanguageId") == i))
+                    {
+                        foreach (var RelatedTaxTags in article.GetPropertyValue<List<RelatedTaxTagsSchema>>("RelatedTaxTags"))
+                        {
+                            if (RelatedTaxTags.TaxTagId == taxGroup.TaxTagId)
+                            {
+                                var DisplayNameInEnglish = taxTagDocs.Where(ad => ad.GetPropertyValue<int>("TaxTagId") == taxGroup.TaxTagId && ad.GetPropertyValue<int>("LanguageId") == 37).Select(ads => ads.GetPropertyValue<string>("DisplayName")).FirstOrDefault();
+                                List<RelatedTaxTagsSchema> relatedTaxTagsSchema = new List<RelatedTaxTagsSchema>();
+                                relatedTaxTagsSchema = article.GetPropertyValue<List<RelatedTaxTagsSchema>>("RelatedTaxTags");
+
+                                var index = relatedTaxTagsSchema.IndexOf(relatedTaxTagsSchema.Where(ras => ras.TaxTagId == taxGroup.TaxTagId).First());
+                                if (index != -1)
+                                    if (DisplayNameInEnglish == "") relatedTaxTagsSchema.Remove(relatedTaxTagsSchema.Where(rtt => rtt.TaxTagId == taxGroup.TaxTagId).First()); else relatedTaxTagsSchema[index] = new RelatedTaxTagsSchema { TaxTagId = taxGroup.TaxTagId, DisplayName = (DisplayNameInEnglish == null ? "" : DisplayNameInEnglish) };
+                                var eventSourcingRelated = new ArticleCommandEvent()
+                                {
+                                    id = article != null ? article.GetPropertyValue<Guid>("id") : Guid.NewGuid(),
+                                    EventType = ServiceBusEventType.Update,
+                                    ArticleId = article.GetPropertyValue<int>("ArticleId"),
+                                    PublishedDate = article.GetPropertyValue<string>("PublishedDate"),
+                                    Author = article.GetPropertyValue<string>("author"),
+                                    ImageId = article.GetPropertyValue<int>("ImageId"),
+                                    State = article.GetPropertyValue<string>("State"),
+                                    Type = article.GetPropertyValue<int>("Type"),
+                                    SubType = article.GetPropertyValue<int>("SubType"),
+                                    ResourcePosition = article.GetPropertyValue<int>("ResourcePosition"),
+                                    Disclaimer = article.GetPropertyValue<DisclamersSchema>("Disclaimer"),
+                                    ResourceGroup = article.GetPropertyValue<ResourceGroupsSchema>("ResourceGroup"),
+                                    IsPublished = article.GetPropertyValue<bool>("IsPublished"),
+                                    CreatedDate = article.GetPropertyValue<string>("CreatedDate"),
+                                    CreatedBy = article.GetPropertyValue<string>("CreatedBy"),
+                                    UpdatedDate = article.GetPropertyValue<string>("UpdatedDate"),
+                                    UpdatedBy = article.GetPropertyValue<string>("UpdatedBy"),
+                                    NotificationSentDate = article.GetPropertyValue<string>("NotificationSentDate"),
+                                    Provinces = article.GetPropertyValue<ProvinceSchema>("Provisions"),
+                                    ArticleContentId = article.GetPropertyValue<int>("ArticleContentId"),
+                                    LanguageId = article.GetPropertyValue<int>("LanguageId"),
+                                    Title = article.GetPropertyValue<string>("Title"),
+                                    TitleInEnglishDefault = article.GetPropertyValue<string>("TitleInEnglishDefault"),
+                                    TeaserText = article.GetPropertyValue<string>("TeaserText"),
+                                    Content = article.GetPropertyValue<string>("Content"),
+                                    RelatedContacts = article.GetPropertyValue<List<RelatedEntityId>>("RelatedContacts"),
+                                    RelatedCountries = article.GetPropertyValue<List<RelatedEntityId>>("RelatedCountries"),
+                                    RelatedCountryGroups = article.GetPropertyValue<List<RelatedEntityId>>("RelatedCountryGroups"),
+                                    RelatedTaxTags = relatedTaxTagsSchema,
+                                    RelatedArticles = article.GetPropertyValue<List<RelatedArticlesSchema>>("RelatedArticles"),
+                                    RelatedResources = article.GetPropertyValue<List<RelatedArticlesSchema>>("RelatedResources"),
+                                    Discriminator = article.GetPropertyValue<string>("Discriminator"),
+                                    PartitionKey = ""
+                                };
+                                await _Eventcontext.PublishThroughEventBusAsync(eventSourcingRelated);
+                            }
+                        }
+                    }
                     var deleteEvt = new TagGroupCommandEvent()
                     {
                         id = taggroupDocs.FirstOrDefault(d => d.GetPropertyValue<int>("TagId") == taxGroup.TaxTagId
