@@ -1,4 +1,5 @@
 ﻿using Author.Core.Framework;
+using Author.Core.Framework.Utilities;
 using Author.Query.Domain.DBAggregate;
 using Author.Query.Persistence.DTO;
 using Author.Query.Persistence.Interfaces;
@@ -20,15 +21,17 @@ namespace Author.Query.Persistence
         private readonly IMapper _mapper;
         private readonly ICacheService<Languages, LanguageDTO> _cacheService;
         private readonly IHttpContextAccessor _accessor;
+        private readonly IUtilityService _utilityService;
 
         public CommonService(TaxathandDbContext dbContext, IOptions<AppSettings> appSettings, IMapper mapper,
-            ICacheService<Languages, LanguageDTO> cacheService, IHttpContextAccessor accessor)
+            ICacheService<Languages, LanguageDTO> cacheService, IHttpContextAccessor accessor, IUtilityService utilityService)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _appSettings = appSettings;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
             _accessor = accessor;
+            _utilityService = utilityService ?? throw new ArgumentNullException(nameof(utilityService));
         }
 
 
@@ -190,14 +193,14 @@ namespace Author.Query.Persistence
         {
             var defaultLocalizationIdentifier = _appSettings.Value.DefaultLanguageId;
 
-            return await SelectLanguageAsync(defaultLocalizationIdentifier);
+            return await SelectLanguageAsync(defaultLocalizationIdentifier,null);
         }
 
-        private async Task<LanguageDTO> SelectLanguageAsync(string lang)
+        private async Task<LanguageDTO> SelectLanguageAsync(string lang, List<LanguageDTO> languageListServer)
         {
             //The LocalisationIdentifier may contain a comma separated list of locales.
             //Using Contains may return the wrong Language; e.g. "hi-IN" is incorrectly returned for "in" because it happens to come first
-            var langData = await _cacheService.GetAllAsync("languagesCacheKey");
+            var langData = (languageListServer.Count == 0) ? await _cacheService.GetAllAsync("languagesCacheKey"): languageListServer;
 
             var language = langData.Where(l => l.LocalisationIdentifier.Contains(lang))
                                    .ToList()
@@ -212,8 +215,13 @@ namespace Author.Query.Persistence
             return language;
         }
 
-        public async Task<List<LanguageDTO>> GetLanguageListFromLocale(string locale)
+        public async Task<List<LanguageDTO>> GetLanguageListFromLocale(List<LanguageDTO> languageListServer)
         {
+            var locale = _utilityService.GetLocale(_accessor.HttpContext.Request.Headers);
+            if (!string.IsNullOrWhiteSpace(locale) && (locale.Equals(Constants.DEFAULT_REQUEST_HEADER_ACCEPT_LANGUAGE, StringComparison.OrdinalIgnoreCase)))
+            {
+                locale = Constants.REQUEST_HEADER_ACEPT_LANGUAGE;
+            }
             var languages = Enumerable.Empty<StringWithQualityHeaderValue>().OrderBy(s => s);
 
             if (!string.IsNullOrWhiteSpace(locale))
@@ -228,6 +236,11 @@ namespace Author.Query.Persistence
             var languageDict = new Dictionary<int, LanguageDTO>();
             LanguageDTO language = null;
 
+            if (languageListServer == null)
+            {
+                languageListServer = await _cacheService.GetAllAsync("languagesCacheKey");
+            }
+
             //This will return there primary language first as per the locale 
             //Need special handling for simplied and traditional chinese.  Both start with zh so we need additional code
             //to handle the case
@@ -237,7 +250,7 @@ namespace Author.Query.Persistence
             string preferredLanguage = "";
             foreach (var lang in languages)
             {
-                language = await SelectLanguageAsync(lang.Value);
+                language = await SelectLanguageAsync(lang.Value, languageListServer);
                 if (language != null)
                 {
                     preferredLanguageId = language.LanguageId;
@@ -261,7 +274,7 @@ namespace Author.Query.Persistence
             //primary language is not available
             //It just needs to look over all languages in the database and see if we find any thing that we consider
             //a match - ie the first 2 digits of the local match
-            var languageListServer = await _cacheService.GetAllAsync("languagesCacheKey");
+            //var languageListServer = await _cacheService.GetAllAsync("languagesCacheKey");
 
             //Need special handling for chinese simplifed and traditional
             if (isChineseTraditional)
@@ -270,7 +283,7 @@ namespace Author.Query.Persistence
                 foreach (var item in languageListServer)
                 {
                     if (preferredLanguageId != item.LanguageId &&
-                        (item.Locale.ToLower() == "zh-tw" || item.Locale.ToLower() == "zh-hk"))
+                        item.Locale.ContainsAny(Constants.ChineseTraditional, StringComparison.OrdinalIgnoreCase))
                     {
                         languageDict.Add(item.LanguageId, item);
                     }
@@ -282,7 +295,7 @@ namespace Author.Query.Persistence
                 foreach (var item in languageListServer)
                 {
                     if (preferredLanguageId != item.LanguageId &&
-                        (item.Locale.ToLower() == "zh-cn" || item.Locale.ToLower() == "zh-sg"))
+                        item.Locale.ContainsAny(Constants.ChineseSimplified, StringComparison.OrdinalIgnoreCase))
                     {
                         languageDict.Add(item.LanguageId, item);
                     }
@@ -302,7 +315,7 @@ namespace Author.Query.Persistence
             if (languageDict.Count == 0)
             {
                 var defaultLocalizationIdentifier = _appSettings.Value.DefaultLanguageId;
-                var defaultLanguage = await SelectLanguageAsync(defaultLocalizationIdentifier);
+                var defaultLanguage = await SelectLanguageAsync(defaultLocalizationIdentifier,languageListServer);
                 languageDict.Add(defaultLanguage.LanguageId, defaultLanguage);
             }
 

@@ -25,18 +25,18 @@ namespace Author.Query.New.API.GraphQL.Resolvers
         {
             graphQLQuery.FieldAsync<ResponseGraphType<CountryResultType>>(
                 "countriesresponse",
-                arguments: new QueryArguments
-                (
-                    new QueryArgument<IdGraphType> { Name = "pageNo", Description = "page number" },
-                    new QueryArgument<IdGraphType> { Name = "pageSize", Description = "page size" }
-                ),
+                //arguments: new QueryArguments
+                //(
+                //    new QueryArgument<IdGraphType> { Name = "pageNo", Description = "page number" },
+                //    new QueryArgument<IdGraphType> { Name = "pageSize", Description = "page size" }
+                //),
                 resolve: async context =>
                 {
-                    var pageNo = context.GetArgument<int>("pageNo") == 0 ? 1 : context.GetArgument<int>("pageNo");
-                    var pageSize = context.GetArgument<int>("pageSize") == 0 ? 10000 : context.GetArgument<int>("pageSize");
+                    //var pageNo = context.GetArgument<int>("pageNo") == 0 ? 1 : context.GetArgument<int>("pageNo");
+                    //var pageSize = context.GetArgument<int>("pageSize") == 0 ? 10000 : context.GetArgument<int>("pageSize");
 
                     var loader = _dataLoaderContextAccessor.Context.GetOrAddLoader("GetAllCountries",
-                                            () => _countryService.GetAllCountriesAsync(pageNo, pageSize));
+                                            () => _countryService.GetAllCountriesAsync());
                     var list = await context.TryAsyncResolve(
                           async c => await loader.LoadAsync());
                     return Response(list);

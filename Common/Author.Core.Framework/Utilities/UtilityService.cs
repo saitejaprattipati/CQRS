@@ -4,11 +4,21 @@ using Microsoft.Net.Http.Headers;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Author.Core.Framework.Utilities
 {
     public class UtilityService : IUtilityService
     {
+        private const string UriRegexPattern =
+            @"(https?|ftp)://(-\.)?([^\s/?\.#-]+\.?)+(/[^\s]*)?$";
+        private const string Iframe = "<iframe.+?src=[\"'](.+?)[\"'].*?>";
+
+        private static readonly Regex UriRegex = new Regex(UriRegexPattern,
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex IframeRegex = new Regex(Iframe, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         private readonly IOptions<AppSettings> _appSettings;
 
         public string locale { get; set; }
@@ -85,6 +95,32 @@ namespace Author.Core.Framework.Utilities
                 builder.Port = -1;
             }
             return builder.Uri.AbsoluteUri;
+        }
+
+        public bool IsContainYouTubeLinks(string content)
+        {
+            var result = false;
+            var baseUri = new Uri(_appSettings.Value.PublicSiteBaseUrl);
+            var matches = IframeRegex.Matches(content);
+
+            foreach (Match match in matches)
+            {
+                var m = match.Groups[1].Value;
+
+                var s = GetAbsoluteUrl(baseUri,m);
+
+                if (UriRegex.IsMatch(s))
+                {
+                    var uri = new Uri(s);
+                    if (uri.Host.ToLower().Contains(Constants.YouTube_Link))
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }

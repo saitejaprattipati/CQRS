@@ -18,7 +18,7 @@ namespace Author.Query.Persistence
 
         protected TaxathandDbContext()
         {
-            // Database.EnsureCreated();
+             //Database.EnsureCreated();
         }
 
         public DbSet<Address> Address { get; set; }
@@ -36,7 +36,6 @@ namespace Author.Query.Persistence
         public DbSet<Articles> Articles { get; set; }
         public DbSet<Images> Images { get; set; }
         public DbSet<SearchSource> SearchSource { get; set; }
-        //public DbSet<RelatedArticlesSchema> RelatedArticlesSchema { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -125,10 +124,10 @@ namespace Author.Query.Persistence
 
             //Assign useractivities partition
             modelBuilder.Entity<UserActivities>()
-                  .Property(e => e.UserActivitiesId)
+                  .Property(e => e.WebsiteUserId)
                   .HasConversion(converter);
             modelBuilder.Entity<UserActivities>()
-                  .HasPartitionKey(o => o.UserActivitiesId);
+                  .HasPartitionKey(o => o.WebsiteUserId);
 
             modelBuilder.Entity<CountryGroups>().OwnsMany(p => p.AssociatedCountryIds, a =>
             {
@@ -146,82 +145,88 @@ namespace Author.Query.Persistence
             });
 
             // For Articles
-            modelBuilder.Entity<Articles>().OwnsMany(p => p.RelatedCountries, a =>
-            {
-                a.WithOwner().HasForeignKey("Articlesid");
-                a.Property<int>("id");
-                a.Property(o => o.IdVal);
-            }).OwnsMany(p => p.RelatedContacts, a =>
-            {
-                a.WithOwner().HasForeignKey("Articlesid");
-                a.Property<int>("id");
-                a.Property(o => o.IdVal);
-            }).OwnsMany(p => p.RelatedCountryGroups, a =>
-            {
-                a.WithOwner().HasForeignKey("Articlesid");
-                a.Property<int>("id");
-                a.Property(o => o.IdVal);
-            }).OwnsMany(p => p.RelatedTaxTags, a =>
-            {
-                a.WithOwner().HasForeignKey("Articlesid");
-                a.Property<int>("id");
-                a.Property(o => o.TaxTagId);
-                a.Property(o => o.DisplayName);
-            }).OwnsMany(p => p.RelatedArticles, a =>
-            {
-                a.OwnsMany(p => p.RelatedCountries, a =>
-                {
-                    a.WithOwner().HasForeignKey("RelatedArticlesSchemaArticlesidid");
-                    a.Property<int>("id");
-                    a.Property(o => o.IdVal);
-                });
-                a.WithOwner().HasForeignKey("Articlesid");
-                a.Property<int>("id");
-                a.Property(o => o.ArticleId);
-                a.Property(o => o.Title);
-                a.Property(o => o.PublishedDate);
-            }).OwnsMany(p => p.RelatedResources, a =>
-            {
-                a.OwnsMany(p => p.RelatedCountries, a =>
-                {
-                    a.WithOwner().HasForeignKey("RelatedArticlesSchemaArticlesidid");
-                    a.Property<int>("id");
-                    a.Property(o => o.IdVal);
-                });
-                a.WithOwner().HasForeignKey("Articlesid");
-                a.Property<int>("id");
-                a.Property(o => o.ArticleId);
-                a.Property(o => o.Title);
-                //a.Property(o => o.RelatedCountries);
-                a.Property(o => o.PublishedDate);
-            }).OwnsOne(p => p.Provisions, a =>
-            {
-                a.WithOwner().HasForeignKey("Articlesid");
-                a.Property<int>("id");
-                a.Property(o => o.ProvinceId);
-                a.Property(o => o.DisplayName);
-            }).OwnsOne(p => p.ResourceGroup, a =>
-            {
-                a.WithOwner().HasForeignKey("Articlesid");
-                a.Property<int>("id");
-                a.Property(o => o.ResourceGroupId);
-                a.Property(o => o.Position);
-                a.Property(o => o.GroupName);
-            }).OwnsOne(p => p.Disclaimer, a =>
-            {
-                a.WithOwner().HasForeignKey("Articlesid");
-                a.Property<int>("id");
-                a.Property(o => o.DisclaimerId);
-                a.Property(o => o.ProviderName);
-                a.Property(o => o.ProviderTerms);
-            });
+            ////modelBuilder.Entity<Articles>().OwnsMany(p => p.RelatedCountries, a =>
+            ////{
+            ////    a.WithOwner().HasForeignKey("Articlesid");
+            ////    a.Property<int>("id");
+            ////    a.Property(o => o.IdVal);
+            ////}).OwnsMany(p => p.RelatedContacts, a =>
+            ////{
+            ////    a.WithOwner().HasForeignKey("Articlesid");
+            ////    a.Property<int>("id");
+            ////    a.Property(o => o.IdVal);
+            ////}).OwnsMany(p => p.RelatedCountryGroups, a =>
+            ////{
+            ////    a.WithOwner().HasForeignKey("Articlesid");
+            ////    a.Property<int>("id");
+            ////    a.Property(o => o.IdVal);
+            ////}).OwnsMany(p => p.RelatedTaxTags, a =>
+            ////{
+            ////    a.WithOwner().HasForeignKey("Articlesid");
+            ////    a.Property<int>("id");
+            ////    a.Property(o => o.TaxTagId);
+            ////    a.Property(o => o.DisplayName);
+            //////}).OwnsMany(p => p.RelatedArticles, a =>
+            //////{
+            //////    a.WithOwner().HasForeignKey("Articlesid");
+            //////    a.Property<int>("id");
+            //////    a.Property(o => o.ArticleId);
+            //////    a.Property(o => o.Title);
+            //////    a.Property(o => o.PublishedDate);
+            //////    a.OwnsMany(p => p.RelatedCountries, a =>
+            //////    {
+            //////        a.WithOwner().HasForeignKey("RelatedArticlesSchemaArticlesidid");
+            //////        a.Property<int>("id");
+            //////        a.Property(o => o.IdVal);
+            //////    });
+            //////}).OwnsMany(p => p.RelatedResources, a =>
+            //////{
+            //////    a.OwnsMany(p => p.RelatedCountries, a =>
+            //////    {
+            //////        a.WithOwner().HasForeignKey("RelatedArticlesSchemaArticlesidid");
+            //////        a.Property<int>("id");
+            //////        a.Property(o => o.IdVal);
+            //////    });
+            //////    a.WithOwner().HasForeignKey("Articlesid");
+            //////    a.Property<int>("id");
+            //////    a.Property(o => o.ArticleId);
+            //////    a.Property(o => o.Title);
+            //////    //a.Property(o => o.RelatedCountries);
+            //////    a.Property(o => o.PublishedDate);
+            ////}).OwnsOne(p => p.Provisions, a =>
+            ////{
+            ////    a.WithOwner().HasForeignKey("Articlesid");
+            ////    a.Property<int>("id");
+            ////    a.Property(o => o.ProvinceId);
+            ////    a.Property(o => o.DisplayName);
+            ////}).OwnsOne(p => p.ResourceGroup, a =>
+            ////{
+            ////    a.WithOwner().HasForeignKey("Articlesid");
+            ////    a.Property<int>("id");
+            ////    a.Property(o => o.ResourceGroupId);
+            ////    a.Property(o => o.Position);
+            ////    a.Property(o => o.GroupName);
+            ////}).OwnsOne(p => p.Disclaimer, a =>
+            ////{
+            ////    a.WithOwner().HasForeignKey("Articlesid");
+            ////    a.Property<int>("id");
+            ////    a.Property(o => o.DisclaimerId);
+            ////    a.Property(o => o.ProviderName);
+            ////    a.Property(o => o.ProviderTerms);
+            ////});
 
-            //modelBuilder.Entity<RelatedArticlesSchema>().OwnsMany(p => p.RelatedCountries, a =>
-            //{
-            //    a.WithOwner().HasForeignKey("Articlesid");
-            //    a.Property<int>("id");
-            //    a.Property(o => o.IdVal);
-            //});
+            modelBuilder.Entity<Articles>().OwnsMany(p => p.RelatedCountries);
+            modelBuilder.Entity<Articles>().OwnsMany(p => p.RelatedContacts);
+            modelBuilder.Entity<Articles>().OwnsMany(p => p.RelatedCountryGroups);
+            modelBuilder.Entity<Articles>().OwnsMany(p => p.RelatedTaxTags);
+            modelBuilder.Entity<Articles>().OwnsMany(p => p.RelatedArticles, a => { a.ToJsonProperty("RelatedArticles"); a.OwnsMany(p => p.RelatedCountries); });
+            modelBuilder.Entity<Articles>().OwnsMany(p => p.RelatedResources, a => { a.ToJsonProperty("RelatedResources"); a.OwnsMany(p => p.RelatedCountries); });
+            modelBuilder.Entity<Articles>().OwnsOne(p => p.Province);
+            modelBuilder.Entity<Articles>().OwnsOne(p => p.ResourceGroup);
+            modelBuilder.Entity<Articles>().OwnsOne(p => p.Disclaimer);
+            modelBuilder.Entity<UserActivities>().OwnsMany(p => p.SavedArticles);
+            modelBuilder.Entity<UserActivities>().OwnsMany(p => p.ReadArticles);
+            modelBuilder.Entity<UserActivities>().OwnsMany(p => p.SubscribedCountries, a => { a.ToJsonProperty("SubscribedCountries"); a.OwnsMany(p => p.Country); });
 
             OneCollectionPerDbSet(modelBuilder);
         }

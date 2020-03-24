@@ -18,6 +18,11 @@ namespace Author.Core.Framework
         public const string ImagesDiscriminator = "Images";
         public const string ArticlesDiscriminator = "Articles";
         public const string TAX_COOKIE_BROWSER_NAME = "taxcookie";
+        public const string YouTube_Link = "youtube";
+        public const string REQUEST_HEADER_ACEPT_LANGUAGE = "en";
+        public const string DEFAULT_REQUEST_HEADER_ACCEPT_LANGUAGE = "en-us";
+        public static readonly string[] ChineseTraditional = { "zh-tw", "zh-hk" };
+        public static readonly string[] ChineseSimplified = { "zh-cn", "zh-sg" };
     }
 
     public enum SystemUserRole

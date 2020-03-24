@@ -28,7 +28,7 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the AddressContentId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("addressContentId")]
-        public int? ImageId { get; set; }
+        public int ImageId { get; set; }
 
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>
@@ -43,11 +43,11 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>
         //[JsonProperty("postCode")]
-        public int? SubType { get; set; }
+        public int SubType { get; set; }
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("postCodeEdited")]
-        public int? ResourcePosition { get; set; }
+        public int ResourcePosition { get; set; }
 
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>
@@ -91,16 +91,12 @@ namespace Author.Query.Domain.DBAggregate
         //[JsonProperty("languageId")]
         public string NotificationSentDate { get; set; }
 
-        /// <summary>gets or sets the AddressId </summary>
-        ///// <value>It is of type integer </value>
-        //[JsonProperty("addressId")]
-        //public int? ProvinceId { get; set; }
-        public ProvinceSchema Provisions { get; set; }
+        public ProvinceSchema Province { get; set; }
 
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>
         //[JsonProperty("postCode")]
-        public int? ArticleContentId { get; set; }
+        public int ArticleContentId { get; set; }
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("postCodeEdited")]
@@ -141,9 +137,9 @@ namespace Author.Query.Domain.DBAggregate
         public ICollection<RelatedTaxTagsSchema> RelatedTaxTags { get; set; }
 
         //public ICollection<RelatedEntityId> RelatedArticles { get; set; }
-        public ICollection<RelatedArticlesSchema> RelatedArticles { get; set; }
+        public IEnumerable<RelatedArticlesSchema> RelatedArticles { get; set; }
 
-        public ICollection<RelatedArticlesSchema> RelatedResources { get; set; }
+        public IEnumerable<RelatedArticlesSchema> RelatedResources { get; set; }
     }   
     //public class RelatedContacts
     //{

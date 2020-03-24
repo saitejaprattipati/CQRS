@@ -37,19 +37,21 @@ namespace Author.Query.Persistence.DTO
         public List<CountryDTO> RelatedCountries { get; set; }
         public CountryDTO RelatedCountry { get; set; }
         public List<TaxTagsDTO> RelatedTaxTags { get; set; }
-        public List<ArticleDTO> RelatedArticles { get; set; }
+        public List<RelatedArticleDTO> RelatedArticles { get; set; }
+        public List<RelatedArticleDTO> RelatedResources { get; set; }
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         public string ImageCredit { get; set; }
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         public string ImageDescriptionText { get; set; }
-        //public List<Locale> AvailableLanguages { get; set; }
+        public List<LanguageDTO> AvailableLanguages { get; set; }
         public bool IsRead { get; set; }
         public bool Saved { get; set; }
-        public long SavedDate { get; set; }
-        //public List<Subscription> RelatedSubscriptions { get; set; }
+        public string SavedDate { get; set; }
+        public List<SubscriptionDTO> RelatedSubscriptions { get; set; }
         [RegularExpression(Constants.GeneralStringRegularExpression)]
-        public string GroupName { get; set; }
-        public int? GroupPosition { get; set; }
+        //public string GroupName { get; set; }
+        //public int? GroupPosition { get; set; }
+        public ResourceGroupDTO ResourceGroup { get; set; }
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         public string SharingWebURL { get; set; }
         [RegularExpression(Constants.GeneralStringRegularExpression)]

@@ -58,6 +58,7 @@ namespace Author.Query.Domain.DBAggregate
 
     public class RelatedEntityId
     {
+        [JsonProperty("IdVal")]
         public int IdVal { get; set; }
     }
 
@@ -67,12 +68,12 @@ namespace Author.Query.Domain.DBAggregate
         public int ArticleId { get; set; }
         [JsonProperty("Title")]
         public string Title { get; set; }
-        [JsonProperty("CountryId")]
+        [JsonProperty("RelatedCountries")]
         //public List<RelatedEntityId> CountryId { get; set; }
 
         public ICollection<RelatedEntityId> RelatedCountries { get; set; }
 
-        [JsonProperty("PartitionKey")]
+        [JsonProperty("PublishedDate")]
         public string PublishedDate { get; set; }
 
     }

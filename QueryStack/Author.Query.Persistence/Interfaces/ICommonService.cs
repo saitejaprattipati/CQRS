@@ -17,7 +17,7 @@ namespace Author.Query.Persistence.Interfaces
 
         Task<LanguageDTO> GetDefaultLanguageAsync();
 
-        Task<List<LanguageDTO>> GetLanguageListFromLocale(string locale);
+        Task<List<LanguageDTO>> GetLanguageListFromLocale(List<LanguageDTO> languageFromCache);
         long GetUnixEpochTime(DateTime date);
         DateTime GetDateTimeFromUnixEpochTime(long value);
     }

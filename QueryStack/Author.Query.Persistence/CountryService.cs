@@ -30,17 +30,17 @@ namespace Author.Query.Persistence
             _commonService = commonService ?? throw new ArgumentNullException(nameof(commonService));
         }
 
-        public async Task<CountryResult> GetAllCountriesAsync(int pageNo, int pageSize)
+        public async Task<CountryResult> GetAllCountriesAsync()
         {
             var languageDetails = _commonService.GetLanguageDetails();
 
             // By default pick the localLanguage value
-            var countries = await GetAllCountriesDataAsync(languageDetails.LocaleLangId, pageNo, pageSize);
+            var countries = await GetAllCountriesDataAsync(languageDetails.LocaleLangId);
 
             // If localLanguage data is not available then pull the data based on default language
             if (countries.Countries.Count == 0)
             {
-                countries = await GetAllCountriesDataAsync(languageDetails.DefaultLanguageId, pageNo, pageSize);
+                countries = await GetAllCountriesDataAsync(languageDetails.DefaultLanguageId);
             }
 
             return countries;
@@ -138,7 +138,7 @@ namespace Author.Query.Persistence
             return countryDTO;
         }
 
-        private async Task<CountryResult> GetAllCountriesDataAsync(int languageId, int pageNo, int pageSize)
+        private async Task<CountryResult> GetAllCountriesDataAsync(int languageId)
         {
             var countryList = new CountryResult();
             var images = await _imageCacheService.GetAllAsync("imagesCacheKey");

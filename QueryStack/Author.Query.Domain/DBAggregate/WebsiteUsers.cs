@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Author.Query.Domain.DBAggregate
+﻿namespace Author.Query.Domain.DBAggregate
 {
-   public class WebsiteUsers
+    public class WebsiteUsers
     {
         /// <summary>gets or sets the id </summary>
         ///// <value>It is of type integer </value>
@@ -13,7 +9,7 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the AddressId </summary>
         ///// <value>It is of type integer </value>
         //[JsonProperty("addressId")]
-        public int? WebsiteUserId { get; set; }
+        public int WebsiteUserId { get; set; }
 
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>
@@ -56,17 +52,17 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("languageId")]
-        public int? AuthServiceName { get; set; }
+        public int AuthServiceName { get; set; }
 
         /// <summary>gets or sets the AddressContentId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("addressContentId")]
-        public int? AuthServiceProviderName { get; set; }
+        public int AuthServiceProviderName { get; set; }
 
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("languageId")]
-        public int? PreferredLanguageId { get; set; }
+        public int PreferredLanguageId { get; set; }
 
         /// <summary>gets or sets the AddressId </summary>
         ///// <value>It is of type integer </value>

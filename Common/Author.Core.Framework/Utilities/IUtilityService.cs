@@ -11,5 +11,7 @@ namespace Author.Core.Framework.Utilities
         string GetCookieId(HttpRequest request);
 
         string FormatArticleContent(string content);
+
+        bool IsContainYouTubeLinks(string content);
     }
 }

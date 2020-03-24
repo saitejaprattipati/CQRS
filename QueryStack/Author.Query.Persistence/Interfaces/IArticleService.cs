@@ -8,7 +8,7 @@ namespace Author.Query.Persistence.Interfaces
 {
     public interface IArticleService
     {
-        Task<ArticleDTO> GetArticleAsync(int articleId, int countryId);
+        Task<ArticleDTO> GetArticleAsync(int articleId, int countryId, string userCookieId);
 
         Task<ILookup<int, Articles>> GetRelatedArticles(IEnumerable<int> articleIds);
 
