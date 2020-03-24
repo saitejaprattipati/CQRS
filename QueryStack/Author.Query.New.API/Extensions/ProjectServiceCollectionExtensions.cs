@@ -4,8 +4,7 @@ using Author.Query.New.API.GraphQL.Resolvers;
 using Author.Query.Persistence;
 using Author.Query.Persistence.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
-using NetCore.AutoRegisterDi;
-using System.Reflection;
+using System.Collections.Generic;
 
 namespace Author.Query.New.API.Extensions
 {
@@ -22,18 +21,18 @@ namespace Author.Query.New.API.Extensions
         /// <summary>
         /// Add project data repositories.
         /// </summary>
-        public static IServiceCollection AddProjectRepositories(this IServiceCollection services) =>
-            services
-                .AddScoped<IUtilityService, UtilityService>()
-                .AddScoped<ICommonService, CommonService>()
-                .AddScoped<IImageService, ImageService>()
-                .AddScoped(typeof(ICacheService<,>), typeof(CacheService<,>))
-                .AddScoped<ICountryService, CountryService>()
-                .AddScoped<ICountryGroupService, CountryGroupService>()
-                .AddScoped<IDisclaimerService, DisclaimerService>()
-                .AddScoped<ITaxTagsService, TaxTagsService>()
-                .AddScoped<IResourceGroupService, ResourceGroupService>();
-        
+        //public static IServiceCollection AddProjectRepositories(this IServiceCollection services) =>
+        //    services
+        //        .AddScoped<IUtilityService, UtilityService>()
+        //        .AddScoped<ICommonService, CommonService>()
+        //        .AddScoped<IImageService, ImageService>()
+        //        .AddScoped(typeof(ICacheService<,>), typeof(CacheService<,>))
+        //        .AddScoped<ICountryService, CountryService>()
+        //        .AddScoped<ICountryGroupService, CountryGroupService>()
+        //        .AddScoped<IDisclaimerService, DisclaimerService>()
+        //        .AddScoped<ITaxTagsService, TaxTagsService>()
+        //        .AddScoped<IResourceGroupService, ResourceGroupService>();
+
 
         //public static IServiceCollection AddProjectRepositories(this IServiceCollection services) =>
         //    services.RegisterAssemblyPublicNonGenericClasses(Assembly.GetAssembly(typeof(CommonService)))
@@ -41,13 +40,30 @@ namespace Author.Query.New.API.Extensions
         //            .Where(c => c.Name.EndsWith("Persistence"))
         //            .AsPublicImplementedInterfaces(ServiceLifetime.Scoped);
 
+        //public static IServiceCollection AddGraphQLResolvers(this IServiceCollection services) =>
+        //services
+        //    .AddScoped<ICountriesResolver, CountriesResolver>()
+        //    .AddScoped<ICountryGroupsResolver, CountryGroupsResolver>()
+        //    .AddScoped<IDisclaimerResolver, DisclaimerResolver>()
+        //    .AddScoped<ITaxTagGroupsResolver, TaxTagGroupsResolver>()
+        //    .AddScoped<IResourceGroupResolver, ResourceGroupResolver>();
+
+        public static IServiceCollection AddProjectRepositories(this IServiceCollection services) =>
+            services.Scan(scan => scan
+                    .FromAssembliesOf(typeof(ICommonService), typeof(IUtilityService))
+                    .AddClasses(classes => classes.InNamespaces(new List<string> { "Author.Query.Persistence", "Author.Query.Persistence.Interfaces", "Author.Core.Framework.Utilities" }))
+                    .AsImplementedInterfaces()
+                    .WithScopedLifetime()
+                );
+
+
         public static IServiceCollection AddGraphQLResolvers(this IServiceCollection services) =>
-        services
-            .AddScoped<ICountriesResolver, CountriesResolver>()
-            .AddScoped<ICountryGroupsResolver, CountryGroupsResolver>()
-            .AddScoped<IDisclaimerResolver, DisclaimerResolver>()
-            .AddScoped<ITaxTagGroupsResolver, TaxTagGroupsResolver>()
-            .AddScoped<IResourceGroupResolver, ResourceGroupResolver>();
+           services.Scan(scan => scan
+                   .FromCallingAssembly()
+                   .AddClasses(classes => classes.InNamespaces("Author.Query.New.API.GraphQL.Resolvers"))
+                   .AsImplementedInterfaces()
+                   .WithScopedLifetime()
+               );
 
         /// <summary>
         /// Add project GraphQL schema and web socket types.

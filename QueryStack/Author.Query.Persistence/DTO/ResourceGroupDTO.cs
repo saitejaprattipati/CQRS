@@ -17,7 +17,7 @@ namespace Author.Query.Persistence.DTO
     {
         public int ResourceGroupId { get; set; }
 
-        public int? Position { get; set; }
+        public int Position { get; set; }
 
         [JsonProperty("groupname")]
         [RegularExpression(Constants.GeneralStringRegularExpression)]

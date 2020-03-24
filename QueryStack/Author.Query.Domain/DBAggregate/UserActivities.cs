@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Author.Query.Domain.DBAggregate
 {
@@ -13,7 +11,7 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the AddressId </summary>
         ///// <value>It is of type integer </value>
         //[JsonProperty("addressId")]
-        public int UserActivitiesId { get; set; }
+        public int WebsiteUserId { get; set; }
 
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>
@@ -27,23 +25,18 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the AddressContentId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("addressContentId")]
-        public List<UserSubscribedCountries> SubscribedCountries { get; set; }       
+        public List<UserSubscribedCountries> SubscribedCountries { get; set; }
     }
     public class UserSavedArticles
     {
-        /// <summary>gets or sets the id </summary>
-        ///// <value>It is of type integer </value>
-        //[JsonProperty("id")]
-        public string id { get; set; }
-
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>
-        //[JsonProperty("postCode")]
-        public int? WebsiteUserId { get; set; }
+       //[JsonProperty("postCode")]
+        public int UserSavedArticleId { get; set; }
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("postCodeEdited")]
-        public int? ArticleId { get; set; }
+        public int ArticleId { get; set; }
 
         /// <summary>gets or sets the AddressContentId </summary>
         /// <value>It is of type integer </value>
@@ -67,15 +60,11 @@ namespace Author.Query.Domain.DBAggregate
     }
     public class UserReadArticles
     {
-        /// <summary>gets or sets the id </summary>
-        ///// <value>It is of type integer </value>
-        //[JsonProperty("id")]
-        public string id { get; set; }
 
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>
         //[JsonProperty("postCode")]
-        public int? WebsiteUserId { get; set; }
+        public int? UserReadArticleId { get; set; }
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("postCodeEdited")]
@@ -103,27 +92,12 @@ namespace Author.Query.Domain.DBAggregate
     }
     public class UserSubscribedCountries
     {
-        /// <summary>gets or sets the id </summary>
-        ///// <value>It is of type integer </value>
-        //[JsonProperty("id")]
-        public string id { get; set; }
-
-        /// <summary>gets or sets the PostCodeEdited </summary>
-        /// <value>It is of type string </value>
-        //[JsonProperty("postCode")]
-        public int? WebsiteUserId { get; set; }
-        /// <summary>gets or sets the PostCodeEdited </summary>
-        /// <value>It is of type string </value>
-        //[JsonProperty("postCode")]
-        public int? UserSubscribedCountryId { get; set; }
-        /// <summary>gets or sets the PostCodeEdited </summary>
-        /// <value>It is of type bool </value>
-        //[JsonProperty("postCodeEdited")]
-        public int? CountryId { get; set; }
-
-        /// <summary>gets or sets the AddressContentId </summary>
-        /// <value>It is of type integer </value>
-        //[JsonProperty("addressContentId")]
-        public string TaxTagId { get; set; }      
+        public int UserSubscribedCountryId { get; set; }
+        public IEnumerable<SubscribedCountryTags> Country { get; set; }
+    }
+    public class SubscribedCountryTags
+    {
+        public int CountryId { get; set; }
+        public int TaxTagId { get; set; }
     }
 }

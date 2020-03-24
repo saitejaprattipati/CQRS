@@ -11,7 +11,7 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the AddressId </summary>
         ///// <value>It is of type integer </value>
         //[JsonProperty("addressId")]
-        public int? AddressId { get; set; }
+        public int AddressId { get; set; }
 
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>

@@ -32,12 +32,12 @@ namespace Author.Query.Persistence.DTO
         public string ProviderName { get; set; } = "";
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         public string ProviderTerms { get; set; } = "";
-        public int? Uuid { get; set; }
+        public int Uuid { get; set; }
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         public string Name { get; set; } = "";
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         public string Path { get; set; } = "";
         public bool CompleteResponse { get; set; } = true;
-        public int? LanguageId { get; set; }
+        public int LanguageId { get; set; }
     }
 }

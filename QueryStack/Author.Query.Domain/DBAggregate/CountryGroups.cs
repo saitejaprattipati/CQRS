@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 
 namespace Author.Query.Domain.DBAggregate
@@ -57,7 +58,58 @@ namespace Author.Query.Domain.DBAggregate
 
     public class RelatedEntityId
     {
+        [JsonProperty("IdVal")]
         public int IdVal { get; set; }
     }
+
+    public class RelatedArticlesSchema
+    {
+        [JsonProperty("ArticleId")]
+        public int ArticleId { get; set; }
+        [JsonProperty("Title")]
+        public string Title { get; set; }
+        [JsonProperty("RelatedCountries")]
+        //public List<RelatedEntityId> CountryId { get; set; }
+
+        public ICollection<RelatedEntityId> RelatedCountries { get; set; }
+
+        [JsonProperty("PublishedDate")]
+        public string PublishedDate { get; set; }
+
+    }
+    public class RelatedTaxTagsSchema
+    {
+        [JsonProperty("TaxTagId")]
+        public int TaxTagId { get; set; }
+        [JsonProperty("DisplayName")]
+        public string DisplayName { get; set; }
+    }
+
+    public class ResourceGroupsSchema
+    {
+        [JsonProperty("ResourceGroupId")]
+        public int ResourceGroupId { get; set; }
+        [JsonProperty("Position")]
+        public int Position { get; set; }
+        [JsonProperty("GroupName")]
+        public string GroupName { get; set; }
+    }
+    public class ProvinceSchema
+    {
+        [JsonProperty("ProvinceId")]
+        public int ProvinceId { get; set; }
+        [JsonProperty("DisplayName")]
+        public string DisplayName { get; set; }
+    }
+    public class DisclamersSchema
+    {
+        [JsonProperty("DisclaimerId")]
+        public int DisclaimerId { get; set; }
+        [JsonProperty("ProviderName")]
+        public string ProviderName { get; set; }
+        [JsonProperty("ProviderTerms")]
+        public string ProviderTerms { get; set; }
+    }
+
 
 }

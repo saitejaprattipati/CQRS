@@ -14,7 +14,7 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the AddressId </summary>
         ///// <value>It is of type integer </value>
         //[JsonProperty("addressId")]
-        public int? ArticleId { get; set; }
+        public int ArticleId { get; set; }
 
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>
@@ -28,7 +28,7 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the AddressContentId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("addressContentId")]
-        public int? ImageId { get; set; }
+        public int ImageId { get; set; }
 
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>
@@ -38,26 +38,27 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets the AddressId </summary>
         ///// <value>It is of type integer </value>
         //[JsonProperty("addressId")]
-        public int? Type { get; set; }
+        public int Type { get; set; }
 
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>
         //[JsonProperty("postCode")]
-        public int? SubType { get; set; }
+        public int SubType { get; set; }
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("postCodeEdited")]
-        public int? ResourcePosition { get; set; }
+        public int ResourcePosition { get; set; }
 
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("languageId")]
-        public int? DisclaimerId { get; set; }
+        //public int? DisclaimerId { get; set; }
+        public DisclamersSchema Disclaimer { get; set; }
 
         /// <summary>gets or sets the AddressContentId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("addressContentId")]
-        public int? ResourceGroupId { get; set; }
+        public ResourceGroupsSchema ResourceGroup { get; set; }
 
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>
@@ -90,15 +91,12 @@ namespace Author.Query.Domain.DBAggregate
         //[JsonProperty("languageId")]
         public string NotificationSentDate { get; set; }
 
-        /// <summary>gets or sets the AddressId </summary>
-        ///// <value>It is of type integer </value>
-        //[JsonProperty("addressId")]
-        public int? ProvinceId { get; set; }
+        public ProvinceSchema Province { get; set; }
 
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type string </value>
         //[JsonProperty("postCode")]
-        public int? ArticleContentId { get; set; }
+        public int ArticleContentId { get; set; }
         /// <summary>gets or sets the PostCodeEdited </summary>
         /// <value>It is of type bool </value>
         //[JsonProperty("postCodeEdited")]
@@ -127,35 +125,41 @@ namespace Author.Query.Domain.DBAggregate
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("languageId")]
-        public List<RelatedContacts> RelatedContacts { get; set; }
+        public ICollection<RelatedEntityId> RelatedContacts { get; set; }
         /// <summary>gets or sets the AddressContentId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("addressContentId")]
-        public List<ArticleRelatedCountries> RelatedCountries { get; set; }
+        public ICollection<RelatedEntityId> RelatedCountries { get; set; }
 
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("languageId")]
-        public List<ArticleRelatedCountryGroups> RelatedCountryGroups { get; set; }
+        public ICollection<RelatedEntityId> RelatedCountryGroups { get; set; }
         /// <summary>gets or sets LanguageId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("languageId")]
-        public List<ArticleRelatedTaxTags> RelatedTaxTags { get; set; }
+        //public ICollection<RelatedEntityId> RelatedTaxTags { get; set; }
+        public ICollection<RelatedTaxTagsSchema> RelatedTaxTags { get; set; }
+
+        //public ICollection<RelatedEntityId> RelatedArticles { get; set; }
+        public IEnumerable<RelatedArticlesSchema> RelatedArticles { get; set; }
+
+        public IEnumerable<RelatedArticlesSchema> RelatedResources { get; set; }
     }   
-    public class RelatedContacts
-    {
-        public string id { get; set; }
-    }
-    public class ArticleRelatedCountries
-    {
-        public string id { get; set; }
-    }
-    public class ArticleRelatedCountryGroups
-    {
-        public string id { get; set; }
-    }
-    public class ArticleRelatedTaxTags
-    {
-        public string id { get; set; }
-    }
+    //public class RelatedContacts
+    //{
+    //    public string id { get; set; }
+    //}
+    //public class ArticleRelatedCountries
+    //{
+    //    public string id { get; set; }
+    //}
+    //public class ArticleRelatedCountryGroups
+    //{
+    //    public string id { get; set; }
+    //}
+    //public class ArticleRelatedTaxTags
+    //{
+    //    public string id { get; set; }
+    //}
 }
