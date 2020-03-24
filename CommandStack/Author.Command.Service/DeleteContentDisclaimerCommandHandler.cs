@@ -70,7 +70,8 @@ namespace Author.Command.Service
                         {
                             id = doc.GetPropertyValue<Guid>("id"),
                             EventType = ServiceBusEventType.Delete,
-                            Discriminator = Constants.DisclaimersDiscriminator
+                            Discriminator = Constants.DisclaimersDiscriminator,
+                            PartitionKey = doc.GetPropertyValue<int>("LanguageId").ToString()
                         };
                         await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
                     }

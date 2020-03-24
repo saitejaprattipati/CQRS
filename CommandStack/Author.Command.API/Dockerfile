@@ -14,6 +14,7 @@ COPY ["CommandStack/Author.Command.Service/Author.Command.Service.csproj", "Comm
 COPY ["CommandStack/Author.Command.Persistence/Author.Command.Persistence.csproj", "CommandStack/Author.Command.Persistence/"]
 COPY ["CommandStack/Author.Command.Domain/Author.Command.Domain.csproj", "CommandStack/Author.Command.Domain/"]
 COPY ["Common/Author.Core.Framework/Author.Core.Framework.csproj", "Common/Author.Core.Framework/"]
+COPY ["Common/Author.Core.Services.Rediscache/Author.Core.Services.Rediscache.csproj", "Common/Author.Core.Services.Rediscache/"]
 COPY ["CommandStack/Author.Command.Events/Author.Command.Events.csproj", "CommandStack/Author.Command.Events/"]
 COPY ["Common/Author.Core.Services.Persistence.CosmosDB/Author.Core.Services.Persistence.CosmosDB.csproj", "Common/Author.Core.Services.Persistence.CosmosDB/"]
 COPY ["Common/Author.Core.Services.BlobStorage/Author.Core.Services.BlobStorage.csproj", "Common/Author.Core.Services.BlobStorage/"]

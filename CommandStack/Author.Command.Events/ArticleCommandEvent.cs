@@ -12,7 +12,7 @@ namespace Author.Command.Events
         public int ArticleId { get; set; }
 
         [JsonProperty("PublishedDate")]
-        public DateTime PublishedDate { get; set; }
+        public string PublishedDate { get; set; }
 
         [JsonProperty("Author")]
         public string Author { get; set; }
@@ -32,32 +32,32 @@ namespace Author.Command.Events
         [JsonProperty("ResourcePosition")]
         public int? ResourcePosition { get; set; }
 
-        [JsonProperty("DisclaimerId")]
-        public int? DisclaimerId { get; set; }
+        [JsonProperty("Disclaimer")]
+        public DisclamersSchema Disclaimer { get; set; }
 
-        [JsonProperty("ResourceGroupId")]
-        public int? ResourceGroupId { get; set; }
+        [JsonProperty("ResourceGroup")]
+        public ResourceGroupsSchema ResourceGroup { get; set; }
 
         [JsonProperty("IsPublished")]
         public bool IsPublished { get; set; }
 
         [JsonProperty("CreatedDate")]
-        public DateTime CreatedDate { get; set; }
+        public string CreatedDate { get; set; }
 
         [JsonProperty("CreatedBy")]
         public string CreatedBy { get; set; }
 
         [JsonProperty("UpdatedDate")]
-        public DateTime UpdatedDate { get; set; }
+        public string UpdatedDate { get; set; }
 
         [JsonProperty("UpdatedBy")]
         public string UpdatedBy { get; set; }
 
         [JsonProperty("NotificationSentDate")]
-        public DateTime? NotificationSentDate { get; set; }
+        public string NotificationSentDate { get; set; }
 
-        [JsonProperty("ProvinceId")]
-        public int? ProvinceId { get; set; }
+        [JsonProperty("Provinces")]
+        public ProvinceSchema Provinces { get; set; }
 
         [JsonProperty("ArticleContentId")]
         public int? ArticleContentId { get; set; }
@@ -68,13 +68,18 @@ namespace Author.Command.Events
         [JsonProperty("Title")]
         public string Title { get; set; }
 
+        [JsonProperty("TitleInEnglishDefault")]
+        public string TitleInEnglishDefault { get; set; }
+        
+
         [JsonProperty("TeaserText")]
         public  string  TeaserText { get; set; }
 
         [JsonProperty("Content")]
         public string Content { get; set; }
+
         [JsonProperty("RelatedResources")]
-        public List<RelatedEntityId> RelatedResources { get; set; }
+        public List<RelatedArticlesSchema> RelatedResources { get; set; }
 
         [JsonProperty("RelatedContacts")]
         public List<RelatedEntityId> RelatedContacts { get; set; }
@@ -86,8 +91,12 @@ namespace Author.Command.Events
         public List<RelatedEntityId> RelatedCountryGroups { get; set; }
 
         [JsonProperty("RelatedTaxTags")]
-        public List<RelatedEntityId> RelatedTaxTags { get; set; }
+        public List<RelatedTaxTagsSchema> RelatedTaxTags { get; set; }
+
         [JsonProperty("RelatedArticles")]
-        public List<RelatedEntityId> RelatedArticles { get; set; }
+        public List<RelatedArticlesSchema> RelatedArticles { get; set; }
+
+        [JsonProperty("PartitionKey")]
+        public string PartitionKey { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Author.Command.Domain.Command;
+using Author.Command.Domain.Models;
 using Author.Command.Events;
 using Author.Command.Persistence;
 using Author.Command.Persistence.DBContextAggregate;
@@ -6,6 +7,7 @@ using Author.Core.Framework;
 using MediatR;
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -29,6 +31,7 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
+            Disclaimers DisclaimersDetails = new Disclaimers();
             var siteDisclaimer = new Articles
             {
                 PublishedDate = DateTime.ParseExact(request.PublishedDate, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture).ToUniversalTime(),
@@ -59,6 +62,7 @@ namespace Author.Command.Service
 
                 await _siteDisclaimerRepository.UnitOfWork
                    .SaveEntitiesAsync();
+                DisclaimersDetails = siteDisclaimer.DisclaimerId == null ? null : _siteDisclaimerRepository.getDisclaimerById(int.Parse(siteDisclaimer.DisclaimerId.ToString()));
                 response.IsSuccessful = true;
                 scope.Complete();
             }
@@ -72,10 +76,10 @@ namespace Author.Command.Service
                         Discriminator = Constants.ArticlesDiscriminator,
                         ArticleId = siteDisclaimer.ArticleId,
                         CreatedBy = siteDisclaimer.CreatedBy ?? string.Empty,
-                        CreatedDate = siteDisclaimer.CreatedDate,
+                        CreatedDate = siteDisclaimer.CreatedDate.ToString(),
                         UpdatedBy = siteDisclaimer.UpdatedBy ?? string.Empty,
-                        UpdatedDate = siteDisclaimer.UpdatedDate,
-                        PublishedDate = siteDisclaimer.PublishedDate,
+                        UpdatedDate = siteDisclaimer.UpdatedDate.ToString(),
+                        PublishedDate = siteDisclaimer.PublishedDate.ToString(),
                         IsPublished = siteDisclaimer.IsPublished,
                         Author = siteDisclaimer.Author ?? string.Empty,
                         Type = siteDisclaimer.Type,
@@ -85,7 +89,8 @@ namespace Author.Command.Service
                         TeaserText = content.TeaserText,
                         Content = content.Content,
                         ArticleContentId = content.ArticleContentId,
-                        DisclaimerId = siteDisclaimer.DisclaimerId
+                        Disclaimer = new DisclamersSchema { DisclaimerId = int.Parse(siteDisclaimer.DisclaimerId.ToString()), ProviderName = DisclaimersDetails.DisclaimerContents.Where(d => d.LanguageId == content.LanguageId).Select(ds => ds.ProviderName).FirstOrDefault(), ProviderTerms = DisclaimersDetails.DisclaimerContents.Where(d => d.LanguageId == content.LanguageId).Select(ds => ds.ProviderTerms).FirstOrDefault() },                      
+                        PartitionKey = ""
                     };
                     await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }

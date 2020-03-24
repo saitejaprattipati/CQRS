@@ -107,6 +107,11 @@ namespace Author.Query.Domain.DBAggregate
         //[JsonProperty("languageId")]
         public string Title { get; set; }
 
+        /// <summary>gets or sets LanguageId </summary>
+        /// <value>It is of type integer </value>
+        //[JsonProperty("languageId")]
+        public string TitleInEnglishDefault { get; set; }
+
         /// <summary>gets or sets the AddressContentId </summary>
         /// <value>It is of type integer </value>
         //[JsonProperty("addressContentId")]

@@ -25,14 +25,16 @@ namespace Author.Command.Service
         private readonly CountryRepository _CountryRepository;
         private readonly ILogger _logger;
         private readonly CosmosDBContext _context;
+        private readonly ICacheService<Countries, Countries> _cacheService;
 
-        public UpdateCountryCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<UpdateCountryCommandHandler> logger, IIntegrationEventBlobService Eventblobcontext)
+        public UpdateCountryCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<UpdateCountryCommandHandler> logger, IIntegrationEventBlobService Eventblobcontext, ICacheService<Countries, Countries> cacheService)
         {
             _CountryRepository = new CountryRepository(new TaxatHand_StgContext());
             _Eventcontext = Eventcontext;
             _Eventblobcontext = Eventblobcontext;
             _logger = logger;
             _context = new CosmosDBContext();
+            _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
         }
         public async Task<UpdateCountryCommandResponse> Handle(UpdateCountryCommand request, CancellationToken cancellationToken)
         {
@@ -123,6 +125,8 @@ namespace Author.Command.Service
                 country.UpdatedDate = DateTime.Now;
                 await _CountryRepository.UnitOfWork
                    .SaveEntitiesAsync();
+                await _cacheService.ClearCacheAsync("countriesCacheKey");
+                await _cacheService.ClearCacheAsync("imagesCacheKey");
                 response.IsSuccessful = true;
                 scope.Complete();
             }
@@ -149,7 +153,8 @@ namespace Author.Command.Service
                     UpdatedBy = pngImage.UpdatedBy,
                     UpdatedDate = pngImage.UpdatedDate,
                     EmpGuid = pngImage.EmpGuid ?? string.Empty,
-                    IsEdited = true
+                    IsEdited = true,
+                    PartitionKey = ""
                 };
                 await _Eventcontext.PublishThroughEventBusAsync(pngImageEvent);
 
@@ -173,7 +178,8 @@ namespace Author.Command.Service
                     UpdatedBy = svgImage.UpdatedBy,
                     UpdatedDate = svgImage.UpdatedDate,
                     EmpGuid = svgImage.EmpGuid ?? string.Empty,
-                    IsEdited = true
+                    IsEdited = true,
+                    PartitionKey = ""
                 };
                 await _Eventcontext.PublishThroughEventBusAsync(svgImageEvent);
 
@@ -197,7 +203,8 @@ namespace Author.Command.Service
                         DisplayName = item.DisplayName,
                         DisplayNameShort = item.DisplayNameShort,
                         LanguageId = item.LanguageId,
-                        Discriminator = Constants.CountriesDiscriminator
+                        Discriminator = Constants.CountriesDiscriminator,
+                        PartitionKey = ""
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }
@@ -208,7 +215,8 @@ namespace Author.Command.Service
                         id = countryDocs.FirstOrDefault(d => d.GetPropertyValue<int>("CountryId") == country.CountryId &&
                                  d.GetPropertyValue<int>("LanguageId") == i).GetPropertyValue<Guid>("id"),
                         EventType = ServiceBusEventType.Delete,
-                        Discriminator = Constants.CountriesDiscriminator
+                        Discriminator = Constants.CountriesDiscriminator,
+                        PartitionKey = ""
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(deleteEvt);
                 }

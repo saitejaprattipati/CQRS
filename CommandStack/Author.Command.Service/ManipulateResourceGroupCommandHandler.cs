@@ -15,6 +15,7 @@ using Author.Core.Framework.ExceptionHandling;
 using System.Transactions;
 using Author.Core.Framework;
 using Author.Core.Services.Persistence.CosmosDB;
+using Author.Command.Domain.Models;
 
 namespace Author.Command.Service
 {
@@ -39,7 +40,7 @@ namespace Author.Command.Service
             {
                 IsSuccessful = false
             };
-
+            var articleDocs = _context.GetAll(Constants.ArticlesDiscriminator);
             List<ResourceGroups> resourceGroups = _ResourceGroupRepository.getResourceGroups(request.ResourceGroupIds);
             if (request.ResourceGroupIds.Count != resourceGroups.Count)
                 throw new RulesException("Invalid", @"ResourceGroup not found");
@@ -106,7 +107,8 @@ namespace Author.Command.Service
                                 CreatedBy = doc.GetPropertyValue<string>("CreatedBy"),
                                 CreatedDate = doc.GetPropertyValue<DateTime>("CreatedDate"),
                                 UpdatedBy = doc.GetPropertyValue<string>("UpdatedBy"),
-                                UpdatedDate = doc.GetPropertyValue<DateTime>("UpdatedDate")
+                                UpdatedDate = doc.GetPropertyValue<DateTime>("UpdatedDate"),
+                                PartitionKey = ""
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(eventsource);
                         }
@@ -116,13 +118,60 @@ namespace Author.Command.Service
                 {
                     foreach (var resourcegrp in resourceGroups)
                     {
+                        foreach (var content in resourcegrp.ResourceGroupContents)
+                        {
+                            foreach (var article in articleDocs.Where(ad => ad.GetPropertyValue<int>("LanguageId") == content.LanguageId))
+                        {
+                            var relatedResourceGroups = article.GetPropertyValue<List<ResourceGroupsSchema>>("ResourceGroup").FirstOrDefault();
+                            if (relatedResourceGroups.ResourceGroupId == resourcegrp.ResourceGroupId)
+                            {
+                                var eventSourcingRelated = new ArticleCommandEvent()
+                                {
+                                    id = article != null ? article.GetPropertyValue<Guid>("id") : Guid.NewGuid(),
+                                    EventType = ServiceBusEventType.Update,
+                                    ArticleId = article.GetPropertyValue<int>("ArticleId"),
+                                    PublishedDate = article.GetPropertyValue<string>("PublishedDate"),
+                                    Author = article.GetPropertyValue<string>("author"),
+                                    ImageId = article.GetPropertyValue<int>("ImageId"),
+                                    State = article.GetPropertyValue<string>("State"),
+                                    Type = article.GetPropertyValue<int>("Type"),
+                                    SubType = article.GetPropertyValue<int>("SubType"),
+                                    ResourcePosition = article.GetPropertyValue<int>("ResourcePosition"),
+                                    Disclaimer = article.GetPropertyValue<DisclamersSchema>("Disclaimer"),
+                                    ResourceGroup = new ResourceGroupsSchema { ResourceGroupId = -1, GroupName = "", Position = -1 },
+                                    IsPublished = article.GetPropertyValue<bool>("IsPublished"),
+                                    CreatedDate = article.GetPropertyValue<string>("CreatedDate"),
+                                    CreatedBy = article.GetPropertyValue<string>("CreatedBy"),
+                                    UpdatedDate = article.GetPropertyValue<string>("UpdatedDate"),
+                                    UpdatedBy = article.GetPropertyValue<string>("UpdatedBy"),
+                                    NotificationSentDate = article.GetPropertyValue<string>("NotificationSentDate"),
+                                    Provinces = article.GetPropertyValue<ProvinceSchema>("Provisions"),
+                                    ArticleContentId = article.GetPropertyValue<int>("ArticleContentId"),
+                                    LanguageId = article.GetPropertyValue<int>("LanguageId"),
+                                    Title = article.GetPropertyValue<string>("Title"),
+                                    TitleInEnglishDefault = article.GetPropertyValue<string>("TitleInEnglishDefault"),
+                                    TeaserText = article.GetPropertyValue<string>("TeaserText"),
+                                    Content = article.GetPropertyValue<string>("Content"),
+                                    RelatedContacts = article.GetPropertyValue<List<RelatedEntityId>>("RelatedContacts"),
+                                    RelatedCountries = article.GetPropertyValue<List<RelatedEntityId>>("RelatedCountries"),
+                                    RelatedCountryGroups = article.GetPropertyValue<List<RelatedEntityId>>("RelatedCountryGroups"),
+                                    RelatedTaxTags = article.GetPropertyValue<List<RelatedTaxTagsSchema>>("RelatedTaxTags"),
+                                    RelatedArticles = article.GetPropertyValue<List<RelatedArticlesSchema>>("RelatedArticles"),
+                                    RelatedResources = article.GetPropertyValue<List<RelatedArticlesSchema>>("RelatedResources"),
+                                    Discriminator = article.GetPropertyValue<string>("Discriminator"),
+                                    PartitionKey = ""
+                                };
+                                await _Eventcontext.PublishThroughEventBusAsync(eventSourcingRelated);
+                            }
+                        } }
                         foreach (var doc in resourcegrpDocs.Where(d => d.GetPropertyValue<int>("ResourceGroupId") == resourcegrp.ResourceGroupId))
                         {
                             var resourceEvent = new ResourceGroupCommandEvent()
                             {
                                 id = doc.GetPropertyValue<Guid>("id"),
                                 EventType = ServiceBusEventType.Delete,
-                                Discriminator = Constants.ResourceGroupsDiscriminator
+                                Discriminator = Constants.ResourceGroupsDiscriminator,
+                                PartitionKey = doc.GetPropertyValue<int>("LanguageId").ToString()
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(resourceEvent);
                         }

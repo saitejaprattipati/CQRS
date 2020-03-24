@@ -33,13 +33,13 @@ namespace Author.Command.Persistence
             List<Articles> objArticles = _context.Articles.Where(a => ArticleIds.Contains(a.ArticleId)).ToList();//   _context.Articles.ToList();
             return objArticles;
         }
-        public Articles getArticleCompleteDataById(int ArticleId)
+        public List<Articles> getArticleCompleteDataById(List<int> ArticleIds)
         {
-            List<Articles> objArticles = _context.Articles.ToList();
+            List<Articles> objArticles=new List<Articles>();// = _context.Articles.ToList();
 
-
-
-            Articles _article = _context.Articles
+            foreach(var article in ArticleIds)
+            {
+                objArticles.Add(_context.Articles
                     .Include(a => a.ArticleContents)
                     .Include(a => a.ArticleRelatedCountries)//.Select(rc => rc.CountryContent))
                     .Include(a => a.ArticleRelatedCountryGroups)//.Select(rcg => rcg.CountryGroupContent))
@@ -47,16 +47,15 @@ namespace Author.Command.Persistence
                     .Include(a => a.ArticleRelatedContacts)//.Select(rc => rc.ContactContent))
                     .Include(a => a.RelatedArticlesArticle)//.Select(ra => ra.ArticleContent))
                     .Include(a => a.RelatedResourcesArticle)//.Select(ra => ra.ArticleContent))
-                   // .Include(a => a.Disclaimer.DisclaimerContent)
-                    .FirstOrDefault(a => a.ArticleId == ArticleId);
-            return _article;
+                    .Include(a => a.UserReadArticles)
+                    .Include(a => a.UserSavedArticles)
+                    // .Include(a => a.Disclaimer.DisclaimerContent)
+                    .FirstOrDefault(a => a.ArticleId == article));
+            }
+            return objArticles;
         }
         public Articles getArticleDataById(int ArticleId)
         {
-            List<Articles> objArticles = _context.Articles.ToList();
-
-
-
             Articles _article = _context.Articles.FirstOrDefault(a => a.ArticleId == ArticleId);
             return _article;
         }
@@ -65,14 +64,23 @@ namespace Author.Command.Persistence
             List<TaxTags> objTaxTags = _context.TaxTags.ToList();
             return objTaxTags;
         }
+        public void DeleteArticle(Articles article)
+        {
+            _context.Articles.Remove(article);
+        }
         public TaxTags getTaxTagsById(int TaxTagsId)
         {
             TaxTags objTaxTags = _context.TaxTags.Where(s=>s.TaxTagId== TaxTagsId).FirstOrDefault();
             return objTaxTags;
         }
-        public List<Countries> getCountries()
+        public List<TaxTags> getTaxTagsDetailsByIds(List<int> TaxTagsId)
         {
-            List<Countries> objCountries = _context.Countries.ToList();
+            List<TaxTags> objTaxTags = _context.TaxTags.Include(s => s.TaxTagContents).Where(s => TaxTagsId.Contains(s.TaxTagId)).ToList();
+            return objTaxTags;
+        }
+        public List<Countries> getCountriesByIds(List<int> CountryIds)
+        {
+            List<Countries> objCountries = _context.Countries.Where(s => CountryIds.Contains(s.CountryId)).ToList();
             return objCountries;
         }
         public CountryGroups getCountryGroupById(int CountryGroupId)
@@ -85,19 +93,34 @@ namespace Author.Command.Persistence
             Countries objCountries = _context.Countries.Where(s=>s.CountryId==CountryId).FirstOrDefault();
             return objCountries;
         }
-        public List<CountryGroups> getCountryGroups()
+        public List<CountryGroups> getCountryGroupsByIds(List<int> CountryGroupIds)
         {
-            List<CountryGroups> objCountryGroups = _context.CountryGroups.ToList();
+            List<CountryGroups> objCountryGroups = _context.CountryGroups.Where(s => CountryGroupIds.Contains(s.CountryGroupId)).ToList();
             return objCountryGroups;
         }
-        public List<Contacts> getContacts()
+        public List<Contacts> getContactsByIds(List<int> ContactIds)
         {
-            List<Contacts> objContacts = _context.Contacts.ToList();
+            List<Contacts> objContacts = _context.Contacts.Where(s => ContactIds.Contains(s.ContactId)).ToList();
             return objContacts;
         }
         public Contacts getContactsById(int ContactId)
         {
             Contacts objContact = _context.Contacts.Where(s=>s.ContactId== ContactId).FirstOrDefault();
+            return objContact;
+        }
+        public Disclaimers getDisclaimerById(int DisclaimerId)
+        {
+            Disclaimers objContact = _context.Disclaimers.Include(s=>s.DisclaimerContents).Where(d => d.DisclaimerId == DisclaimerId).FirstOrDefault();
+            return objContact;
+        }
+        public ResourceGroups getResourceGroupById(int ResourceGroupId)
+        {
+            ResourceGroups objContact = _context.ResourceGroups.Include(s=>s.ResourceGroupContents).Where(r => r.ResourceGroupId == ResourceGroupId).FirstOrDefault();
+            return objContact;
+        }
+        public Provinces getProvisionsById(int ProvisionsId)
+        {
+            Provinces objContact = _context.Provinces.Include(s=>s.ProvinceContents).Where(p => p.ProvinceId == ProvisionsId).FirstOrDefault();
             return objContact;
         }
         public Articles Add(Articles Article)

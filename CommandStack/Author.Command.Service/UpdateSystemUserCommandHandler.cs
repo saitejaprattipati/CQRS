@@ -137,7 +137,8 @@ namespace Author.Command.Service
                         TimeZone = user.TimeZone,
                         CountryId = content.CountryId,
                         IsPrimary = content.IsPrimary,
-                        SystemUserAssociatedCountryId = content.SystemUserAssociatedCountryId
+                        SystemUserAssociatedCountryId = content.SystemUserAssociatedCountryId,
+                        PartitionKey = ""
                     };
                     await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }
@@ -148,7 +149,8 @@ namespace Author.Command.Service
                         id = systemuserDocs.FirstOrDefault(d => d.GetPropertyValue<int>("SystemUserId") == user.SystemUserId
                               && d.GetPropertyValue<int>("SystemUserAssociatedCountryId") == i).GetPropertyValue<Guid>("id"),
                         EventType = ServiceBusEventType.Delete,
-                        Discriminator = Constants.SystemUsersDiscriminator
+                        Discriminator = Constants.SystemUsersDiscriminator,
+                        PartitionKey = ""
                     };
                     await _eventcontext.PublishThroughEventBusAsync(deleteEvt);
                 }

@@ -104,18 +104,19 @@ namespace Author.Command.Service
                         Type = siteDisclaimer.Type,
                         SubType = siteDisclaimer.SubType,
                         Author = siteDisclaimer.Author ?? string.Empty,
-                        PublishedDate = siteDisclaimer.PublishedDate,
+                        PublishedDate = siteDisclaimer.PublishedDate.ToString(),
                         Title = item.Title,
                         TeaserText = item.TeaserText,
                         Content = item.Content,
                         LanguageId = item.LanguageId,
                         UpdatedBy = siteDisclaimer.UpdatedBy ?? string.Empty,
-                        UpdatedDate = siteDisclaimer.UpdatedDate,
+                        UpdatedDate = siteDisclaimer.UpdatedDate.ToString(),
                         CreatedBy = siteDisclaimer.CreatedBy ?? string.Empty,
-                        CreatedDate = siteDisclaimer.CreatedDate,
+                        CreatedDate = siteDisclaimer.CreatedDate.ToString(),
                         ArticleContentId = item.ArticleContentId,
                         IsPublished = siteDisclaimer.IsPublished,
-                        ArticleId = siteDisclaimer.ArticleId
+                        ArticleId = siteDisclaimer.ArticleId,
+                        PartitionKey = ""
                     };
                     await _eventcontext.PublishThroughEventBusAsync(eventSource);                    
                 }
@@ -126,7 +127,8 @@ namespace Author.Command.Service
                         id = disclaimerdocs.FirstOrDefault(d => d.GetPropertyValue<int>("ArticleId") == siteDisclaimer.ArticleId
                                              && d.GetPropertyValue<int?>("LanguageId") == i).GetPropertyValue<Guid>("id"),
                         EventType = ServiceBusEventType.Delete,
-                        Discriminator = Constants.ArticlesDiscriminator
+                        Discriminator = Constants.ArticlesDiscriminator,
+                        PartitionKey = ""
                     };
                     await _eventcontext.PublishThroughEventBusAsync(deleteEvt);
                 }

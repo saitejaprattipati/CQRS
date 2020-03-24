@@ -24,13 +24,15 @@ namespace Author.Command.Service
         private readonly CountryRepository _CountryRepository;
         private readonly ILogger _logger;
         private readonly CosmosDBContext _context;
+        private readonly ICacheService<Countries, Countries> _cacheService;
 
-        public ManipulateCountriesCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<ManipulateCountriesCommandHandler> logger)
+        public ManipulateCountriesCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<ManipulateCountriesCommandHandler> logger, ICacheService<Countries, Countries> cacheService)
         {
             _CountryRepository = new CountryRepository(new TaxatHand_StgContext());
             _Eventcontext = Eventcontext;
             _logger = logger;
             _context = new CosmosDBContext();
+            _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
         }
 
         public async Task<ManipulateCountriesCommandResponse> Handle(ManipulateCountriesCommand request, CancellationToken cancellationToken)
@@ -83,6 +85,8 @@ namespace Author.Command.Service
                 }
                 else
                     throw new RulesException("Operation", @"The Operation " + request.Operation + " is not valied");
+                await _cacheService.ClearCacheAsync("countriesCacheKey");
+                await _cacheService.ClearCacheAsync("imagesCacheKey");
                 await _CountryRepository.UnitOfWork
                    .SaveEntitiesAsync();
                 response.IsSuccessful = true;
@@ -115,7 +119,8 @@ namespace Author.Command.Service
                                 CountryContentId = doc.GetPropertyValue<int>("CountryContentId"),
                                 DisplayName = doc.GetPropertyValue<string>("DisplayName"),
                                 DisplayNameShort = doc.GetPropertyValue<string>("DisplayNameShort"),
-                                LanguageId = doc.GetPropertyValue<int?>("LanguageId")
+                                LanguageId = doc.GetPropertyValue<int?>("LanguageId"),
+                                PartitionKey = ""
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(eventsource);
                         }
@@ -129,14 +134,16 @@ namespace Author.Command.Service
                         {
                             id = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == item.PngimageId).GetPropertyValue<Guid>("id"),
                             EventType = ServiceBusEventType.Delete,
-                            Discriminator = Constants.ImagesDiscriminator
+                            Discriminator = Constants.ImagesDiscriminator,
+                            PartitionKey = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == item.SvgimageId).GetPropertyValue<int>("CountryId").ToString()
                         };
                         await _Eventcontext.PublishThroughEventBusAsync(pngimgevent);
                         var svgimgevent = new ImageCommandEvent()
                         {
                             id = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == item.SvgimageId).GetPropertyValue<Guid>("id"),
                             EventType = ServiceBusEventType.Delete,
-                            Discriminator = Constants.ImagesDiscriminator
+                            Discriminator = Constants.ImagesDiscriminator,
+                            PartitionKey = imageDocs.FirstOrDefault(d => d.GetPropertyValue<int>("ImageId") == item.SvgimageId).GetPropertyValue<int>("CountryId").ToString()
                         };
                         await _Eventcontext.PublishThroughEventBusAsync(svgimgevent);
 
@@ -146,7 +153,8 @@ namespace Author.Command.Service
                             {
                                 id = doc.GetPropertyValue<Guid>("id"),
                                 EventType = ServiceBusEventType.Delete,
-                                Discriminator = Constants.CountriesDiscriminator
+                                Discriminator = Constants.CountriesDiscriminator,
+                                PartitionKey = doc.GetPropertyValue<int>("LanguageId").ToString()
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(countryevent);
                         }

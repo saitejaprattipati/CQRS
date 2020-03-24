@@ -114,7 +114,8 @@ namespace Author.Command.Service
                                 UpdatedBy = doc.GetPropertyValue<string>("UpdatedBy"),
                                 UpdatedDate = doc.GetPropertyValue<DateTime>("UpdatedDate"),
                                 GroupName = doc.GetPropertyValue<string>("GroupName"),
-                                LanguageId = doc.GetPropertyValue<int?>("LanguageId")
+                                LanguageId = doc.GetPropertyValue<int?>("LanguageId"),
+                                PartitionKey = ""
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(eventsource);
                         }
@@ -130,7 +131,8 @@ namespace Author.Command.Service
                             {
                                 id = doc.GetPropertyValue<Guid>("id"),
                                 EventType = ServiceBusEventType.Delete,
-                                Discriminator = Constants.CountryGroupsDiscriminator
+                                Discriminator = Constants.CountryGroupsDiscriminator,
+                                PartitionKey = doc.GetPropertyValue<int>("LanguageId").ToString()
                             };
                             await _Eventcontext.PublishThroughEventBusAsync(countryevent);
                         }

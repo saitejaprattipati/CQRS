@@ -98,7 +98,8 @@ namespace Author.Command.Service
                         TimeZone = user.TimeZone,
                         CountryId = content.CountryId,
                         IsPrimary = content.IsPrimary,
-                        SystemUserAssociatedCountryId = content.SystemUserAssociatedCountryId
+                        SystemUserAssociatedCountryId = content.SystemUserAssociatedCountryId,
+                        PartitionKey = ""
                     };
                     await _eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }

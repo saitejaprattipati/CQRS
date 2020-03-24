@@ -23,13 +23,15 @@ namespace Author.Command.Service
         private readonly IIntegrationEventPublisherServiceService _Eventcontext;
         private readonly CountryRepository _CountryRepository;
         private readonly ILogger _logger;
+        private readonly ICacheService<Countries, Countries> _cacheService;
 
-        public CreateCountryCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<CreateCountryCommandHandler> logger, IIntegrationEventBlobService Eventblobcontext)
+        public CreateCountryCommandHandler(IIntegrationEventPublisherServiceService Eventcontext, ILogger<CreateCountryCommandHandler> logger, IIntegrationEventBlobService Eventblobcontext, ICacheService<Countries, Countries> cacheService)
         {
             _CountryRepository = new CountryRepository(new TaxatHand_StgContext());
             _Eventcontext = Eventcontext;
             _Eventblobcontext = Eventblobcontext;
             _logger = logger;
+            _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
         }
         public async Task<CreateCountryCommandResponse> Handle(CreateCountryCommand request, CancellationToken cancellationToken)
         {
@@ -98,6 +100,8 @@ namespace Author.Command.Service
                 _CountryRepository.Add(_Country);
                 await _CountryRepository.UnitOfWork
                    .SaveEntitiesAsync();
+               await _cacheService.ClearCacheAsync("countriesCacheKey");
+               await _cacheService.ClearCacheAsync("imagesCacheKey");
                 response.IsSuccessful = true;
                 scope.Complete();
             }
@@ -123,7 +127,8 @@ namespace Author.Command.Service
                     UpdatedBy = _imagesPNG.UpdatedBy,
                     UpdatedDate = _imagesPNG.UpdatedDate,
                     EmpGuid = _imagesPNG.EmpGuid ?? string.Empty,
-                    IsEdited = false
+                    IsEdited = false,
+                    PartitionKey = ""
                 };
                 await _Eventcontext.PublishThroughEventBusAsync(pngImageEvent);
 
@@ -146,7 +151,8 @@ namespace Author.Command.Service
                     UpdatedBy = _imagesSVG.UpdatedBy,
                     UpdatedDate = _imagesSVG.UpdatedDate,
                     EmpGuid = _imagesSVG.EmpGuid ?? string.Empty,
-                    IsEdited = false
+                    IsEdited = false,
+                    PartitionKey = ""
                 };
                 await _Eventcontext.PublishThroughEventBusAsync(svgImageEvent);
 
@@ -167,7 +173,8 @@ namespace Author.Command.Service
                         DisplayName = content.DisplayName,
                         DisplayNameShort = content.DisplayNameShort,
                         LanguageId = content.LanguageId,
-                        Discriminator = Constants.CountriesDiscriminator
+                        Discriminator = Constants.CountriesDiscriminator,
+                        PartitionKey = ""
                     };
                     await _Eventcontext.PublishThroughEventBusAsync(eventSourcing);
                 }
