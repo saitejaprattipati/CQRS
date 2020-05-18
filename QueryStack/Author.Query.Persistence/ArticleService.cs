@@ -43,22 +43,23 @@ namespace Author.Query.Persistence
         {
             // Get all languages
             var languageFromCache = await _languageCacheService.GetAllAsync("languagesCacheKey");
-            var defaultLanguageId = Convert.ToInt32(_appSettings.Value.DefaultLanguageId);
-            var localeLanguageList = await _commonService.GetLanguageListFromLocale(languageFromCache);
-            var languageDetails = new LanguageDetailsDTO();
+            //var defaultLanguageId = Convert.ToInt32(_appSettings.Value.DefaultLanguageId);
+            //var localeLanguageList = await _commonService.GetLanguageListFromLocale(languageFromCache);
+            //var languageDetails = new LanguageDetailsDTO();
 
-            if ((localeLanguageList.Count == 1) && (localeLanguageList[0].LanguageId.Equals(defaultLanguageId)))
-            {
-                languageDetails.DefaultLanguageId = localeLanguageList[0].LanguageId;
-            }
-            else
-            {
-                languageDetails = _commonService.GetLanguageDetails();
-            }
-            var localeLanguageIdList = new List<int>();
-            localeLanguageIdList.AddRange(localeLanguageList.Select(ll => ll.LanguageId));
+            //if ((localeLanguageList.Count == 1) && (localeLanguageList[0].LanguageId.Equals(defaultLanguageId)))
+            //{
+            //    languageDetails.DefaultLanguageId = localeLanguageList[0].LanguageId;
+            //}
+            //else
+            //{
+            //    languageDetails = _commonService.GetLanguageDetails();
+            //}
+            //var localeLanguageIdList = new List<int>();
+            //localeLanguageIdList.AddRange(localeLanguageList.Select(ll => ll.LanguageId));
 
-            var article = await GetArticleDetailsAsync(articleId, languageDetails.DefaultLanguageId, localeLanguageIdList, countryId, languageFromCache, userCookieId);
+            //var article = await GetArticleDetailsAsync(articleId, languageDetails.DefaultLanguageId, localeLanguageIdList, countryId, languageFromCache, userCookieId);
+            var article = await GetArticleDetailsAsync(articleId, 37, new List<int> { 37}, countryId, languageFromCache, userCookieId);
 
             return article;
         }
