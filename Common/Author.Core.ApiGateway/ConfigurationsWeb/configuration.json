@@ -5,7 +5,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "authoradmincommandapi",
+          "Host": "authorquerygrpcclient",
           "Port": 80
         }
       ],

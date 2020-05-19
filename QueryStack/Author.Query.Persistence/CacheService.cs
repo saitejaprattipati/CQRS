@@ -77,6 +77,7 @@ namespace Author.Query.Persistence
         public async Task<List<TEntityDTO>> GetAllAsync(string cacheKey)
         {
             var cacheData = await _cache.StringGetAsync(cacheKey);
+           // RedisValue cacheData = "";
             if (cacheData.IsNullOrEmpty)
             {
                 // Get data from database

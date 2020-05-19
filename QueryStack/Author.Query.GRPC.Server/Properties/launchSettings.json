@@ -1,0 +1,23 @@
+{
+  "profiles": {
+    "Author.Query.GRPC.Server": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:5001"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "publishAllPorts": true
+    },
+    "Azure Dev Spaces": {
+      "commandName": "AzureDevSpaces",
+      "launchBrowser": true,
+      "resourceGroup": "App0295_POC_RG",
+      "aksName": "TAHAKSCluster",
+      "subscriptionId": "24b11871-bf50-42a3-9545-684eb027e133"
+    }
+  }
+}

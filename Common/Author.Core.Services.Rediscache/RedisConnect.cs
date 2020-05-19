@@ -22,7 +22,7 @@ namespace Author.Core.Services.Rediscache
         }
         private static Lazy<ConnectionMultiplexer> lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
         {
-            return ConnectionMultiplexer.Connect(RedisConnection.RedisCacheName + ",abortConnect=false,ssl=true,password=" + RedisConnection.RedisCachePassword);
+            return ConnectionMultiplexer.Connect(RedisConnection.RedisCacheName + ",synctimeout=10000,abortConnect=false,ssl=true,password=" + RedisConnection.RedisCachePassword);
         });
 
         public static ConnectionMultiplexer Connection

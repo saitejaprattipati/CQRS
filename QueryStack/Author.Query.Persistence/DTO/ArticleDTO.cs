@@ -21,7 +21,7 @@ namespace Author.Query.Persistence.DTO
         public string PublishedDate { get; set; }
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         public string Author { get; set; }
-        public int? ResourcePosition { get; set; }
+        public int ResourcePosition { get; set; }
         [RegularExpression(Constants.GeneralStringRegularExpression)]
         public string Province { get; set; }
         public int LanguageId { get; set; }

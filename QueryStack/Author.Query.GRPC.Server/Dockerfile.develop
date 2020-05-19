@@ -1,0 +1,23 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1
+ARG BUILD_CONFIGURATION=Debug
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_URLS=http://+:80
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+EXPOSE 80
+
+WORKDIR /src
+COPY ["Common/Author.Core.Framework/Author.Core.Framework.csproj", "Common/Author.Core.Framework/"]
+COPY ["Common/Author.Core.Services.Persistence.CosmosDB/Author.Core.Services.Persistence.CosmosDB.csproj", "Common/Author.Core.Services.Persistence.CosmosDB/"]
+COPY ["Common/Author.Core.Services.Rediscache/Author.Core.Services.Rediscache.csproj", "Common/Author.Core.Services.Rediscache/"]
+COPY ["QueryStack/Author.Query.Domain/Author.Query.Domain.csproj", "QueryStack/Author.Query.Domain/"]
+COPY ["QueryStack/Author.Query.GRPC.Server/Author.Query.GRPC.Server.csproj", "QueryStack/Author.Query.GRPC.Server/"]
+COPY ["QueryStack/Author.Query.Persistence/Author.Query.Persistence.csproj", "QueryStack/Author.Query.Persistence/"]
+
+RUN dotnet restore "QueryStack/Author.Query.GRPC.Server/Author.Query.GRPC.Server.csproj"
+COPY . .
+WORKDIR "/src/QueryStack/Author.Query.GRPC.Server"
+RUN dotnet build --no-restore "Author.Query.GRPC.Server.csproj" -c $BUILD_CONFIGURATION
+
+RUN echo "exec dotnet run --no-build --no-launch-profile -c $BUILD_CONFIGURATION --" > /entrypoint.sh
+
+ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]

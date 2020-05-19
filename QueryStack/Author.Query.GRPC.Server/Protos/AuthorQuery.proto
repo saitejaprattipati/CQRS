@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option csharp_namespace = "AuthorGRPC";
+
+package AuthorApi;
+
+service Author {
+  rpc GetArticles (ArticleRequest) returns (ArticleResponse);
+}
+
+message ArticleRequest {
+  int32 articleId = 1;
+  int32 countryId = 2;
+  string userCookieId = 3;
+}
+
+message ArticleResponse {
+	int32 ArticleId = 1;
+	string PublishedDate = 2;
+	string Author = 3;
+	int32 ResourcePosition = 4;
+	string Province = 5;
+	int32 LanguageId = 6;
+	string Title = 7;
+
+	string TeaserText = 8;
+	string ContentType = 9;
+	string Content = 10;
+	string RelatedTaxTags = 11;
+	
+	string ImageCredit = 12;
+	string ImageDescriptionText = 13;
+
+	bool IsRead = 14;
+	bool Saved =15;
+	string SavedDate = 16;
+
+	string SharingWebURL = 17;
+	string ImagePath = 18;
+	bool Subscribed = 19;
+	string Name = 20;
+	string Path = 21;
+	bool CompleteResponse = 22;
+	string TitleInEnglishDefault = 23;
+	bool ContainsYoutubeLink = 24;
+}
